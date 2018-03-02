@@ -35,6 +35,14 @@ public class AmountTest {
     }
 
     @Test
+    public void testMultiply() {
+        Amount a = new Amount(2.0);
+        Quantity b = new Quantity(3);
+        Amount result = a.multiply(b);
+        Assert.assertEquals(new Amount(6.0), result);
+    }
+
+    @Test
     public void testToString() {
         Amount a = new Amount(1234.567);
         Assert.assertEquals("1234.567", a.toString());

@@ -23,6 +23,10 @@ public class Amount {
         return new Amount(value - other.value);
     }
 
+    public Amount multiply(Quantity quantity) {
+        return new Amount(value * quantity.getValue());
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
