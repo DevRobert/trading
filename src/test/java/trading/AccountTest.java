@@ -3,14 +3,25 @@ package trading;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
+import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 
 public class AccountTest {
     private Account account;
 
     @Before()
     public void before() {
-        Amount startingBalance = new Amount(10000.0);
-        this.account = new Account(startingBalance);
+        Amount availableMoney = new Amount(10000.0);
+        this.account = new Account(availableMoney);
+    }
+
+    @Test()
+    public void accountIsInitializedWithSpecifiedAvailableMoney() {
+        Assert.assertEquals(new Amount(10000.0), account.getAvailableMoney());
+    }
+
+    @Test
+    public void accountIsInitializedWithZeroCommissions() {
+        Assert.assertEquals(Amount.Zero, account.getCommissions());
     }
 
     @Test
@@ -28,11 +39,6 @@ public class AccountTest {
         Assert.assertEquals(isin, position.getISIN());
         Assert.assertEquals(quantity, position.getQuantity());
         Assert.assertEquals(fullPrice, position.getFullMarketPrice());
-    }
-
-    @Test
-    public void accountStartsWithZeroCommissions() {
-        Assert.assertEquals(Amount.Zero, account.getCommissions());
     }
 
     @Test
@@ -84,7 +90,7 @@ public class AccountTest {
     }
 
     @Test
-    public void sellTransactionWithoutPrecedingBuyTransactionIsDenied() {
+    public void sellTransactionWithoutPrecedingBuyTransactionFails() {
         ISIN isin = ISIN.MunichRe;
         Quantity quantity = new Quantity(1);
         Amount totalPrice = new Amount(1000.0);
@@ -104,7 +110,7 @@ public class AccountTest {
     }
 
     @Test
-    public void partialSellTransactionIsDenied() throws StateException {
+    public void partialSellTransactionFails() throws StateException {
         ISIN isin = ISIN.MunichRe;
         Amount fullBuyPrice = new Amount(1000.0);
         Amount fullSellPrice = new Amount(2000.0);
@@ -128,7 +134,7 @@ public class AccountTest {
     }
 
     @Test
-    public void exceedingSellTransactionIsDenied() throws StateException {
+    public void exceedingSellTransactionFails() throws StateException {
         ISIN isin = ISIN.MunichRe;
         Amount fullBuyPrice = new Amount(1000.0);
         Amount fullSellPrice = new Amount(2000.0);
@@ -152,7 +158,7 @@ public class AccountTest {
     }
 
     @Test
-    public void buyTransactionForUncompensatedPositionIsDenied() throws StateException {
+    public void buyTransactionForUncompensatedPositionFails() throws StateException {
         ISIN isin = ISIN.MunichRe;
         Amount fullBuyPrice = new Amount(1000.0);
         Amount buyCommission = new Amount(10.0);
@@ -174,7 +180,7 @@ public class AccountTest {
     }
 
     @Test
-    public void buyTransactionForCompensatedPositionIsAccepted() throws StateException {
+    public void buyTransactionForCompensatedPositionFails() throws StateException {
         ISIN isin = ISIN.MunichRe;
         Amount fullBuyPrice = new Amount(1000.0);
         Amount fullSellPrice = new Amount(2000.0);
@@ -193,5 +199,56 @@ public class AccountTest {
         Position position = account.getPosition(isin);
         Assert.assertEquals(furtherBuyPrice, position.getFullMarketPrice());
         Assert.assertEquals(new Quantity(5), position.getQuantity());
+    }
+
+    @Test
+    public void buyTransactionReducesAvailableMoney() throws StateException {
+        // Initial available money: 10,000
+
+        Amount totalPrice = new Amount(1000.0);
+        Amount commission = new Amount(10.0);
+
+        Transaction transaction = new Transaction(TransactionType.Buy, ISIN.MunichRe, new Quantity(1), totalPrice, commission);
+
+        account.registerTransaction(transaction);
+
+        // Expected available money: 10,000 - 1,000 - 10 = 8,990
+
+        Assert.assertEquals(new Amount(8990.0), account.getAvailableMoney());
+    }
+
+    @Test
+    public void sellTransactionIncreasesAvailableMoney() throws StateException {
+        // Initial available money: 10,000
+
+        Amount totalBuyPrice = new Amount(1000.0);
+        Amount buyCommission = new Amount(10.0);
+
+        Transaction buyTransaction = new Transaction(TransactionType.Buy, ISIN.MunichRe, new Quantity(1), totalBuyPrice, buyCommission);
+
+        account.registerTransaction(buyTransaction);
+
+        // Interim available money: 10,000 - 1,000 - 10 = 8,990
+
+        Amount totalSellPrice = new Amount(2000.0);
+        Amount sellCommission = new Amount(20.0);
+
+        Transaction sellTransaction = new Transaction(TransactionType.Sell, ISIN.MunichRe, new Quantity(1), totalSellPrice, sellCommission);
+
+        account.registerTransaction(sellTransaction);
+
+        // Expected available money: 8,990 + 2,000 - 20 = 10,970
+
+        Assert.assertEquals(new Amount(10970.0), account.getAvailableMoney());
+    }
+
+    @Test
+    public void buyTransactionFailsIfNotEnoughAvailableMoney() {
+        throw new NotImplementedException();
+    }
+
+    @Test
+    public void buyTransactionSucceedsForExactlyEnoughAvailableMoney() {
+        throw new NotImplementedException();
     }
 }

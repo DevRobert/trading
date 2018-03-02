@@ -2,19 +2,29 @@ package trading;
 
 import java.util.HashMap;
 
-// TODO Maintain account balance
-
 public class Account {
-    private Amount balance;
+    private Amount availableMoney;
     private HashMap<ISIN, Position> positions = new HashMap<>();
     private Amount commissions;
 
-    public Account(Amount startingBalance) {
+    public Amount getCommissions() {
+        return commissions;
+    }
+
+    public Amount getAvailableMoney() {
+        return availableMoney;
+    }
+
+    public Account(Amount availableMoney) {
         this.commissions = Amount.Zero;
-        this.balance = startingBalance;
+        this.availableMoney = availableMoney;
     }
 
     public void registerTransaction(Transaction transaction) throws StateException {
+        this.ensureTransactionCanBePaid(transaction);
+
+        // TODO Refactor Merge paths; create (revocable) position if not existing
+
         if(this.hasPosition(transaction.getIsin())) {
             this.handleTransactionForExistingPosition(transaction);
         }
@@ -22,7 +32,27 @@ public class Account {
             this.handleTransactionForNewPosition(transaction);
         }
 
+        this.updateBalances(transaction);
+    }
+
+    private void ensureTransactionCanBePaid(Transaction transaction) {
+
+    }
+
+    private void updateBalances(Transaction transaction) {
         this.commissions = this.commissions.add(transaction.getCommission());
+
+        if(transaction.getTransactionType() == TransactionType.Buy) {
+            this.availableMoney = this.availableMoney.subtract(transaction.getTotalPrice());
+        }
+        else if(transaction.getTransactionType() == TransactionType.Sell) {
+            this.availableMoney = this.availableMoney.add(transaction.getTotalPrice());
+        }
+        else {
+            throw new RuntimeException("Transaction type not supported: " + transaction.getTransactionType());
+        }
+
+        this.availableMoney = this.availableMoney.subtract(transaction.getCommission());
     }
 
     private void handleTransactionForNewPosition(Transaction transaction) throws StateException {
@@ -107,9 +137,5 @@ public class Account {
 
     private boolean hasPosition(ISIN isin) {
         return this.positions.containsKey(isin);
-    }
-
-    public Amount getCommissions() {
-        return commissions;
     }
 }
