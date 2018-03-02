@@ -1,7 +1,10 @@
-package trading;
+package trading.account;
 
 import org.junit.Assert;
 import org.junit.Test;
+import trading.Amount;
+import trading.ISIN;
+import trading.Quantity;
 
 public class PositionTest {
     @Test

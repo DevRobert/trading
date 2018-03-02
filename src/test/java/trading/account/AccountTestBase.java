@@ -12,7 +12,7 @@ public abstract class AccountTestBase {
         this.account = new Account(availableMoney);
     }
 
-    protected void prepareAccountWithBuyTransaction() throws StateException {
+    protected void prepareAccountWithBuyTransaction() throws AccountStateException {
         // Initial available money = 10,000
         // Initial balance = 10,000
 

@@ -1,4 +1,4 @@
-package trading;
+package trading.account;
 
 public class PositionNotFoundException extends RuntimeException {
 }

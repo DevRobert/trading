@@ -1,4 +1,6 @@
-package trading;
+package trading.account;
+
+import trading.*;
 
 import java.util.HashMap;
 
@@ -40,7 +42,7 @@ public class Account {
         this.balance = availableMoney;
     }
 
-    public void registerTransaction(Transaction transaction) throws StateException {
+    public void registerTransaction(Transaction transaction) throws AccountStateException {
         this.ensureTransactionCanBePaid(transaction);
 
         Position position = this.getPositionOrCreatePending(transaction.getIsin());
@@ -48,7 +50,7 @@ public class Account {
         try {
             this.handleTransaction(transaction, position);
         }
-        catch(StateException ex) {
+        catch(AccountStateException ex) {
             if(position.isCreationPending()) {
                 this.positions.remove(transaction.getIsin());
             }
@@ -73,7 +75,7 @@ public class Account {
         return position;
     }
 
-    private void ensureTransactionCanBePaid(Transaction transaction) throws StateException {
+    private void ensureTransactionCanBePaid(Transaction transaction) throws AccountStateException {
         Amount requiredAmount;
 
         if(transaction.getTransactionType() == TransactionType.Buy) {
@@ -87,7 +89,7 @@ public class Account {
         }
 
         if(requiredAmount.getValue() > this.availableMoney.getValue()) {
-            throw new StateException("The transaction amount (total price and commission) exceeds the available money.");
+            throw new AccountStateException("The transaction amount (total price and commission) exceeds the available money.");
         }
     }
 
@@ -109,7 +111,7 @@ public class Account {
         this.balance = this.balance.subtract(transaction.getCommission());
     }
 
-    private void handleTransaction(Transaction transaction, Position position) throws StateException {
+    private void handleTransaction(Transaction transaction, Position position) throws AccountStateException {
         if(transaction.getTransactionType() == TransactionType.Buy) {
             this.handleBuyTransaction(transaction, position);
         }
@@ -121,18 +123,18 @@ public class Account {
         }
     }
 
-    private void handleBuyTransaction(Transaction transaction, Position position) throws StateException {
+    private void handleBuyTransaction(Transaction transaction, Position position) throws AccountStateException {
         if(!position.getQuantity().isZero()) {
-            throw new StateException("Subsequent buy transactions for uncompensated positions are not supported.");
+            throw new AccountStateException("Subsequent buy transactions for uncompensated positions are not supported.");
         }
 
         position.setQuantity(transaction.getQuantity());
         position.setFullMarketPrice(transaction.getTotalPrice());
     }
 
-    private void handleSellTransaction(Transaction transaction, Position position) throws StateException {
+    private void handleSellTransaction(Transaction transaction, Position position) throws AccountStateException {
         if(position.isCreationPending()) {
-            throw new StateException("The sell transaction could not be processed because there was no respective position found.");
+            throw new AccountStateException("The sell transaction could not be processed because there was no respective position found.");
         }
 
         this.preventPartialSellTransactions(transaction, position);
@@ -146,15 +148,15 @@ public class Account {
         position.setFullMarketPrice(Amount.Zero);
     }
 
-    private void preventPartialSellTransactions(Transaction transaction, Position position) throws StateException {
+    private void preventPartialSellTransactions(Transaction transaction, Position position) throws AccountStateException {
         if(transaction.getQuantity().getValue() < position.getQuantity().getValue()) {
-            throw new StateException("Partial sell transactions are not supported.");
+            throw new AccountStateException("Partial sell transactions are not supported.");
         }
     }
 
-    private void preventExceedingSellTransactions(Transaction transaction, Position position) throws StateException {
+    private void preventExceedingSellTransactions(Transaction transaction, Position position) throws AccountStateException {
         if(transaction.getQuantity().getValue() > position.getQuantity().getValue()) {
-            throw new StateException("The sell transaction states a higher quantity than the position has.");
+            throw new AccountStateException("The sell transaction states a higher quantity than the position has.");
         }
     }
 

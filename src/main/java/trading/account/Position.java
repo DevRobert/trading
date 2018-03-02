@@ -1,4 +1,8 @@
-package trading;
+package trading.account;
+
+import trading.Amount;
+import trading.ISIN;
+import trading.Quantity;
 
 public class Position {
     private ISIN isin;

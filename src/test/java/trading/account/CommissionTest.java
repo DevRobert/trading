@@ -11,7 +11,7 @@ public class CommissionTest extends AccountTestBase {
     }
 
     @Test
-    public void commissionOfBuyTransactionIsRegistered() throws StateException {
+    public void commissionOfBuyTransactionIsRegistered() throws AccountStateException {
         Amount fullPrice = new Amount(100.0);
         Amount commission = new Amount(20.0);
         Transaction transaction = new Transaction(TransactionType.Buy, ISIN.MunichRe, new Quantity(1), fullPrice, commission);
@@ -21,7 +21,7 @@ public class CommissionTest extends AccountTestBase {
     }
 
     @Test
-    public void commissionOfSellTransactionIsRegistered() throws StateException {
+    public void commissionOfSellTransactionIsRegistered() throws AccountStateException {
         ISIN isin = ISIN.MunichRe;
         Quantity quantity = new Quantity(1);
         Amount fullBuyPrice = new Amount(1000.0);

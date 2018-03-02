@@ -11,14 +11,14 @@ public class BalanceTest extends AccountTestBase {
     }
 
     @Test
-    public void buyTransactionReducesBalanceByCommission() throws StateException {
+    public void buyTransactionReducesBalanceByCommission() throws AccountStateException {
         prepareAccountWithBuyTransaction();
 
         Assert.assertEquals(new Amount(9990.0), account.getBalance());
     }
 
     @Test
-    public void sellTransactionReducesBalanceByCommissionForZeroMargin() throws StateException {
+    public void sellTransactionReducesBalanceByCommissionForZeroMargin() throws AccountStateException {
         this.prepareAccountWithBuyTransaction();
 
         // Intermediate balance = 9,990
@@ -35,7 +35,7 @@ public class BalanceTest extends AccountTestBase {
     }
 
     @Test
-    public void sellTransactionIncreasesBalanceByPositiveMarginAndZeroCommissions() throws StateException {
+    public void sellTransactionIncreasesBalanceByPositiveMarginAndZeroCommissions() throws AccountStateException {
         this.prepareAccountWithBuyTransaction();
 
         // Intermediate balance = 9,990
@@ -52,7 +52,7 @@ public class BalanceTest extends AccountTestBase {
     }
 
     @Test
-    public void sellTransactionDecreasesBalanceByNegativeMarginAndZeroCommissions() throws StateException {
+    public void sellTransactionDecreasesBalanceByNegativeMarginAndZeroCommissions() throws AccountStateException {
         this.prepareAccountWithBuyTransaction();
 
         // Intermediate balance = 9,990

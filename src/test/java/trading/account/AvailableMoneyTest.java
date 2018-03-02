@@ -11,7 +11,7 @@ public class AvailableMoneyTest extends AccountTestBase {
     }
 
     @Test
-    public void buyTransactionReducesAvailableMoney() throws StateException {
+    public void buyTransactionReducesAvailableMoney() throws AccountStateException {
         // Initial available money: 10,000
 
         Amount totalPrice = new Amount(1000.0);
@@ -27,7 +27,7 @@ public class AvailableMoneyTest extends AccountTestBase {
     }
 
     @Test
-    public void sellTransactionIncreasesAvailableMoney() throws StateException {
+    public void sellTransactionIncreasesAvailableMoney() throws AccountStateException {
         // Initial available money: 10,000
 
         Amount totalBuyPrice = new Amount(1000.0);
@@ -60,12 +60,12 @@ public class AvailableMoneyTest extends AccountTestBase {
 
         try {
             account.registerTransaction(transaction);
-        } catch (StateException ex) {
+        } catch (AccountStateException ex) {
             Assert.assertEquals("The transaction amount (total price and commission) exceeds the available money.", ex.getMessage());
             return;
         }
 
-        Assert.fail("StateException expected.");
+        Assert.fail("AccountStateException expected.");
     }
 
     @Test
@@ -77,16 +77,16 @@ public class AvailableMoneyTest extends AccountTestBase {
 
         try {
             account.registerTransaction(transaction);
-        } catch (StateException ex) {
+        } catch (AccountStateException ex) {
             Assert.assertEquals("The transaction amount (total price and commission) exceeds the available money.", ex.getMessage());
             return;
         }
 
-        Assert.fail("StateException expected.");
+        Assert.fail("AccountStateException expected.");
     }
 
     @Test
-    public void buyTransactionSucceedsIfExactlyEnoughMoneyAvailable() throws StateException {
+    public void buyTransactionSucceedsIfExactlyEnoughMoneyAvailable() throws AccountStateException {
         Amount buyTotalPrice = new Amount(9000.0);
         Amount buyCommission = new Amount(1000.0);
 
@@ -97,7 +97,7 @@ public class AvailableMoneyTest extends AccountTestBase {
     }
 
     @Test
-    public void buyTransactionSucceedsIfMoreThanEnoughMoneyAvailable() throws StateException {
+    public void buyTransactionSucceedsIfMoreThanEnoughMoneyAvailable() throws AccountStateException {
         Amount buyTotalPrice = new Amount(8000.0);
         Amount buyCommission = new Amount(1000.0);
 
@@ -108,7 +108,7 @@ public class AvailableMoneyTest extends AccountTestBase {
     }
 
     @Test
-    public void sellTransactionSucceedsEvenIfCommissionExceedsTotalPriceAndNoMoneyIsAvailable() throws StateException {
+    public void sellTransactionSucceedsEvenIfCommissionExceedsTotalPriceAndNoMoneyIsAvailable() throws AccountStateException {
         Amount buyTotalPrice = new Amount(9000.0);
         Amount buyCommission = new Amount(1000.0);
 

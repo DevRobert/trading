@@ -4,12 +4,10 @@ import org.junit.Assert;
 import org.junit.Test;
 import trading.Amount;
 import trading.ISIN;
-import trading.Position;
-import trading.StateException;
 
 public class MarketPriceUpdateTest extends AccountTestBase {
     @Test
-    public void increasingMarketPriceIncreasesPositionTotalMarketPrice() throws StateException {
+    public void increasingMarketPriceIncreasesPositionTotalMarketPrice() throws AccountStateException {
         // Seeding money 10,000
         // Price: 5,000 for 10 shares (500 per share)
         // Commission: 10
@@ -25,7 +23,7 @@ public class MarketPriceUpdateTest extends AccountTestBase {
     }
 
     @Test
-    public void decreasingMarketPriceDecreasesPositionTotalMarketPrice() throws StateException {
+    public void decreasingMarketPriceDecreasesPositionTotalMarketPrice() throws AccountStateException {
         // Seeding money 10,000
         // Price: 5,000 for 10 shares (500 per share)
         // Commission: 10
@@ -41,7 +39,7 @@ public class MarketPriceUpdateTest extends AccountTestBase {
     }
 
     @Test
-    public void increasingMarketPriceIncreasesAccountBalance() throws StateException {
+    public void increasingMarketPriceIncreasesAccountBalance() throws AccountStateException {
         // Seeding money 10,000
         // Price: 5,000 for 10 shares (500 per share)
         // Commission: 10
@@ -59,7 +57,7 @@ public class MarketPriceUpdateTest extends AccountTestBase {
     }
 
     @Test
-    public void decreasingMarketPriceDecreasesAccountBalance() throws StateException {
+    public void decreasingMarketPriceDecreasesAccountBalance() throws AccountStateException {
         // Seeding money 10,000
         // Price: 5,000 for 10 shares (500 per share)
         // Commission: 10
@@ -77,7 +75,7 @@ public class MarketPriceUpdateTest extends AccountTestBase {
     }
 
     @Test
-    public void increasingMarketPriceDoesNotAffectAvailableMoney() throws StateException {
+    public void increasingMarketPriceDoesNotAffectAvailableMoney() throws AccountStateException {
         // Seeding money 10,000
         // Price: 5,000 for 10 shares (500 per share)
         // Commission: 10

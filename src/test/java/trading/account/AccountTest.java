@@ -18,7 +18,7 @@ public class AccountTest extends AccountTestBase {
     }
 
     @Test
-    public void buyTransactionLeadsToNewPosition() throws StateException {
+    public void buyTransactionLeadsToNewPosition() throws AccountStateException {
         ISIN isin = ISIN.MunichRe;
         Quantity quantity = new Quantity(1000);
         Amount fullPrice = new Amount(2000.0);
@@ -35,7 +35,7 @@ public class AccountTest extends AccountTestBase {
     }
 
     @Test
-    public void buyTransactionLeadsToConfirmedPosition() throws StateException {
+    public void buyTransactionLeadsToConfirmedPosition() throws AccountStateException {
         Amount fullPrice = new Amount(1000.0);
         Amount commission = new Amount(10.0);
         Transaction transaction = new Transaction(TransactionType.Buy, ISIN.MunichRe, new Quantity(1), fullPrice, commission);
@@ -47,7 +47,7 @@ public class AccountTest extends AccountTestBase {
     }
 
     @Test
-    public void sellTransactionCompensatesExistingPosition() throws StateException {
+    public void sellTransactionCompensatesExistingPosition() throws AccountStateException {
         ISIN isin = ISIN.MunichRe;
         Quantity quantity = new Quantity(1);
         Amount fullBuyPrice = new Amount(1000.0);
@@ -78,16 +78,16 @@ public class AccountTest extends AccountTestBase {
         try {
             account.registerTransaction(transaction);
         }
-        catch(StateException ex) {
+        catch(AccountStateException ex) {
             Assert.assertEquals("The sell transaction could not be processed because there was no respective position found.", ex.getMessage());
             return;
         }
 
-        Assert.fail("StateException expected.");
+        Assert.fail("AccountStateException expected.");
     }
 
     @Test
-    public void partialSellTransactionFails() throws StateException {
+    public void partialSellTransactionFails() throws AccountStateException {
         ISIN isin = ISIN.MunichRe;
         Amount fullBuyPrice = new Amount(1000.0);
         Amount fullSellPrice = new Amount(2000.0);
@@ -102,16 +102,16 @@ public class AccountTest extends AccountTestBase {
         try {
             account.registerTransaction(sellTransaction);
         }
-        catch(StateException ex) {
+        catch(AccountStateException ex) {
             Assert.assertEquals("Partial sell transactions are not supported.", ex.getMessage());
             return;
         }
 
-        Assert.fail("StateException expected.");
+        Assert.fail("AccountStateException expected.");
     }
 
     @Test
-    public void exceedingSellTransactionFails() throws StateException {
+    public void exceedingSellTransactionFails() throws AccountStateException {
         ISIN isin = ISIN.MunichRe;
         Amount fullBuyPrice = new Amount(1000.0);
         Amount fullSellPrice = new Amount(2000.0);
@@ -126,16 +126,16 @@ public class AccountTest extends AccountTestBase {
         try {
             account.registerTransaction(sellTransaction);
         }
-        catch(StateException ex) {
+        catch(AccountStateException ex) {
             Assert.assertEquals("The sell transaction states a higher quantity than the position has.", ex.getMessage());
             return;
         }
 
-        Assert.fail("StateException expected.");
+        Assert.fail("AccountStateException expected.");
     }
 
     @Test
-    public void buyTransactionForUncompensatedPositionFails() throws StateException {
+    public void buyTransactionForUncompensatedPositionFails() throws AccountStateException {
         ISIN isin = ISIN.MunichRe;
         Amount fullBuyPrice = new Amount(1000.0);
         Amount buyCommission = new Amount(10.0);
@@ -148,16 +148,16 @@ public class AccountTest extends AccountTestBase {
         try {
             account.registerTransaction(furtherBuyTransaction);
         }
-        catch(StateException ex) {
+        catch(AccountStateException ex) {
             Assert.assertEquals("Subsequent buy transactions for uncompensated positions are not supported.", ex.getMessage());
             return;
         }
 
-        Assert.fail("StateException expected.");
+        Assert.fail("AccountStateException expected.");
     }
 
     @Test
-    public void buyTransactionForCompensatedPositionFails() throws StateException {
+    public void buyTransactionForCompensatedPositionFails() throws AccountStateException {
         ISIN isin = ISIN.MunichRe;
         Amount fullBuyPrice = new Amount(1000.0);
         Amount fullSellPrice = new Amount(2000.0);
@@ -189,12 +189,12 @@ public class AccountTest extends AccountTestBase {
         try {
             account.registerTransaction(transaction);
         }
-        catch(StateException ex) {
+        catch(AccountStateException ex) {
             registrationFailed = true;
         }
 
         if(!registrationFailed) {
-            Assert.fail("StateException expected.");
+            Assert.fail("AccountStateException expected.");
         }
 
         try {
