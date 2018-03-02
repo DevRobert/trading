@@ -41,7 +41,7 @@ public class Position {
         this.creationPending = true;
     }
 
-    public void confirmCreation() {
+    protected void confirmCreation() {
         this.creationPending = false;
     }
 }
