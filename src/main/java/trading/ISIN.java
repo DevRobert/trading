@@ -4,6 +4,7 @@ import java.util.Objects;
 
 public class ISIN {
     public static final ISIN MunichRe = new ISIN("DE0008430026");
+    public static final ISIN Allianz = new ISIN("DE0008404005");
 
     private final String text;
 
