@@ -1,4 +1,4 @@
-package trading.order;
+package trading.broker;
 
 public interface Broker {
     // setOrder

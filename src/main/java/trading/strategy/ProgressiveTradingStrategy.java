@@ -1,8 +1,7 @@
 package trading.strategy;
 
 import trading.account.Account;
-import trading.market.MarketPriceSnapshot;
-import trading.order.Broker;
+import trading.broker.Broker;
 
 /**
  * Progressive Trading Strategy

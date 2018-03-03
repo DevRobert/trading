@@ -7,7 +7,7 @@ import trading.AvailableStocks;
 import trading.ISIN;
 import trading.account.Account;
 import trading.market.MarketPriceSnapshot;
-import trading.order.Broker;
+import trading.broker.Broker;
 
 import java.util.HashSet;
 import java.util.Set;

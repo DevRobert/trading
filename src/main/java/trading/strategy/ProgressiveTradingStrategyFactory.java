@@ -2,7 +2,7 @@ package trading.strategy;
 
 import trading.AvailableStocks;
 import trading.account.Account;
-import trading.order.Broker;
+import trading.broker.Broker;
 
 public class ProgressiveTradingStrategyFactory implements TradingStrategyFactory {
     @Override
