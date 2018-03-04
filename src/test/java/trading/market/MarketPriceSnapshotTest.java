@@ -6,6 +6,8 @@ import org.junit.Test;
 import trading.Amount;
 import trading.ISIN;
 
+import java.util.Set;
+
 public class MarketPriceSnapshotTest {
     private MarketPriceSnapshotBuilder builder;
 
@@ -15,7 +17,7 @@ public class MarketPriceSnapshotTest {
     }
 
     @Test
-    public void snapshotReturnsMarketPriceForKnownISIN() {
+    public void returnsMarketPriceForKnownISIN() {
         Amount marketPrice = new Amount(1000.0);
         builder.setMarketPrice(ISIN.MunichRe, marketPrice);
 
@@ -36,5 +38,18 @@ public class MarketPriceSnapshotTest {
         }
 
         Assert.fail("UnknownStockException expected.");
+    }
+
+    @Test
+    public void listOfReturnedISINsCoversRegisteredStocks() {
+        builder.setMarketPrice(ISIN.MunichRe, new Amount(1000.0));
+        builder.setMarketPrice(ISIN.Allianz, new Amount(500.0));
+
+        MarketPriceSnapshot snapshot = builder.build();
+
+        Set<ISIN> isins = snapshot.getISINs();
+        Assert.assertTrue(isins.contains(ISIN.MunichRe));
+        Assert.assertTrue(isins.contains(ISIN.Allianz));
+        Assert.assertEquals(2, isins.size());
     }
 }

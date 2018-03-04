@@ -3,12 +3,13 @@ package trading.market;
 import trading.Amount;
 import trading.ISIN;
 
-import java.util.HashMap;
+import java.util.Map;
+import java.util.Set;
 
 public class MarketPriceSnapshot {
-    private final HashMap<ISIN, Amount> marketPrices;
+    private final Map<ISIN, Amount> marketPrices;
 
-    public MarketPriceSnapshot(HashMap<ISIN, Amount> marketPrices) {
+    public MarketPriceSnapshot(Map<ISIN, Amount> marketPrices) {
         this.marketPrices = marketPrices;
     }
 
@@ -20,5 +21,9 @@ public class MarketPriceSnapshot {
         }
 
         return marketPrice;
+    }
+
+    public Set<ISIN> getISINs() {
+        return this.marketPrices.keySet();
     }
 }

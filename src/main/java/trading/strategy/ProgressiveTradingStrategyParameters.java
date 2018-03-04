@@ -4,37 +4,37 @@ import trading.ISIN;
 
 public class ProgressiveTradingStrategyParameters {
     private final ISIN isin;
-    private final int buyTriggerPositiveSeriesNumDays;
-    private final int sellTriggerNumNegativeDays;
-    private final int sellTriggerNumMaxDays;
-    private final int restartTriggerNumNegativeDays;
+    private final int buyTriggerRisingDaysInSequence;
+    private final int sellTriggerDecliningDaysInSequence;
+    private final int sellTriggerMaxDays;
+    private final int restartTriggerDecliningDaysInSequence;
 
     public ISIN getISIN() {
         return this.isin;
     }
 
-    public int getBuyTriggerPositiveSeriesNumDays() {
-        return buyTriggerPositiveSeriesNumDays;
+    public int getBuyTriggerRisingDaysInSequence() {
+        return buyTriggerRisingDaysInSequence;
     }
 
-    public int getSellTriggerNumNegativeDays() {
-        return sellTriggerNumNegativeDays;
+    public int getSellTriggerDecliningDaysInSequence() {
+        return sellTriggerDecliningDaysInSequence;
     }
 
-    public int getSellTriggerNumMaxDays() {
-        return sellTriggerNumMaxDays;
+    public int getSellTriggerMaxDays() {
+        return sellTriggerMaxDays;
     }
 
-    public int getRestartTriggerNumNegativeDays() {
-        return restartTriggerNumNegativeDays;
+    public int getRestartTriggerDecliningDaysInSequence() {
+        return restartTriggerDecliningDaysInSequence;
     }
 
-    public ProgressiveTradingStrategyParameters(ISIN isin, int buyTriggerPositiveSeriesNumDays, int sellTriggerNumNegativeDays, int sellTriggerNumMaxDays, int restartTriggerNumNegativeDays) {
+    public ProgressiveTradingStrategyParameters(ISIN isin, int buyTriggerRisingDaysInSequence, int sellTriggerDecliningDaysInSequence, int sellTriggerMaxDays, int restartTriggerDecliningDaysInSequence) {
         this.isin = isin;
-        this.buyTriggerPositiveSeriesNumDays = buyTriggerPositiveSeriesNumDays;
-        this.sellTriggerNumNegativeDays = sellTriggerNumNegativeDays;
-        this.sellTriggerNumMaxDays = sellTriggerNumMaxDays;
-        this.restartTriggerNumNegativeDays = restartTriggerNumNegativeDays;
+        this.buyTriggerRisingDaysInSequence = buyTriggerRisingDaysInSequence;
+        this.sellTriggerDecliningDaysInSequence = sellTriggerDecliningDaysInSequence;
+        this.sellTriggerMaxDays = sellTriggerMaxDays;
+        this.restartTriggerDecliningDaysInSequence = restartTriggerDecliningDaysInSequence;
     }
 
     public static ProgressiveTradingStrategyParameters parse(TradingStrategyParameters parameters) {
@@ -46,10 +46,10 @@ public class ProgressiveTradingStrategyParameters {
 
         try {
             isinString = parameters.getParameter("isin");
-            buyTriggerPositiveSeriesNumDays = getIntegerParameter(parameters, "buyTriggerPositiveSeriesNumDays", true, false);
-            sellTriggerNumNegativeDays = getIntegerParameter(parameters, "sellTriggerNumNegativeDays", true, true);
-            sellTriggerNumMaxDays = getIntegerParameter(parameters, "sellTriggerNumMaxDays", true, true);
-            restartTriggerNumNegativeDays = getIntegerParameter(parameters, "restartTriggerNumNegativeDays", true, false);
+            buyTriggerPositiveSeriesNumDays = getIntegerParameter(parameters, "buyTriggerRisingDaysInSequence", true, false);
+            sellTriggerNumNegativeDays = getIntegerParameter(parameters, "sellTriggerDecliningDaysInSequence", true, true);
+            sellTriggerNumMaxDays = getIntegerParameter(parameters, "sellTriggerMaxDays", true, true);
+            restartTriggerNumNegativeDays = getIntegerParameter(parameters, "restartTriggerDecliningDaysInSequence", true, false);
         }
         catch(MissingParameterException ex) {
             throw new StrategyInitializationException(ex.getMessage());

@@ -3,7 +3,7 @@ package trading.strategy;
 import trading.account.Account;
 import trading.broker.Broker;
 
-/**
+ /**
  * Progressive Trading Strategy
  *
  * Invests all available money into one specified stock.
@@ -11,22 +11,22 @@ import trading.broker.Broker;
  *
  * Parameters:
  *
- *  1. isin
- *  2. buyTriggerPositiveSeriesNumDays; >= 0
- *  3. sellTriggerNumNegativeDays; >= 0
- *  4. sellTriggerNumMaxDays; >= 1
- *  5. restartTriggerNumNegativeDays; >= 0
+ *  1. (ISIN) isin
+ *  2. (int) buyTriggerRisingDaysInSequence; >= 0
+ *  3. (int) sellTriggerDecliningDaysInSequence; >= 0
+ *  4. (int) sellTriggerMaxDays; >= 1
+ *  5. (int) restartTriggerDecliningDaysInSequence; >= 0
  *
  * Phases:
  *
- *  A: Sets buy order for given ISIN after a series of {buyTriggerPositiveSeriesNumDays} days has passed.
+ *  A: Sets buy order for given ISIN after a series of {buyTriggerRisingDaysInSequence} days has passed.
  *     The maximum possible amount of available money is used for this order.
  *
  *  B: Sets sell order for bought position when one of the following condition occurs:
- *     - {sellTriggerNumNegativeDays} days with negative performance have passed after buying.
- *     - {sellTriggerNumMaxDays} days have passed after buying.
+ *     - {sellTriggerDecliningDaysInSequence} days with negative performance have passed after buying.
+ *     - {sellTriggerMaxDays} days have passed after buying.
  *
- *  C: {restartTriggerNumNegativeDays} days with negative performance have to be passed, so that Phase A is entered again.
+ *  C: {restartTriggerDecliningDaysInSequence} days with negative performance have to be passed, so that Phase A is entered again.
  */
 public class ProgressiveTradingStrategy implements TradingStrategy {
     private final ProgressiveTradingStrategyParameters parameters;
@@ -39,3 +39,6 @@ public class ProgressiveTradingStrategy implements TradingStrategy {
         this.broker = null;
     }
 }
+
+// TODO sellTriggerDecliningDaysInSequence vs sellTriggerDecliningDays
+// TODO restartTriggerDecliningDaysInSequence vs restartTriggerDecliningDays

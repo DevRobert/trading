@@ -1,6 +1,6 @@
 package trading.broker;
 
 public interface Broker {
-    // setOrder
-    // cancelOrder
+    void setOrder(OrderRequest orderRequest);
+    void notifyDayOpened();
 }

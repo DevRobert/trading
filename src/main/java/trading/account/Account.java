@@ -32,7 +32,7 @@ public class Account {
         return position;
     }
 
-    private boolean hasPosition(ISIN isin) {
+    public boolean hasPosition(ISIN isin) {
         return this.positions.containsKey(isin);
     }
 
