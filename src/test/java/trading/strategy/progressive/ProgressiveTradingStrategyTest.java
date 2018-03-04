@@ -30,10 +30,8 @@ public class ProgressiveTradingStrategyTest extends ProgressiveTradingStrategyTe
 
         beginHistory(isin, new Amount(1000.0));
 
-        // RisingDaysInSequence = 0
-
         beginSimulation();
-        passDay(new Amount(1000.0));
+        openDay();
 
         assertPositionHasPositiveQuantity(isin);
     }
@@ -44,10 +42,8 @@ public class ProgressiveTradingStrategyTest extends ProgressiveTradingStrategyTe
 
         beginHistory(isin, new Amount(1000.0));
 
-        // RisingDaysInSequence = 0
-
         beginSimulation();
-        passDay(new Amount(1000.0));
+        openDay();
 
         assertNoneOrEmptyPosition(isin);
     }
@@ -57,12 +53,10 @@ public class ProgressiveTradingStrategyTest extends ProgressiveTradingStrategyTe
         this.buyTriggerRisingDaysInSequence = 1;
 
         beginHistory(isin, new Amount(1000.0));
-        addHistory(new Amount(1100.0));
-
-        // RisingDaysInSequence = 1
+        addHistory(new Amount(1100.0)); // raised - 1 day in sequence
 
         beginSimulation();
-        passDay(new Amount(1000.0));
+        openDay();
 
         assertPositionHasPositiveQuantity(isin);
     }
@@ -72,14 +66,13 @@ public class ProgressiveTradingStrategyTest extends ProgressiveTradingStrategyTe
         this.buyTriggerRisingDaysInSequence = 1;
 
         beginHistory(isin, new Amount(1000.0));
-        addHistory(new Amount(1100.0));
-        addHistory(new Amount(1200.0));
+        addHistory(new Amount(1100.0)); // raised - 1 days in sequence
+        addHistory(new Amount(1200.0)); // raised - 2 days in sequence
 
         // RisingDaysInSequence = 2
 
         beginSimulation();
-        passDay(new Amount(1000.0));
-
+        openDay();
         assertPositionHasPositiveQuantity(isin);
     }
 
@@ -88,14 +81,14 @@ public class ProgressiveTradingStrategyTest extends ProgressiveTradingStrategyTe
         this.buyTriggerRisingDaysInSequence = 1;
 
         beginHistory(isin, new Amount(1000.0));
-        // RisingDaysInSequence = 0
 
         beginSimulation();
-        passDay(new Amount(1100.0));
-        // RisingDaysInSequence = 1
 
         openDay();
+        assertNoneOrEmptyPosition(isin);
+        closeDay(new Amount(1100.0)); // raised - 1 day in sequence
 
+        openDay();
         assertPositionHasPositiveQuantity(isin);
     }
 
@@ -107,10 +100,8 @@ public class ProgressiveTradingStrategyTest extends ProgressiveTradingStrategyTe
 
         beginHistory(isin, new Amount(1000.0));
 
-        // RisingDaysInSequence = 0
-
         beginSimulation();
-        passDay(new Amount(1000.0));
+        openDay();
 
         // Expected price = 1,000
         // Expected quantity = 50
@@ -141,10 +132,11 @@ public class ProgressiveTradingStrategyTest extends ProgressiveTradingStrategyTe
         beginHistory(isin, new Amount(1000.0));
         beginSimulation();
 
-        passDay(new Amount(1100.0));
+        openDay();
         assertPositionHasPositiveQuantity(isin);
+        closeDay(new Amount(1100.0)); // raised - 1 day in sequence
 
-        passDay(new Amount(1200.0));
+        openDay();
         assertNoneOrEmptyPosition(isin);
     }
 
@@ -156,13 +148,15 @@ public class ProgressiveTradingStrategyTest extends ProgressiveTradingStrategyTe
         beginHistory(isin, new Amount(1000.0));
         beginSimulation();
 
-        passDay(new Amount(1100.0));
+        openDay();
         assertPositionHasPositiveQuantity(isin);
+        closeDay(new Amount(1100.0)); // raised - 1 day in sequence
 
-        passDay(new Amount(1200.0));
+        openDay();
         assertPositionHasPositiveQuantity(isin);
+        closeDay(new Amount(1200.0)); // raised - 2 days in sequence
 
-        passDay(new Amount(1300.0));
+        openDay();
         assertNoneOrEmptyPosition(isin);
     }
 
@@ -187,13 +181,13 @@ public class ProgressiveTradingStrategyTest extends ProgressiveTradingStrategyTe
 
         openDay();
         assertPositionHasPositiveQuantity(isin);
-        closeDay(new Amount(1100.0)); // price raised
+        closeDay(new Amount(1100.0)); // raised - 1 say in sequence
 
         // First selling for next day expected (due to sellTriggerMaxDays = 1)
 
         openDay();
         assertNoneOrEmptyPosition(isin);
-        closeDay(new Amount(900.0)); // price raised - 1 day in sequence
+        closeDay(new Amount(900.0)); // declined - 1 day in sequence
 
         // Second buy expected for next day (due to restartTriggerDecliningDays = 0 and buyTriggerRisingDaysInSequence = 0)
 
@@ -216,19 +210,19 @@ public class ProgressiveTradingStrategyTest extends ProgressiveTradingStrategyTe
 
         openDay();
         assertPositionHasPositiveQuantity(isin);
-        closeDay(new Amount(1100.0)); // price raised (1 day in sequence)
+        closeDay(new Amount(1100.0)); // raised (1 day in sequence)
 
         // First sale expected for next day (due to sellTriggerMaxDays = 1)
 
         openDay();
         assertNoneOrEmptyPosition(isin);
-        closeDay(new Amount(1200.0)); // price raised (2 days in sequence)
+        closeDay(new Amount(1200.0)); // raised (2 days in sequence)
 
         // Wait expected for next day (due to not fulfilled restartTriggerDecliningDays = 1)
 
         openDay();
         assertNoneOrEmptyPosition(isin);
-        closeDay(new Amount(1100.0)); // price declined (1 day in sequence)
+        closeDay(new Amount(1100.0)); // declined (1 day in sequence)
 
         // Second buy expected for next day (due to fulfilled restartTriggerDecliningDays = 1)
 
