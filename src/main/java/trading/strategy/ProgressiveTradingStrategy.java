@@ -13,9 +13,9 @@ import trading.broker.Broker;
  *
  *  1. (ISIN) isin
  *  2. (int) buyTriggerRisingDaysInSequence; >= 0
- *  3. (int) sellTriggerDecliningDaysInSequence; >= 0
+ *  3. (int) sellTriggerDecliningDays; >= 0
  *  4. (int) sellTriggerMaxDays; >= 1
- *  5. (int) restartTriggerDecliningDaysInSequence; >= 0
+ *  5. (int) restartTriggerDecliningDays; >= 0
  *
  * Phases:
  *
@@ -44,6 +44,4 @@ public class ProgressiveTradingStrategy implements TradingStrategy {
 
      }
  }
-
-// TODO sellTriggerDecliningDaysInSequence vs sellTriggerDecliningDays
-// TODO restartTriggerDecliningDaysInSequence vs restartTriggerDecliningDays
+ 

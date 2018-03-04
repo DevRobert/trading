@@ -11,9 +11,9 @@ public abstract class ProgressiveTradingStrategyTestBase extends TradingStrategy
     public void before() {
         this.parametersBuilder.setParameter("isin", ISIN.MunichRe.getText());
         this.parametersBuilder.setParameter("buyTriggerRisingDaysInSequence", "1");
-        this.parametersBuilder.setParameter("sellTriggerDecliningDaysInSequence", "1");
+        this.parametersBuilder.setParameter("sellTriggerDecliningDays", "1");
         this.parametersBuilder.setParameter("sellTriggerMaxDays", "3");
-        this.parametersBuilder.setParameter("restartTriggerDecliningDaysInSequence", "0");
+        this.parametersBuilder.setParameter("restartTriggerDecliningDays", "0");
     }
 
     @Override

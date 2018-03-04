@@ -51,23 +51,23 @@ public class ProgressiveTradingStrategyParametersTest extends ProgressiveTrading
     // Validate Parameter 3: (int) sellTriggerDecliningDaysInSequence; >= 1
 
     @Test
-    public void initializationFailsIfSellTriggerDecliningDaysInSequenceParameterNotSpecified() {
-        testInitializationFailsForMissingParameter("sellTriggerDecliningDaysInSequence");
+    public void initializationFailsIfSellTriggerDecliningDaysParameterNotSpecified() {
+        testInitializationFailsForMissingParameter("sellTriggerDecliningDays");
     }
 
     @Test
-    public void initializationFailsIfSellTriggerDecliningDaysInSequenceParameterNotAValidInteger() {
-        testInitializationFailsForInvalidIntegerParameter("sellTriggerDecliningDaysInSequence");
+    public void initializationFailsIfSellTriggerDecliningDaysParameterNotAValidInteger() {
+        testInitializationFailsForInvalidIntegerParameter("sellTriggerDecliningDays");
     }
 
     @Test
-    public void initializationFailsIfSellTriggerDecliningDaysInSequenceParameterNegative() {
-        testInitializationFailsForNegativeParameterValue("sellTriggerDecliningDaysInSequence");
+    public void initializationFailsIfSellTriggerDecliningDaysParameterNegative() {
+        testInitializationFailsForNegativeParameterValue("sellTriggerDecliningDays");
     }
 
     @Test
-    public void initializationFailsIfSellTriggerDecliningDaysInSequenceParameterZero() {
-        testInitializationFailsForZeroParameterValue("sellTriggerDecliningDaysInSequence");
+    public void initializationFailsIfSellTriggerDecliningDaysParameterZero() {
+        testInitializationFailsForZeroParameterValue("sellTriggerDecliningDays");
     }
 
     // Validate Parameter 4: (int) sellTriggerMaxDays; >= 1
@@ -95,17 +95,17 @@ public class ProgressiveTradingStrategyParametersTest extends ProgressiveTrading
     // Validate Parameter 5: (int) restartTriggerDecliningDaysInSequence; >= 0
 
     @Test
-    public void initializationFailsIfRestartTriggerDecliningDaysInSequenceParameterNotSpecified() {
-        testInitializationFailsForMissingParameter("restartTriggerDecliningDaysInSequence");
+    public void initializationFailsIfRestartTriggerDecliningDaysParameterNotSpecified() {
+        testInitializationFailsForMissingParameter("restartTriggerDecliningDays");
     }
 
     @Test
-    public void initializationFailsIfRestartTriggerDecliningDaysInSequenceParameterNotAValidInteger() {
-        testInitializationFailsForInvalidIntegerParameter("restartTriggerDecliningDaysInSequence");
+    public void initializationFailsIfRestartTriggerDecliningDaysParameterNotAValidInteger() {
+        testInitializationFailsForInvalidIntegerParameter("restartTriggerDecliningDays");
     }
 
     @Test
-    public void initializationFailsIfRestartTriggerDecliningDaysInSequenceParameterNegative() {
-        testInitializationFailsForNegativeParameterValue("restartTriggerDecliningDaysInSequence");
+    public void initializationFailsIfRestartTriggerDecliningDaysParameterNegative() {
+        testInitializationFailsForNegativeParameterValue("restartTriggerDecliningDays");
     }
 }
