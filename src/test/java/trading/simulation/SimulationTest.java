@@ -212,7 +212,7 @@ public class SimulationTest {
             simulation.closeDay(new MarketPriceSnapshotBuilder().build());
         }
         catch(SimulationStateException ex) {
-            Assert.assertEquals("The market price snapshot must contains market prices for all available stocks.", ex.getMessage());
+            Assert.assertEquals("The market price snapshot must contain market prices for all available stocks.", ex.getMessage());
             return;
         }
 
