@@ -1,11 +1,13 @@
 package trading.strategy.progressive;
 
+import trading.Amount;
 import trading.Quantity;
 import trading.account.Account;
 import trading.broker.Broker;
 import trading.broker.OrderRequest;
 import trading.broker.OrderType;
 import trading.market.HistoricalMarketData;
+import trading.market.HistoricalStockData;
 import trading.strategy.StrategyInitializationException;
 import trading.strategy.TradingStrategy;
 
@@ -38,7 +40,7 @@ public class ProgressiveTradingStrategy implements TradingStrategy {
     private final ProgressiveTradingStrategyParameters parameters;
     private final Account account;
     private final Broker broker;
-    private final HistoricalMarketData historicalMarketData;
+    private final HistoricalStockData historicalStockData;
 
     public ProgressiveTradingStrategy(ProgressiveTradingStrategyParameters parameters, Account account, Broker broker, HistoricalMarketData historicalMarketData) {
         if (parameters == null) {
@@ -62,14 +64,28 @@ public class ProgressiveTradingStrategy implements TradingStrategy {
         }
 
         this.parameters = parameters;
-        this.account = null;
+        this.account = account;
         this.broker = broker;
-        this.historicalMarketData = null;
+        this.historicalStockData = historicalMarketData.getStockData(parameters.getISIN());
     }
 
     @Override
     public void prepareOrdersForNextTradingDay() {
-        Quantity quantity = new Quantity(1);
+        this.checkSetBuyMarketOrder();
+    }
+
+    private void checkSetBuyMarketOrder() {
+        if(this.historicalStockData.getRisingDaysInSequence() >= this.parameters.getBuyTriggerRisingDaysInSequence()) {
+            this.setBuyMarketOrder();
+        }
+    }
+
+    private void setBuyMarketOrder() {
+        Amount availableMoney = account.getAvailableMoney();
+        Amount lastClosingMarketPrice = historicalStockData.getLastClosingMarketPrice();
+        double maxQuantity = Math.floor(availableMoney.getValue() / lastClosingMarketPrice.getValue());
+
+        Quantity quantity = new Quantity((int) maxQuantity);
         OrderRequest orderRequest = new OrderRequest(OrderType.BuyMarket, this.parameters.getISIN(), quantity);
         this.broker.setOrder(orderRequest);
     }

@@ -1,9 +1,12 @@
 package trading.strategy;
 
+import org.junit.Assert;
 import org.junit.Before;
 import trading.Amount;
 import trading.ISIN;
+import trading.Quantity;
 import trading.account.Account;
+import trading.account.Position;
 import trading.broker.Broker;
 import trading.broker.VirtualBroker;
 import trading.market.HistoricalMarketData;
@@ -111,11 +114,41 @@ public abstract class TradingStrategyTestBase {
     }
 
     protected void passDay(MarketPriceSnapshot closingMarketPrices) {
+        openDay();
+        closeDay(closingMarketPrices);
+    }
+
+    protected void openDay() {
         if(simulation == null) {
             throw new RuntimeException("The simulation has not been started yet.");
         }
 
         simulation.openDay();
+    }
+
+    protected void closeDay(MarketPriceSnapshot closingMarketPrices) {
+        if(simulation == null) {
+            throw new RuntimeException("The simulation has not been started yet.");
+        }
+
         simulation.closeDay(closingMarketPrices);
+    }
+
+    protected void assertPositionHasPositiveQuantity(ISIN isin) {
+        if(!account.hasPosition(isin)) {
+            Assert.fail(String.format("Position for ISIN '%s' expected, but no position found.", isin.getText()));
+        }
+
+        Assert.assertFalse("Position with positive quantity expected, but zero quantity found.", account.getPosition(isin).getQuantity().isZero());
+    }
+
+    protected void assertNoneOrEmptyPosition(ISIN isin) {
+        if(!account.hasPosition(isin)) {
+            return;
+        }
+
+        Position position = account.getPosition(isin);
+
+        Assert.assertTrue("None or empty position expected, but position with non-zero quantity found.", position.getQuantity().isZero());
     }
 }
