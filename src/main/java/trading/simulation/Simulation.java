@@ -20,6 +20,8 @@ public class Simulation {
         this.broker = broker;
         this.tradingStrategy = tradingStrategy;
         this.activeDay = false;
+
+        this.tradingStrategy.prepareOrdersForNextTradingDay();
     }
 
     public void openDay() {
@@ -40,6 +42,6 @@ public class Simulation {
         this.activeDay = false;
 
         this.historicalMarketData.registerClosedDay(closingMarketPrices);
-        this.tradingStrategy.notifyDayClosed();
+        this.tradingStrategy.prepareOrdersForNextTradingDay();
     }
 }

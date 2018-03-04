@@ -1,8 +1,22 @@
 package trading.strategy.progressive;
 
+import org.junit.Assert;
 import org.junit.Test;
+import trading.Amount;
+import trading.ISIN;
+import trading.account.Position;
 
 public class ProgressiveTradingStrategyTest extends ProgressiveTradingStrategyTestBase {
+    /**
+     * Default Parameters
+     *
+     *  - ISIN: MunichRe
+     *  - buyTriggerRisingDaysInSequence: 1
+     *  - sellTriggerDecliningDays: 1
+     *  - sellTriggerMaxDays: 1
+     *  - restartTriggerDecliningDays: 0
+     */
+
      /**
      * Phase A
      *
@@ -11,12 +25,20 @@ public class ProgressiveTradingStrategyTest extends ProgressiveTradingStrategyTe
      */
 
     @Test
-    public void buyOrderIsSetIfNumRisingDaysInSequenceIsZeroAndBuyTriggerNumRisingDaysInSequenceIsZero() {
+    public void buyOrderIsSetInitiallyIfRisingDaysInSequenceIsZeroAndBuyTriggerNumRisingDaysInSequenceIsZero() {
+        beginHistory(ISIN.MunichRe, new Amount(1000.0));
+        addHistory(new Amount(900.00));
 
+        // Now: RisingDaysInSequence = 0
+
+        beginSimulation();
+
+        Position position = account.getPosition(ISIN.MunichRe);
+        Assert.assertFalse(position.getQuantity().getValue() > 0);
     }
 
     @Test
-    public void buyOrderIsSetIfPreInitDayWasNegativeAndNextDayIsPositiveAndBuyTriggerPositiveSeriesNumDaysIsOne() {
+    public void buyOrderIsSetInitiallyIfPreInitDayWasNegativeAndNextDayIsPositiveAndBuyTriggerPositiveSeriesNumDaysIsOne() {
 
     }
 

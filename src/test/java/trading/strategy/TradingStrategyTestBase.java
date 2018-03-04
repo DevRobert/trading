@@ -1,35 +1,32 @@
 package trading.strategy;
 
-import org.junit.Assert;
 import org.junit.Before;
 import trading.Amount;
 import trading.ISIN;
 import trading.account.Account;
+import trading.broker.Broker;
+import trading.broker.VirtualBroker;
 import trading.market.HistoricalMarketData;
 import trading.market.MarketPriceSnapshot;
-import trading.broker.Broker;
 import trading.market.MarketPriceSnapshotBuilder;
 import trading.simulation.Simulation;
 import trading.simulation.SimulationBuilder;
 
 public abstract class TradingStrategyTestBase {
-    private TradingStrategyFactory strategyFactory;
-    private Account account;
-    private Broker broker;
+    protected Account account;
+    private VirtualBroker broker;
     private Simulation simulation;
     private SimulationBuilder simulationBuilder;
 
     protected TradingStrategy strategy;
-    protected TradingStrategyParametersBuilder parametersBuilder;
 
-    protected abstract TradingStrategyFactory getStrategyFactory();
+    protected abstract TradingStrategy initializeTradingStrategy(Account account, Broker broker, HistoricalMarketData historicalMarketData);
 
     private HistoricalMarketData historicalMarketData;
 
     @Before()
-    public void baseBefore() {
+    public void tradingStrategyTestBaseBefore() {
         this.account = new Account(new Amount(50000.0));
-        this.parametersBuilder = new TradingStrategyParametersBuilder();
     }
 
     protected void beginHistory(ISIN isin, Amount initialMarketPrice) {
@@ -46,87 +43,50 @@ public abstract class TradingStrategyTestBase {
         historicalMarketData = new HistoricalMarketData(marketPriceSnapshot);
     }
 
-    protected void beginSimulation() {
+    protected void addHistory(Amount marketPrice) {
         if(historicalMarketData == null) {
-            throw new RuntimeException("The history has to be started before starting the simulation.");
+            throw new RuntimeException("The history has not been started.");
+        }
+
+        if(historicalMarketData.getAvailableStocks().size() != 1) {
+            throw new RuntimeException("This method is only allowed when one stock available.");
+        }
+
+        ISIN isin = historicalMarketData.getAvailableStocks().stream().findFirst().get();
+
+        MarketPriceSnapshotBuilder marketPriceSnapshotBuilder = new MarketPriceSnapshotBuilder();
+        marketPriceSnapshotBuilder.setMarketPrice(isin, marketPrice);
+        MarketPriceSnapshot marketPriceSnapshot = marketPriceSnapshotBuilder.build();
+
+        addHistory(marketPriceSnapshot);
+    }
+
+    protected void addHistory(MarketPriceSnapshot marketPriceSnapshot) {
+        if(historicalMarketData == null) {
+            throw new RuntimeException("The history has not been started.");
         }
 
         if(simulation != null) {
             throw new RuntimeException("The simulation has already been started.");
         }
 
-        TradingStrategyFactory strategyFactory = this.getStrategyFactory();
-        TradingStrategyParameters parameters = this.parametersBuilder.build();
-
-        this.strategy = strategyFactory.initializeTradingStrategy(parameters, this.account, this.broker, this.historicalMarketData);
+        historicalMarketData.registerClosedDay(marketPriceSnapshot);
     }
 
-    protected void testInitializationFailsForMissingParameter(String parameterName) {
-        this.parametersBuilder.setParameter(parameterName, null);
-
-        beginHistory(ISIN.MunichRe, new Amount(1000.0));
-
-        try {
-            beginSimulation();
-        }
-        catch(StrategyInitializationException ex) {
-            Assert.assertEquals(String.format("The parameter '%s' has not been specified.", parameterName), ex.getMessage());
-            return;
+    protected void beginSimulation() {
+        if(this.historicalMarketData == null) {
+            throw new RuntimeException("The history has to be started before starting the simulation.");
         }
 
-        Assert.fail("StrategyInitializationException expected.");
-    }
-
-    protected void testInitializationFailsForInvalidIntegerParameter(String parameterName) {
-        this.parametersBuilder.setParameter(parameterName, "XX");
-
-        beginHistory(ISIN.MunichRe, new Amount(1000.0));
-
-        try {
-            beginSimulation();
-        }
-        catch(StrategyInitializationException ex) {
-            Assert.assertEquals(String.format("The parameter '%s' is not a valid integer.", parameterName), ex.getMessage());
-            return;
+        if(this.simulation != null) {
+            throw new RuntimeException("The simulation has already been started.");
         }
 
-        Assert.fail("StrategyInitializationException expected.");
-    }
-
-    protected void testInitializationFailsForZeroParameterValue(String parameterName) {
-        this.parametersBuilder.setParameter(parameterName, "0");
-
-        beginHistory(ISIN.MunichRe, new Amount(1000.0));
-
-        try {
-            beginSimulation();
-        }
-        catch(StrategyInitializationException ex) {
-            Assert.assertEquals(String.format("The parameter '%s' must not be zero.", parameterName), ex.getMessage());
-            return;
-        }
-
-        Assert.fail("StrategyInitializationException expected.");
-    }
-
-    protected void testInitializationFailsForNegativeParameterValue(String parameterName) {
-        this.parametersBuilder.setParameter(parameterName, "-1");
-
-        beginHistory(ISIN.MunichRe, new Amount(1000.0));
-
-        try {
-            beginSimulation();
-        }
-        catch(StrategyInitializationException ex) {
-            Assert.assertEquals(String.format("The parameter '%s' must not be negative.", parameterName), ex.getMessage());
-            return;
-        }
-
-        Assert.fail("StrategyInitializationException expected.");
+        this.broker = new VirtualBroker(this.account, this.historicalMarketData);
+        this.strategy = this.initializeTradingStrategy(this.account, this.broker, historicalMarketData);
     }
 
     protected void dayPassesWithQuote(Amount amount) {
-
         // dayPassesWithQuotes(new MarketPriceSnapshot());
     }
 

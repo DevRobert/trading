@@ -14,7 +14,7 @@ import java.util.List;
 
 public class ManualTradingStrategyTest {
     @Test
-    public void manualTradingStrategySetOrderRequestsAfterDayClosed() {
+    public void setOrderRequestsAfterDayClosed() {
         final List<OrderRequest> setOrderRequests = new ArrayList();
 
         Broker broker = new Broker() {
@@ -34,7 +34,7 @@ public class ManualTradingStrategyTest {
         OrderRequest orderRequest = new OrderRequest(OrderType.BuyMarket, ISIN.MunichRe, new Quantity(1));
         manualTradingStrategy.registerOrderRequest(orderRequest);
 
-        manualTradingStrategy.notifyDayClosed();
+        manualTradingStrategy.prepareOrdersForNextTradingDay();
 
         Assert.assertEquals(1, setOrderRequests.size());
         Assert.assertSame(orderRequest, setOrderRequests.get(0));

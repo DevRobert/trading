@@ -35,6 +35,26 @@ public class ProgressiveTradingStrategyParameters {
         this.sellTriggerDecliningDays = sellTriggerDecliningDays;
         this.sellTriggerMaxDays = sellTriggerMaxDays;
         this.restartTriggerDecliningDays = restartTriggerDecliningDays;
+
+        if(buyTriggerRisingDaysInSequence < 0) {
+            throw new StrategyInitializationException("The parameter 'buyTriggerRisingDaysInSequence' must not be negative.");
+        }
+
+        if(sellTriggerDecliningDays < 0) {
+            throw new StrategyInitializationException("The parameter 'sellTriggerDecliningDays' must not be negative.");
+        }
+
+        if(sellTriggerMaxDays < 0) {
+            throw new StrategyInitializationException("The parameter 'sellTriggerMaxDays' must not be negative.");
+        }
+
+        if(sellTriggerMaxDays == 0) {
+            throw new StrategyInitializationException("The parameter 'sellTriggerMaxDays' must not be zero.");
+        }
+
+        if(restartTriggerDecliningDays < 0) {
+            throw new StrategyInitializationException("The parameter 'restartTriggerDecliningDays' must not be negative.");
+        }
     }
 
     public static ProgressiveTradingStrategyParameters parse(TradingStrategyParameters parameters) {
@@ -45,11 +65,12 @@ public class ProgressiveTradingStrategyParameters {
         int restartTriggerDecliningDays;
 
         try {
+
             isinString = parameters.getParameter("isin");
-            buyTriggerRisingDaysInSequence = getIntegerParameter(parameters, "buyTriggerRisingDaysInSequence", true, false);
-            sellTriggerDecliningDays = getIntegerParameter(parameters, "sellTriggerDecliningDays", true, true);
-            sellTriggerNumMaxDays = getIntegerParameter(parameters, "sellTriggerMaxDays", true, true);
-            restartTriggerDecliningDays = getIntegerParameter(parameters, "restartTriggerDecliningDays", true, false);
+            buyTriggerRisingDaysInSequence = getIntegerParameter(parameters, "buyTriggerRisingDaysInSequence");
+            sellTriggerDecliningDays = getIntegerParameter(parameters, "sellTriggerDecliningDays");
+            sellTriggerNumMaxDays = getIntegerParameter(parameters, "sellTriggerMaxDays");
+            restartTriggerDecliningDays = getIntegerParameter(parameters, "restartTriggerDecliningDays");
         }
         catch(MissingParameterException ex) {
             throw new StrategyInitializationException(ex.getMessage());
@@ -65,10 +86,7 @@ public class ProgressiveTradingStrategyParameters {
                 restartTriggerDecliningDays);
     }
 
-    // TODO introduce validation mode
-    // TODO extract "helper" class, also available for other trading strategies
-
-    private static int getIntegerParameter(TradingStrategyParameters parameters, String name, boolean nonNegative, boolean nonZero) {
+    private static int getIntegerParameter(TradingStrategyParameters parameters, String name) {
         String valueString = parameters.getParameter(name);
         int value;
 
@@ -79,14 +97,22 @@ public class ProgressiveTradingStrategyParameters {
             throw new StrategyInitializationException(String.format("The parameter '%s' is not a valid integer.", name));
         }
 
-        if(nonNegative && value < 0) {
-            throw new StrategyInitializationException(String.format("The parameter '%s' must not be negative.", name));
-        }
-
-        if(nonZero && value == 0) {
-            throw new StrategyInitializationException(String.format("The parameter '%s' must not be zero.", name));
-        }
-
         return value;
+    }
+
+    public static ProgressiveTradingStrategyParameters getDefault() {
+        final ISIN isin = ISIN.MunichRe;
+        final int buyTriggerRisingDaysInSequence = 1;
+        final int sellTriggerDecliningDays = 1;
+        final int sellTriggerMaxDays = 3;
+        final int restartTriggerDecliningDays = 0;
+
+        return new ProgressiveTradingStrategyParameters(
+                isin,
+                buyTriggerRisingDaysInSequence,
+                sellTriggerDecliningDays,
+                sellTriggerMaxDays,
+                restartTriggerDecliningDays
+        );
     }
 }

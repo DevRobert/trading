@@ -26,7 +26,7 @@ public class ManualTradingStrategy implements TradingStrategy {
     }
 
     @Override
-    public void notifyDayClosed() {
+    public void prepareOrdersForNextTradingDay() {
         OrderRequest orderRequest;
 
         while((orderRequest = this.orderRequestQueue.poll()) != null) {

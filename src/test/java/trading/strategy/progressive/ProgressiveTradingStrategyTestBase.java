@@ -2,22 +2,38 @@ package trading.strategy.progressive;
 
 import org.junit.Before;
 import trading.ISIN;
-import trading.strategy.ProgressiveTradingStrategyFactory;
-import trading.strategy.TradingStrategyFactory;
-import trading.strategy.TradingStrategyTestBase;
+import trading.account.Account;
+import trading.broker.Broker;
+import trading.market.HistoricalMarketData;
+import trading.strategy.*;
 
 public abstract class ProgressiveTradingStrategyTestBase extends TradingStrategyTestBase {
+    protected ISIN isin;
+    protected int buyTriggerRisingDaysInSequence;
+    protected int sellTriggerDecliningDays;
+    protected int sellTriggerMaxDays;
+    protected int restartTriggerDecliningDays;
+
     @Before
-    public void before() {
-        this.parametersBuilder.setParameter("isin", ISIN.MunichRe.getText());
-        this.parametersBuilder.setParameter("buyTriggerRisingDaysInSequence", "1");
-        this.parametersBuilder.setParameter("sellTriggerDecliningDays", "1");
-        this.parametersBuilder.setParameter("sellTriggerMaxDays", "3");
-        this.parametersBuilder.setParameter("restartTriggerDecliningDays", "0");
+    public void progressiveTradingStrategyTestBaseBefore() {
+        ProgressiveTradingStrategyParameters defaultParameters = ProgressiveTradingStrategyParameters.getDefault();
+
+        isin = defaultParameters.getISIN();
+        buyTriggerRisingDaysInSequence = defaultParameters.getBuyTriggerRisingDaysInSequence();
+        sellTriggerDecliningDays = defaultParameters.getSellTriggerDecliningDays();
+        sellTriggerMaxDays = defaultParameters.getSellTriggerMaxDays();
+        restartTriggerDecliningDays = defaultParameters.getRestartTriggerDecliningDays();
     }
 
     @Override
-    protected TradingStrategyFactory getStrategyFactory() {
-        return new ProgressiveTradingStrategyFactory();
+    protected TradingStrategy initializeTradingStrategy(Account account, Broker broker, HistoricalMarketData historicalMarketData) {
+        ProgressiveTradingStrategyParameters parameters = new ProgressiveTradingStrategyParameters(
+                isin,
+                buyTriggerRisingDaysInSequence,
+                sellTriggerDecliningDays,
+                sellTriggerMaxDays,
+                restartTriggerDecliningDays);
+
+        return new ProgressiveTradingStrategy(parameters, account, broker, historicalMarketData);
     }
 }

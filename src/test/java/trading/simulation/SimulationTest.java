@@ -110,6 +110,17 @@ public class SimulationTest {
     // State sequence
 
     @Test
+    public void tradingStrategyIsAskedToPrepareOrdersForNextTradingDayWhenSimulationStarted() {
+        AtomicBoolean prepareOrdersSignalReceived = new AtomicBoolean(false);
+
+        this.tradingStrategy = () -> prepareOrdersSignalReceived.set(true);
+
+        startSimulation();
+
+        Assert.assertTrue(prepareOrdersSignalReceived.get());
+    }
+
+    @Test
     public void closeDayFailsInitiallyWhenNoDayStarted() {
         startSimulation();
 
@@ -219,7 +230,7 @@ public class SimulationTest {
     }
 
     @Test
-    public void historicalMarketDataAreUpdatedBeforeDayClosedSignalIsForwaredToTradingStrategy() {
+    public void historicalMarketDataAreUpdatedBeforeDayClosedSignalIsForwardedToTradingStrategy() {
 
     }
 }

@@ -2,8 +2,9 @@ package trading.strategy;
 
 import trading.account.Account;
 import trading.broker.Broker;
+import trading.market.HistoricalMarketData;
 
- /**
+/**
  * Progressive Trading Strategy
  *
  * Invests all available money into one specified stock.
@@ -32,16 +33,37 @@ public class ProgressiveTradingStrategy implements TradingStrategy {
     private final ProgressiveTradingStrategyParameters parameters;
     private final Account account;
     private final Broker broker;
+    private final HistoricalMarketData historicalMarketData;
 
-    protected ProgressiveTradingStrategy(ProgressiveTradingStrategyParameters parameters, Account account, Broker broker) {
+    public ProgressiveTradingStrategy(ProgressiveTradingStrategyParameters parameters, Account account, Broker broker, HistoricalMarketData historicalMarketData) {
+        if(parameters == null) {
+            throw new StrategyInitializationException("The strategy parameters were not specified.");
+        }
+
+        if(account == null) {
+            throw new StrategyInitializationException("The account was not specified.");
+        }
+
+        if(broker == null) {
+            throw new StrategyInitializationException("The broker was not specified.");
+        }
+
+        if(historicalMarketData == null) {
+            throw new StrategyInitializationException("The historical market data were not specified.");
+        }
+
+        if(!historicalMarketData.getAvailableStocks().contains(parameters.getISIN())) {
+            throw new StrategyInitializationException(String.format("The ISIN parameter '%s' does not refer to an available stock.", parameters.getISIN().getText()));
+        }
+
         this.parameters = null;
         this.account = null;
         this.broker = null;
+        this.historicalMarketData = null;
     }
 
      @Override
-     public void notifyDayClosed() {
+     public void prepareOrdersForNextTradingDay() {
 
      }
  }
- 
