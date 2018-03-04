@@ -27,23 +27,7 @@ public class SimulationBuilder {
         this.tradingStrategy = tradingStrategy;
     }
 
-    public Simulation startSimulation() {
-        if(this.historicalMarketData == null) {
-            throw new SimulationStartException("The historical market data must be set.");
-        }
-
-        if(this.account == null) {
-            throw new SimulationStartException("The account must be set.");
-        }
-
-        if(this.broker == null) {
-            throw new SimulationStartException("The broker must be set.");
-        }
-
-        if(this.tradingStrategy == null) {
-            throw new SimulationStartException("The trading strategy must be set.");
-        }
-
+    public Simulation beginSimulation() {
         return new Simulation(this.historicalMarketData, this.account, this.broker, this.tradingStrategy);
     }
 }

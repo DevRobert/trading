@@ -31,7 +31,7 @@ public class HistoricalStockDataTest {
     // numRisingDaysInSequence
 
     @Test
-    public void risingDaysInSequenceIsZeroForEmptyDataTest() {
+    public void risingDaysInSequenceIsZeroForInitialDataSet() {
         Assert.assertEquals(0, historicalStockData.getRisingDaysInSequence());
     }
 
@@ -65,7 +65,7 @@ public class HistoricalStockDataTest {
     // numDecliningDaysInSequence
 
     @Test
-    public void decliningDaysInSequenceisZeroForEmptyDataSet() {
+    public void decliningDaysInSequenceIsZeroForInitialDataSet() {
         Assert.assertEquals(0, historicalStockData.getDecliningDaysInSequence());
     }
 

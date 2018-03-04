@@ -1,7 +1,10 @@
 package trading.strategy.progressive;
 
+import trading.Quantity;
 import trading.account.Account;
 import trading.broker.Broker;
+import trading.broker.OrderRequest;
+import trading.broker.OrderType;
 import trading.market.HistoricalMarketData;
 import trading.strategy.StrategyInitializationException;
 import trading.strategy.TradingStrategy;
@@ -38,34 +41,36 @@ public class ProgressiveTradingStrategy implements TradingStrategy {
     private final HistoricalMarketData historicalMarketData;
 
     public ProgressiveTradingStrategy(ProgressiveTradingStrategyParameters parameters, Account account, Broker broker, HistoricalMarketData historicalMarketData) {
-        if(parameters == null) {
+        if (parameters == null) {
             throw new StrategyInitializationException("The strategy parameters were not specified.");
         }
 
-        if(account == null) {
+        if (account == null) {
             throw new StrategyInitializationException("The account was not specified.");
         }
 
-        if(broker == null) {
+        if (broker == null) {
             throw new StrategyInitializationException("The broker was not specified.");
         }
 
-        if(historicalMarketData == null) {
+        if (historicalMarketData == null) {
             throw new StrategyInitializationException("The historical market data were not specified.");
         }
 
-        if(!historicalMarketData.getAvailableStocks().contains(parameters.getISIN())) {
+        if (!historicalMarketData.getAvailableStocks().contains(parameters.getISIN())) {
             throw new StrategyInitializationException(String.format("The ISIN parameter '%s' does not refer to an available stock.", parameters.getISIN().getText()));
         }
 
-        this.parameters = null;
+        this.parameters = parameters;
         this.account = null;
-        this.broker = null;
+        this.broker = broker;
         this.historicalMarketData = null;
     }
 
-     @Override
-     public void prepareOrdersForNextTradingDay() {
-
-     }
- }
+    @Override
+    public void prepareOrdersForNextTradingDay() {
+        Quantity quantity = new Quantity(1);
+        OrderRequest orderRequest = new OrderRequest(OrderType.BuyMarket, this.parameters.getISIN(), quantity);
+        this.broker.setOrder(orderRequest);
+    }
+}

@@ -16,9 +16,8 @@ public abstract class TradingStrategyTestBase {
     protected Account account;
     private VirtualBroker broker;
     private Simulation simulation;
-    private SimulationBuilder simulationBuilder;
 
-    protected TradingStrategy strategy;
+    protected TradingStrategy tradingStrategy;
 
     protected abstract TradingStrategy initializeTradingStrategy(Account account, Broker broker, HistoricalMarketData historicalMarketData);
 
@@ -83,21 +82,40 @@ public abstract class TradingStrategyTestBase {
         }
 
         this.broker = new VirtualBroker(this.account, this.historicalMarketData);
-        this.strategy = this.initializeTradingStrategy(this.account, this.broker, historicalMarketData);
+        this.tradingStrategy = this.initializeTradingStrategy(this.account, this.broker, historicalMarketData);
+
+        SimulationBuilder simulationBuilder = new SimulationBuilder();
+        simulationBuilder.setTradingStrategy(this.tradingStrategy);
+        simulationBuilder.setHistoricalMarketData(this.historicalMarketData);
+        simulationBuilder.setAccount(this.account);
+        simulationBuilder.setBroker(this.broker);
+        this.simulation = simulationBuilder.beginSimulation();
     }
 
-    protected void dayPassesWithQuote(Amount amount) {
-        // dayPassesWithQuotes(new MarketPriceSnapshot());
+    protected void passDay(Amount closingMarketPrice) {
+        if(simulation == null) {
+            throw new RuntimeException("The simulation has not been started yet.");
+        }
+
+        if(historicalMarketData.getAvailableStocks().size() != 1) {
+            throw new RuntimeException("This method is only allowed when one stock available.");
+        }
+
+        ISIN isin = historicalMarketData.getAvailableStocks().stream().findFirst().get();
+
+        MarketPriceSnapshotBuilder marketPriceSnapshotBuilder = new MarketPriceSnapshotBuilder();
+        marketPriceSnapshotBuilder.setMarketPrice(isin, closingMarketPrice);
+        MarketPriceSnapshot closingMarketPrices = marketPriceSnapshotBuilder.build();
+
+        passDay(closingMarketPrices);
     }
 
-    protected void dayPassesWithQuotes(MarketPriceSnapshot marketPriceSnapshot) {
+    protected void passDay(MarketPriceSnapshot closingMarketPrices) {
+        if(simulation == null) {
+            throw new RuntimeException("The simulation has not been started yet.");
+        }
 
+        simulation.openDay();
+        simulation.closeDay(closingMarketPrices);
     }
-
-//    expectNoTrades();
-//    dayPassesWithQuote(new Amount(1000.0));
-//    expectNoTrades();
-//    dayPassesWithQuote(new Amount(1000.0));
-//    expectNoTrades();
-//    dayPassesWithQuote(new Amount(1000.0)
 }

@@ -43,7 +43,7 @@ public class SimulationTest {
         simulationBuilder.setAccount(account);
         simulationBuilder.setBroker(broker);
         simulationBuilder.setTradingStrategy(tradingStrategy);
-        simulation = simulationBuilder.startSimulation();
+        simulation = simulationBuilder.beginSimulation();
     }
 
     // Simulation preconditions

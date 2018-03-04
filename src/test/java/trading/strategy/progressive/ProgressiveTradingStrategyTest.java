@@ -25,25 +25,35 @@ public class ProgressiveTradingStrategyTest extends ProgressiveTradingStrategyTe
      */
 
     @Test
-    public void buyOrderIsSetInitiallyIfRisingDaysInSequenceIsZeroAndBuyTriggerNumRisingDaysInSequenceIsZero() {
+    public void buyOrderIsSetInitially_IfParameterBuyTriggerNumRisingDaysInSequenceIsZero_AndNumRisingDaysInSequenceIsZero() {
         beginHistory(ISIN.MunichRe, new Amount(1000.0));
-        addHistory(new Amount(900.00));
 
         // Now: RisingDaysInSequence = 0
 
         beginSimulation();
+        passDay(new Amount(1000.0));
 
         Position position = account.getPosition(ISIN.MunichRe);
-        Assert.assertFalse(position.getQuantity().getValue() > 0);
+        Assert.assertTrue(position.getQuantity().getValue() > 0);
     }
 
     @Test
-    public void buyOrderIsSetInitiallyIfPreInitDayWasNegativeAndNextDayIsPositiveAndBuyTriggerPositiveSeriesNumDaysIsOne() {
+    public void buyOrderIsNotSetInitially_IfParameterBuyTriggerNumRisingDaysInSequenceIsOne_AndNumRisingDaysInSequenceIsZero() {
 
     }
 
     @Test
-    public void buyOrderIsSetAfterOneDayIfPreInitDayWasNegativeAndNextTwoDaysArePositive() {
+    public void buyOrderIsSetInitially_IfParameterBuyTriggerNumRisingDaysInSequenceIsOne_AndNumRisingDaysInSequenceIsOne() {
+
+    }
+
+    @Test
+    public void buyOrderIsSetInitially_IfParameterBuyTriggerNumRisingDaysInSequenceIsOne_AndNumRisingDaysInSequenceIsTwo() {
+
+    }
+
+    @Test
+    public void buyOrderIsSetAfterOneDay_IfRisingDaysInSequenceIs() {
 
     }
 
