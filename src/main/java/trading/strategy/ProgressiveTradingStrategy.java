@@ -38,7 +38,12 @@ public class ProgressiveTradingStrategy implements TradingStrategy {
         this.account = null;
         this.broker = null;
     }
-}
+
+     @Override
+     public void notifyDayClosed() {
+
+     }
+ }
 
 // TODO sellTriggerDecliningDaysInSequence vs sellTriggerDecliningDays
 // TODO restartTriggerDecliningDaysInSequence vs restartTriggerDecliningDays

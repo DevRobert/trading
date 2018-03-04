@@ -38,5 +38,8 @@ public class Simulation {
         }
 
         this.activeDay = false;
+
+        this.historicalMarketData.registerClosedDay(closingMarketPrices);
+        this.tradingStrategy.notifyDayClosed();
     }
 }

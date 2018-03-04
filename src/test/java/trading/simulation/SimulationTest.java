@@ -15,8 +15,10 @@ import trading.market.HistoricalMarketData;
 import trading.market.MarketPriceSnapshot;
 import trading.market.MarketPriceSnapshotBuilder;
 import trading.strategy.ManualTradingStrategy;
+import trading.strategy.TradingStrategy;
 
 import java.util.HashMap;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * The simulation is a core component of the trading application. Its role is mainly to integrate
@@ -35,7 +37,7 @@ public class SimulationTest {
     private HistoricalMarketData historicalMarketData;
     private Account account;
     private VirtualBroker broker;
-    private ManualTradingStrategy tradingStrategy;
+    private TradingStrategy tradingStrategy;
 
     @Before
     public void before() {
@@ -46,7 +48,7 @@ public class SimulationTest {
         Amount availableMoney = new Amount(50000.0);
         account = new Account(availableMoney);
         broker = new VirtualBroker(account, historicalMarketData);
-        tradingStrategy = new ManualTradingStrategy();
+        tradingStrategy = new ManualTradingStrategy(broker);
     }
 
     protected void startSimulation() {
@@ -141,7 +143,9 @@ public class SimulationTest {
     public void closeDayFailsIfDayWasClosedAndNoNextDayStarted() {
         startSimulation();
 
-        MarketPriceSnapshot closingMarketPrices = new MarketPriceSnapshot(new HashMap<>());
+        MarketPriceSnapshotBuilder marketPriceSnapshotBuilder = new MarketPriceSnapshotBuilder();
+        marketPriceSnapshotBuilder.setMarketPrice(ISIN.MunichRe, new Amount(1100.0));
+        MarketPriceSnapshot closingMarketPrices = marketPriceSnapshotBuilder.build();
 
         simulation.openDay();
         simulation.closeDay(closingMarketPrices);
@@ -204,28 +208,23 @@ public class SimulationTest {
     }
 
     @Test
-    public void closeDaySignalWithMissingMarketPricesFails() {
+    public void closeDaySignalLeadsToCalculationOfNextOrdersByTradingStrategy() {
+        AtomicBoolean setOrderTriggerReceived = new AtomicBoolean(false);
+
+        this.tradingStrategy = () -> setOrderTriggerReceived.set(true);
+
         startSimulation();
         simulation.openDay();
 
-        try {
-            simulation.closeDay(new MarketPriceSnapshotBuilder().build());
-        }
-        catch(SimulationStateException ex) {
-            Assert.assertEquals("The market price snapshot must contain market prices for all available stocks.", ex.getMessage());
-            return;
-        }
+        MarketPriceSnapshotBuilder marketPriceSnapshotBuilder = new MarketPriceSnapshotBuilder();
+        marketPriceSnapshotBuilder.setMarketPrice(ISIN.MunichRe, new Amount(1100.0));
+        simulation.closeDay(marketPriceSnapshotBuilder.build());
 
-        Assert.fail("SimulationStateException expected.");
+        Assert.assertTrue(setOrderTriggerReceived.get());
     }
 
     @Test
-    public void closeDaySignalLeadsToCalculationOfNextOrdersByTradingStrategy() {
-
-    }
-
-    @Test
-    public void historicalMarketDataAreUpdatedBeforeTradingStrategyIsInformedAboutClosingDay() {
+    public void historicalMarketDataAreUpdatedBeforeTradingStrategyIsInformedAboutClosedDay() {
 
     }
 }
