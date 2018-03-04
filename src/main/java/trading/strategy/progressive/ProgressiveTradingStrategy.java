@@ -3,6 +3,7 @@ package trading.strategy.progressive;
 import trading.Amount;
 import trading.Quantity;
 import trading.account.Account;
+import trading.account.Position;
 import trading.broker.Broker;
 import trading.broker.OrderRequest;
 import trading.broker.OrderType;
@@ -27,20 +28,34 @@ import trading.strategy.TradingStrategy;
  *
  * Phases:
  *
- *  A: Sets buy order for given ISIN after a series of {buyTriggerRisingDaysInSequence} days has passed.
- *     The maximum possible amount of available money is used for this order.
+ * A. Wait and buy stocks
  *
- *  B: Sets sell order for bought position when one of the following condition occurs:
- *     - {sellTriggerDecliningDaysInSequence} days with negative performance have passed after buying.
- *     - {sellTriggerMaxDays} days have passed after buying.
+ * Sets buy order for given ISIN after a series of {buyTriggerRisingDaysInSequence} days has passed.
+ * The maximum possible amount of available money is used for this order.
  *
- *  C: {restartTriggerDecliningDaysInSequence} days with negative performance have to be passed, so that Phase A is entered again.
+ *
+ * B. Wait and sell stocks
+ *
+ * Sets sell order for bought position when one of the following condition occurs:
+ *  - {sellTriggerDecliningDaysInSequence} days with negative performance have passed after buying.
+ *  - {sellTriggerMaxDays} days have passed after buying.
+ *
+ *
+ * C. Wait and reset
+ *
+ * {restartTriggerDecliningDaysInSequence} days with negative performance have to be passed, so that Phase A is entered again.
  */
 public class ProgressiveTradingStrategy implements TradingStrategy {
     private final ProgressiveTradingStrategyParameters parameters;
     private final Account account;
     private final Broker broker;
     private final HistoricalStockData historicalStockData;
+
+    private boolean inStateWaitAndBuyStocks = true;
+    private boolean inStateWaitAndSellStocks = false;
+    private boolean inStateWaitAndReset = false;
+
+    private int passedDaysSinceBuying = 0;
 
     public ProgressiveTradingStrategy(ProgressiveTradingStrategyParameters parameters, Account account, Broker broker, HistoricalMarketData historicalMarketData) {
         if (parameters == null) {
@@ -71,12 +86,20 @@ public class ProgressiveTradingStrategy implements TradingStrategy {
 
     @Override
     public void prepareOrdersForNextTradingDay() {
-        this.checkSetBuyMarketOrder();
+        if(this.inStateWaitAndBuyStocks) {
+            this.waitAndBuyStocks();
+        }
+        else if(this.inStateWaitAndSellStocks) {
+            this.waitAndSellStocks();
+        }
     }
 
-    private void checkSetBuyMarketOrder() {
+    private void waitAndBuyStocks() {
         if(this.historicalStockData.getRisingDaysInSequence() >= this.parameters.getBuyTriggerRisingDaysInSequence()) {
             this.setBuyMarketOrder();
+
+            this.inStateWaitAndBuyStocks = false;
+            this.inStateWaitAndSellStocks  = true;
         }
     }
 
@@ -87,6 +110,22 @@ public class ProgressiveTradingStrategy implements TradingStrategy {
 
         Quantity quantity = new Quantity((int) maxQuantity);
         OrderRequest orderRequest = new OrderRequest(OrderType.BuyMarket, this.parameters.getISIN(), quantity);
+        this.broker.setOrder(orderRequest);
+
+        this.passedDaysSinceBuying = 0; // todo unit test
+    }
+
+    private void waitAndSellStocks() {
+        this.passedDaysSinceBuying++;
+
+        if(this.passedDaysSinceBuying >= this.parameters.getSellTriggerMaxDays()) {
+            this.setSellMarketOrder();
+        }
+    }
+
+    private void setSellMarketOrder() {
+        Position position = account.getPosition(this.parameters.getISIN());
+        OrderRequest orderRequest = new OrderRequest(OrderType.SellMarket, position.getISIN(), position.getQuantity());
         this.broker.setOrder(orderRequest);
     }
 }

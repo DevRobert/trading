@@ -18,7 +18,7 @@ public class ProgressiveTradingStrategyTest extends ProgressiveTradingStrategyTe
      */
 
     /**
-     * Phase A
+     * Phase A: Wait and buy stocks
      * <p>
      * Sets buy order for given ISIN after a series of {buyTriggerRisingDaysInSequence} days has passed.
      * The maximum possible amount of available money is used for this order.
@@ -126,15 +126,49 @@ public class ProgressiveTradingStrategyTest extends ProgressiveTradingStrategyTe
     }
 
     /**
-     * Phase B
+     * Phase B: Wait and sell stocks
      *
      * Sets sell order for bought position when one of the following condition occurs:
      *  - {sellTriggerNumNegativeDays} days with negative performance have passed after buying.
      *  - {sellTriggerNumMaxDays} days have passed after buying.
      */
 
+    @Test
+    public void sellOrderIsSetOneDayAfterBuying_IfParameterSellTriggerMaxDaysIsOne_AndRisingSequence() {
+        this.buyTriggerRisingDaysInSequence = 0;
+        this.sellTriggerMaxDays = 1;
+
+        beginHistory(isin, new Amount(1000.0));
+        beginSimulation();
+
+        passDay(new Amount(1100.0));
+        assertPositionHasPositiveQuantity(isin);
+
+        passDay(new Amount(1200.0));
+        assertNoneOrEmptyPosition(isin);
+    }
+
+    @Test
+    public void sellOrderIsSetTwoDaysAfterBuying_IfParameterSellTriggerMaxDaysIsTwo_AndRisingSequence() {
+        this.buyTriggerRisingDaysInSequence = 0;
+        this.sellTriggerMaxDays = 2;
+
+        beginHistory(isin, new Amount(1000.0));
+        beginSimulation();
+
+        passDay(new Amount(1100.0));
+        assertPositionHasPositiveQuantity(isin);
+
+        passDay(new Amount(1200.0));
+        assertPositionHasPositiveQuantity(isin);
+
+        passDay(new Amount(1300.0));
+        assertNoneOrEmptyPosition(isin);
+    }
+
+
     /**
-     * Phase C
+     * Phase C: Wait and reset
      *
      * {restartTriggerNumNegativeDays} days with negative performance have to be passed, so that Phase A is entered again.
      */

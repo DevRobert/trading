@@ -135,7 +135,7 @@ public class AccountTest extends AccountTestBase {
     }
 
     @Test
-    public void buyTransactionForUncompensatedPositionFails() throws AccountStateException {
+    public void buyTransactionForNonEmptyPositionFails() throws AccountStateException {
         ISIN isin = ISIN.MunichRe;
         Amount fullBuyPrice = new Amount(1000.0);
         Amount buyCommission = new Amount(10.0);
@@ -149,7 +149,7 @@ public class AccountTest extends AccountTestBase {
             account.registerTransaction(furtherBuyTransaction);
         }
         catch(AccountStateException ex) {
-            Assert.assertEquals("Subsequent buy transactions for uncompensated positions are not supported.", ex.getMessage());
+            Assert.assertEquals("Subsequent buy transactions for non-empty positions are not supported.", ex.getMessage());
             return;
         }
 

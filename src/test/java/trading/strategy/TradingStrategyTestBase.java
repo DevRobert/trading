@@ -4,7 +4,6 @@ import org.junit.Assert;
 import org.junit.Before;
 import trading.Amount;
 import trading.ISIN;
-import trading.Quantity;
 import trading.account.Account;
 import trading.account.Position;
 import trading.broker.Broker;
@@ -124,6 +123,24 @@ public abstract class TradingStrategyTestBase {
         }
 
         simulation.openDay();
+    }
+
+    protected void closeDay(Amount closingMarketPrice) {
+        if(simulation == null) {
+            throw new RuntimeException("The simulation has not been started yet.");
+        }
+
+        if(historicalMarketData.getAvailableStocks().size() != 1) {
+            throw new RuntimeException("This method is only allowed when one stock available.");
+        }
+
+        ISIN isin = historicalMarketData.getAvailableStocks().stream().findFirst().get();
+
+        MarketPriceSnapshotBuilder marketPriceSnapshotBuilder = new MarketPriceSnapshotBuilder();
+        marketPriceSnapshotBuilder.setMarketPrice(isin, closingMarketPrice);
+        MarketPriceSnapshot closingMarketPrices = marketPriceSnapshotBuilder.build();
+
+        closeDay(closingMarketPrices);
     }
 
     protected void closeDay(MarketPriceSnapshot closingMarketPrices) {

@@ -59,6 +59,11 @@ public class VirtualBroker implements Broker {
     }
 
     private void processMarketSellOrderRequest(OrderRequest orderRequest) {
-        throw new RuntimeException("not implemented");
+        ISIN isin = orderRequest.getIsin();
+        Amount lastMarketPrice = this.historicalMarketData.getStockData(isin).getLastClosingMarketPrice();
+        Amount totalPrice = lastMarketPrice.multiply(orderRequest.getQuantity());
+        Amount commission = new Amount(0.0);
+        Transaction transaction = new Transaction(TransactionType.Sell, isin, orderRequest.getQuantity(), totalPrice, commission);
+        account.registerTransaction(transaction);
     }
 }

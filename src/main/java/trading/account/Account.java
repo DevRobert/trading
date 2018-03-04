@@ -125,7 +125,7 @@ public class Account {
 
     private void handleBuyTransaction(Transaction transaction, Position position) throws AccountStateException {
         if(!position.getQuantity().isZero()) {
-            throw new AccountStateException("Subsequent buy transactions for uncompensated positions are not supported.");
+            throw new AccountStateException("Subsequent buy transactions for non-empty positions are not supported.");
         }
 
         position.setQuantity(transaction.getQuantity());
