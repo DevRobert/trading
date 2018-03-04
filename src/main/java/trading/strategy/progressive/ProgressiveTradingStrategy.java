@@ -1,8 +1,10 @@
-package trading.strategy;
+package trading.strategy.progressive;
 
 import trading.account.Account;
 import trading.broker.Broker;
 import trading.market.HistoricalMarketData;
+import trading.strategy.StrategyInitializationException;
+import trading.strategy.TradingStrategy;
 
 /**
  * Progressive Trading Strategy

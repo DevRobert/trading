@@ -12,7 +12,7 @@ import trading.broker.VirtualBroker;
 import trading.market.HistoricalMarketData;
 import trading.market.MarketPriceSnapshot;
 import trading.market.MarketPriceSnapshotBuilder;
-import trading.strategy.ManualTradingStrategy;
+import trading.strategy.manual.ManualTradingStrategy;
 import trading.strategy.TradingStrategy;
 
 import java.util.HashMap;

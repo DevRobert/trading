@@ -7,7 +7,6 @@ import trading.Quantity;
 import trading.broker.Broker;
 import trading.broker.OrderRequest;
 import trading.broker.OrderType;
-import trading.strategy.ManualTradingStrategy;
 
 import java.util.ArrayList;
 import java.util.List;

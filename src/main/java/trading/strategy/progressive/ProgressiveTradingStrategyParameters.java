@@ -1,6 +1,9 @@
-package trading.strategy;
+package trading.strategy.progressive;
 
 import trading.ISIN;
+import trading.strategy.MissingParameterException;
+import trading.strategy.StrategyInitializationException;
+import trading.strategy.TradingStrategyParameters;
 
 public class ProgressiveTradingStrategyParameters {
     private final ISIN isin;

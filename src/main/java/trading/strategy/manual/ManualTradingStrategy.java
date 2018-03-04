@@ -1,7 +1,8 @@
-package trading.strategy;
+package trading.strategy.manual;
 
 import trading.broker.Broker;
 import trading.broker.OrderRequest;
+import trading.strategy.TradingStrategy;
 
 import java.util.Queue;
 import java.util.concurrent.LinkedBlockingQueue;

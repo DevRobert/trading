@@ -11,8 +11,6 @@ import trading.broker.VirtualBroker;
 import trading.market.HistoricalMarketData;
 import trading.market.MarketPriceSnapshot;
 import trading.market.MarketPriceSnapshotBuilder;
-import trading.strategy.ProgressiveTradingStrategy;
-import trading.strategy.ProgressiveTradingStrategyParameters;
 import trading.strategy.StrategyInitializationException;
 
 public class ProgressiveTradingStrategyInitializationTest {
