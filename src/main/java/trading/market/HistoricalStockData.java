@@ -3,41 +3,41 @@ package trading.market;
 import trading.Amount;
 
 public class HistoricalStockData {
-    private Amount lastMarketPrice;
+    private Amount lastClosingMarketPrice;
     private int risingDaysInSequence = 0;
     private int decliningDaysInSequence = 0;
 
-    public Amount getLastMarketPrice() {
-        return this.lastMarketPrice;
-    }
-
     public HistoricalStockData(Amount initialMarketPrice) {
-        this.lastMarketPrice = initialMarketPrice;
+        this.lastClosingMarketPrice = initialMarketPrice;
     }
 
-    public void pushMarketPrice(Amount marketPrice) {
-        if(marketPrice.getValue() > lastMarketPrice.getValue()) {
+    protected void registerClosedDay(Amount closingMarketPrice) {
+        if(closingMarketPrice.getValue() > lastClosingMarketPrice.getValue()) {
             risingDaysInSequence++;
         }
         else {
             risingDaysInSequence = 0;
         }
 
-        if(marketPrice.getValue() < lastMarketPrice.getValue()) {
+        if(closingMarketPrice.getValue() < lastClosingMarketPrice.getValue()) {
             decliningDaysInSequence++;
         }
         else {
             decliningDaysInSequence = 0;
         }
 
-        this.lastMarketPrice = marketPrice;
+        this.lastClosingMarketPrice = closingMarketPrice;
+    }
+
+    public Amount getLastClosingMarketPrice() {
+        return this.lastClosingMarketPrice;
     }
 
     public int getRisingDaysInSequence() {
-        return risingDaysInSequence;
+        return this.risingDaysInSequence;
     }
 
     public int getDecliningDaysInSequence() {
-        return decliningDaysInSequence;
+        return this.decliningDaysInSequence;
     }
 }

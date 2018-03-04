@@ -200,7 +200,7 @@ public class SimulationTest {
         marketPriceSnapshotBuilder.setMarketPrice(ISIN.MunichRe, newMarketPriceMunichRe);
         simulation.closeDay(marketPriceSnapshotBuilder.build());
 
-        Assert.assertEquals(newMarketPriceMunichRe, historicalMarketData.getStockData(ISIN.MunichRe).getLastMarketPrice());
+        Assert.assertEquals(newMarketPriceMunichRe, historicalMarketData.getStockData(ISIN.MunichRe).getLastClosingMarketPrice());
     }
 
     @Test

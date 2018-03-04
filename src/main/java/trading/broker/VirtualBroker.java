@@ -51,7 +51,7 @@ public class VirtualBroker implements Broker {
 
     private void processMarketBuyOrderRequest(OrderRequest orderRequest) {
         ISIN isin = orderRequest.getIsin();
-        Amount lastMarketPrice = this.historicalMarketData.getStockData(isin).getLastMarketPrice();
+        Amount lastMarketPrice = this.historicalMarketData.getStockData(isin).getLastClosingMarketPrice();
         Amount totalPrice = lastMarketPrice.multiply(orderRequest.getQuantity());
         Amount commission = new Amount(0.0);
         Transaction transaction = new Transaction(TransactionType.Buy, isin, orderRequest.getQuantity(), totalPrice, commission);

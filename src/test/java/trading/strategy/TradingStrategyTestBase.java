@@ -3,7 +3,6 @@ package trading.strategy;
 import org.junit.Assert;
 import org.junit.Before;
 import trading.Amount;
-import trading.AvailableStocks;
 import trading.ISIN;
 import trading.account.Account;
 import trading.market.HistoricalMarketData;
@@ -12,11 +11,6 @@ import trading.broker.Broker;
 import trading.market.MarketPriceSnapshotBuilder;
 import trading.simulation.Simulation;
 import trading.simulation.SimulationBuilder;
-
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
 
 public abstract class TradingStrategyTestBase {
     private TradingStrategyFactory strategyFactory;
