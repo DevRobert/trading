@@ -5,11 +5,9 @@ import org.junit.Before;
 import org.junit.Test;
 import trading.Amount;
 import trading.ISIN;
-import trading.Quantity;
 import trading.account.Account;
-import trading.account.Position;
+import trading.broker.Broker;
 import trading.broker.OrderRequest;
-import trading.broker.OrderType;
 import trading.broker.VirtualBroker;
 import trading.market.HistoricalMarketData;
 import trading.market.MarketPriceSnapshot;
@@ -20,23 +18,11 @@ import trading.strategy.TradingStrategy;
 import java.util.HashMap;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-/**
- * The simulation is a core component of the trading application. Its role is mainly to integrate
- * the core entities:
- *
- * - Historical data
- * - Trading strategy
- * - Broker
- * - Account
- *
- * In order to get meaningful test results, these dependencies are not replaced but used in this test suite.
- * If a test fails, at first make sure that the tests of the dependent entity classes succeed.
- */
 public class SimulationTest {
     private Simulation simulation;
     private HistoricalMarketData historicalMarketData;
     private Account account;
-    private VirtualBroker broker;
+    private Broker broker;
     private TradingStrategy tradingStrategy;
 
     @Before
@@ -181,21 +167,30 @@ public class SimulationTest {
     // Redirect of signals
 
     @Test
-    public void openDaySignalLeadsToExecutionOfOrderRequestsByBroker() {
-        startSimulation();
+    public void forwardDayOpenedSignalToBroker() {
+        final AtomicBoolean dayOpenedSignalReceived = new AtomicBoolean(false);
 
-        Quantity quantity = new Quantity(1);
-        OrderRequest orderRequest = new OrderRequest(OrderType.BuyMarket, ISIN.MunichRe, quantity);
-        broker.setOrder(orderRequest);
+        broker = new Broker() {
+            @Override
+            public void setOrder(OrderRequest orderRequest) {
+
+            }
+
+            @Override
+            public void notifyDayOpened() {
+                dayOpenedSignalReceived.set(true);
+            }
+        };
+
+        startSimulation();
 
         simulation.openDay();
 
-        Position position = account.getPosition(ISIN.MunichRe);
-        Assert.assertEquals(quantity, position.getQuantity());
+        Assert.assertTrue(dayOpenedSignalReceived.get());
     }
 
     @Test
-    public void closeDaySignalLeadsToUpdateOfHistoricalMarketData() {
+    public void updateHistoricalMarketDataWhenDayClosed() {
         startSimulation();
         simulation.openDay();
 
@@ -208,10 +203,10 @@ public class SimulationTest {
     }
 
     @Test
-    public void closeDaySignalLeadsToCalculationOfNextOrdersByTradingStrategy() {
-        AtomicBoolean setOrderTriggerReceived = new AtomicBoolean(false);
+    public void forwardDayClosedSignalToTradingStrategy() {
+        AtomicBoolean dayClosedSignalReceived = new AtomicBoolean(false);
 
-        this.tradingStrategy = () -> setOrderTriggerReceived.set(true);
+        this.tradingStrategy = () -> dayClosedSignalReceived.set(true);
 
         startSimulation();
         simulation.openDay();
@@ -220,11 +215,11 @@ public class SimulationTest {
         marketPriceSnapshotBuilder.setMarketPrice(ISIN.MunichRe, new Amount(1100.0));
         simulation.closeDay(marketPriceSnapshotBuilder.build());
 
-        Assert.assertTrue(setOrderTriggerReceived.get());
+        Assert.assertTrue(dayClosedSignalReceived.get());
     }
 
     @Test
-    public void historicalMarketDataAreUpdatedBeforeTradingStrategyIsInformedAboutClosedDay() {
+    public void historicalMarketDataAreUpdatedBeforeDayClosedSignalIsForwaredToTradingStrategy() {
 
     }
 }
