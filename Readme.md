@@ -10,3 +10,4 @@
 * Reporting/ Challenge
 * Historical market data source for simulation
 * ParseParametersException
+* Indicators (separate from historical market data)
