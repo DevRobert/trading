@@ -166,10 +166,73 @@ public class ProgressiveTradingStrategyTest extends ProgressiveTradingStrategyTe
         assertNoneOrEmptyPosition(isin);
     }
 
-
     /**
      * Phase C: Wait and reset
      *
      * {restartTriggerNumNegativeDays} days with negative performance have to be passed, so that Phase A is entered again.
      */
+
+    @Test
+    public void sellOrderIsSetAgainAfterZeroDaysWaiting() {
+        this.buyTriggerRisingDaysInSequence = 0;
+        this.sellTriggerMaxDays = 1;
+        this.restartTriggerDecliningDays = 0;
+
+        beginHistory(isin, new Amount(1000.0));
+
+        beginSimulation();
+        assertNoneOrEmptyPosition(isin);
+
+        // First buy expected for next day (due to buyTriggerRisingDaysInSequence = 0)
+
+        openDay();
+        assertPositionHasPositiveQuantity(isin);
+        closeDay(new Amount(1100.0)); // price raised
+
+        // First selling for next day expected (due to sellTriggerMaxDays = 1)
+
+        openDay();
+        assertNoneOrEmptyPosition(isin);
+        closeDay(new Amount(900.0)); // price raised - 1 day in sequence
+
+        // Second buy expected for next day (due to restartTriggerDecliningDays = 0 and buyTriggerRisingDaysInSequence = 0)
+
+        openDay();
+        assertPositionHasPositiveQuantity(isin);
+    }
+
+    @Test
+    public void sellOrderIsSetAgainAfterOneDayWaitingDueToRestartTrigger() {
+        this.buyTriggerRisingDaysInSequence = 0;
+        this.sellTriggerMaxDays = 1;
+        this.restartTriggerDecliningDays = 1;
+
+        beginHistory(isin, new Amount(1000.0));
+
+        beginSimulation();
+        assertNoneOrEmptyPosition(isin);
+
+        // First buy expected for next day (due to buyTriggerRisingDaysInSequence = 0)
+
+        openDay();
+        assertPositionHasPositiveQuantity(isin);
+        closeDay(new Amount(1100.0)); // price raised (1 day in sequence)
+
+        // First sale expected for next day (due to sellTriggerMaxDays = 1)
+
+        openDay();
+        assertNoneOrEmptyPosition(isin);
+        closeDay(new Amount(1200.0)); // price raised (2 days in sequence)
+
+        // Wait expected for next day (due to not fulfilled restartTriggerDecliningDays = 1)
+
+        openDay();
+        assertNoneOrEmptyPosition(isin);
+        closeDay(new Amount(1100.0)); // price declined (1 day in sequence)
+
+        // Second buy expected for next day (due to fulfilled restartTriggerDecliningDays = 1)
+
+        openDay();
+        assertPositionHasPositiveQuantity(isin);
+    }
 }

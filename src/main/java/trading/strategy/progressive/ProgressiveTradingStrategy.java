@@ -86,6 +86,12 @@ public class ProgressiveTradingStrategy implements TradingStrategy {
 
     @Override
     public void prepareOrdersForNextTradingDay() {
+        if(this.inStateWaitAndReset) {
+            this.waitAndReset();
+            // can lead to a state change that has to be processed
+            // immediately within this prepare orders call
+        }
+
         if(this.inStateWaitAndBuyStocks) {
             this.waitAndBuyStocks();
         }
@@ -120,6 +126,9 @@ public class ProgressiveTradingStrategy implements TradingStrategy {
 
         if(this.passedDaysSinceBuying >= this.parameters.getSellTriggerMaxDays()) {
             this.setSellMarketOrder();
+
+            this.inStateWaitAndSellStocks = false;
+            this.inStateWaitAndReset = true;
         }
     }
 
@@ -127,5 +136,12 @@ public class ProgressiveTradingStrategy implements TradingStrategy {
         Position position = account.getPosition(this.parameters.getISIN());
         OrderRequest orderRequest = new OrderRequest(OrderType.SellMarket, position.getISIN(), position.getQuantity());
         this.broker.setOrder(orderRequest);
+    }
+
+    private void waitAndReset() {
+        if(this.historicalStockData.getDecliningDaysInSequence() >= this.parameters.getRestartTriggerDecliningDays()) {
+            this.inStateWaitAndReset = false;
+            this.inStateWaitAndBuyStocks = true;
+        }
     }
 }
