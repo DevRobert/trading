@@ -1,16 +1,22 @@
 package trading.simulation;
 
+import trading.Amount;
+import trading.ISIN;
 import trading.account.Account;
 import trading.broker.Broker;
 import trading.market.HistoricalMarketData;
 import trading.market.MarketPriceSnapshot;
+import trading.market.MarketPriceSnapshotBuilder;
 import trading.strategy.TradingStrategy;
+
+import java.util.Set;
 
 public class Simulation {
     private final HistoricalMarketData historicalMarketData;
     private final Account account;
     private final Broker broker;
     private final TradingStrategy tradingStrategy;
+    private final ISIN singleISIN;
 
     private boolean activeDay;
 
@@ -37,6 +43,15 @@ public class Simulation {
         this.tradingStrategy = tradingStrategy;
         this.activeDay = false;
 
+        Set<ISIN> availableStocks = historicalMarketData.getAvailableStocks();
+
+        if(availableStocks.size() == 1) {
+            this.singleISIN = availableStocks.stream().findFirst().get();
+        }
+        else {
+            this.singleISIN = null;
+        }
+
         this.tradingStrategy.prepareOrdersForNextTradingDay();
     }
 
@@ -59,5 +74,17 @@ public class Simulation {
 
         this.historicalMarketData.registerClosedDay(closingMarketPrices);
         this.tradingStrategy.prepareOrdersForNextTradingDay();
+    }
+
+    public void closeDay(Amount closingMarketPrice) {
+        if(this.singleISIN == null) {
+            throw new SimulationStateException("The single-stock close day function must not be used when multiple stocks registered.");
+        }
+
+        MarketPriceSnapshotBuilder marketPriceSnapshotBuilder = new MarketPriceSnapshotBuilder();
+        marketPriceSnapshotBuilder.setMarketPrice(this.singleISIN, closingMarketPrice);
+        MarketPriceSnapshot closingMarketPrices = marketPriceSnapshotBuilder.build();
+
+        this.closeDay(closingMarketPrices);
     }
 }

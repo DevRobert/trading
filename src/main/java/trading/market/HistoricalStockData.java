@@ -7,8 +7,8 @@ public class HistoricalStockData {
     private int risingDaysInSequence = 0;
     private int decliningDaysInSequence = 0;
 
-    public HistoricalStockData(Amount initialMarketPrice) {
-        this.lastClosingMarketPrice = initialMarketPrice;
+    public HistoricalStockData(Amount initialClosingMarketPrice) {
+        this.lastClosingMarketPrice = initialClosingMarketPrice;
     }
 
     protected void registerClosedDay(Amount closingMarketPrice) {

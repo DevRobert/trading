@@ -12,16 +12,21 @@ import trading.market.HistoricalMarketData;
 import trading.market.MarketPriceSnapshot;
 import trading.market.MarketPriceSnapshotBuilder;
 import trading.strategy.StrategyInitializationException;
+import trading.strategy.WaitFixedPeriodTrigger;
 
 public class ProgressiveTradingStrategyInitializationTest {
-    private ProgressiveTradingStrategyParameters parameters;
     private Account account;
     private HistoricalMarketData historicalMarketData;
     private Broker broker;
+    private ProgressiveTradingStrategyParametersBuilder parametersBuilder;
 
     @Before
     public void before() {
-        parameters = ProgressiveTradingStrategyParameters.getDefault();
+        parametersBuilder = new ProgressiveTradingStrategyParametersBuilder();
+        parametersBuilder.setISIN(ISIN.MunichRe);
+        parametersBuilder.setBuyTrigger(new WaitFixedPeriodTrigger(1));
+        parametersBuilder.setSellTrigger(new WaitFixedPeriodTrigger(1));
+        parametersBuilder.setResetTrigger(new WaitFixedPeriodTrigger(1));
 
         Amount availableMoney = new Amount(50000.0);
         account = new Account(availableMoney);
@@ -34,12 +39,18 @@ public class ProgressiveTradingStrategyInitializationTest {
     }
 
     private void initializeTradingStrategy() {
+        ProgressiveTradingStrategyParameters parameters = null;
+
+        if(parametersBuilder != null) {
+            parameters = parametersBuilder.build();
+        }
+
         new ProgressiveTradingStrategy(parameters, account, broker, historicalMarketData);
     }
 
     @Test
     public void initializationFailsIfNoParametersSpecified() {
-        parameters = null;
+        parametersBuilder = null;
 
         try {
             initializeTradingStrategy();;
@@ -99,13 +110,7 @@ public class ProgressiveTradingStrategyInitializationTest {
 
     @Test
     public void initializationFailsIfISINParameterDoesNotReferToAnAvailableStock() {
-        parameters = new ProgressiveTradingStrategyParameters(
-                ISIN.Allianz,
-                parameters.getBuyTriggerRisingDaysInSequence(),
-                parameters.getSellTriggerDecliningDays(),
-                parameters.getSellTriggerMaxDays(),
-                parameters.getRestartTriggerDecliningDays()
-        );
+        parametersBuilder.setISIN(ISIN.Allianz);
 
         try {
             initializeTradingStrategy();

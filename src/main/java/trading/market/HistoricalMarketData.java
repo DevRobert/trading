@@ -3,12 +3,12 @@ package trading.market;
 import trading.Amount;
 import trading.ISIN;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
 public class HistoricalMarketData {
     private final Map<ISIN, HistoricalStockData> historicalStockDataMap;
+    private final ISIN singleISIN;
 
     public HistoricalMarketData(MarketPriceSnapshot initialClosingMarketPrices) {
         this.historicalStockDataMap = new HashMap<>();
@@ -18,6 +18,23 @@ public class HistoricalMarketData {
             HistoricalStockData historicalStockData = new HistoricalStockData(initialMarketPrice);
             this.historicalStockDataMap.put(isin, historicalStockData);
         }
+
+        this.singleISIN = null;
+    }
+
+    public HistoricalMarketData(ISIN isin, Amount initialClosingMarketPrice) {
+        if(isin == null) {
+            throw new RuntimeException("The ISIN must be specified.");
+        }
+
+        if(initialClosingMarketPrice == null) {
+            throw new RuntimeException("The initialClosingMarketPrice must be specified.");
+        }
+
+        this.historicalStockDataMap = new HashMap<>();
+        this.historicalStockDataMap.put(isin, new HistoricalStockData(initialClosingMarketPrice));
+
+        this.singleISIN = isin;
     }
 
     public HistoricalStockData getStockData(ISIN isin) {
@@ -47,5 +64,16 @@ public class HistoricalMarketData {
             Amount closingMarketPrice = closingMarketPrices.getMarketPrice(isin);
             historicalStockData.registerClosedDay(closingMarketPrice);
         }
+    }
+
+    public void registerClosedDay(Amount closingMarketPrice) {
+        if(singleISIN == null) {
+            throw new RuntimeException("The single-stock market update function must not be used when multiple stocks registered.");
+        }
+
+        MarketPriceSnapshotBuilder marketPriceSnapshotBuilder = new MarketPriceSnapshotBuilder();
+        marketPriceSnapshotBuilder.setMarketPrice(this.singleISIN, closingMarketPrice);
+        MarketPriceSnapshot marketPriceSnapshot = marketPriceSnapshotBuilder.build();
+        this.registerClosedDay(marketPriceSnapshot);
     }
 }

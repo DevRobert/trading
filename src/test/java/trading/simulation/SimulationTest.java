@@ -214,6 +214,40 @@ public class SimulationTest {
     }
 
     @Test
+    public void updateHistoricalMarketDataWhenDayClosed_forSingleStock() {
+        startSimulation();
+        simulation.openDay();
+
+        Amount newMarketPriceMunichRe = new Amount(1100.0);
+        simulation.closeDay(newMarketPriceMunichRe);
+
+        Assert.assertEquals(newMarketPriceMunichRe, historicalMarketData.getStockData(ISIN.MunichRe).getLastClosingMarketPrice());
+    }
+
+    @Test
+    public void updateHistoricalMarketDataFails_ifForSingleStockCalled_butMultipleStocksAvailable() {
+        MarketPriceSnapshotBuilder marketPriceSnapshotBuilder = new MarketPriceSnapshotBuilder();
+        marketPriceSnapshotBuilder.setMarketPrice(ISIN.MunichRe, new Amount(1000.0));
+        marketPriceSnapshotBuilder.setMarketPrice(ISIN.Allianz, new Amount(500.0));
+        historicalMarketData = new HistoricalMarketData(marketPriceSnapshotBuilder.build());
+
+        startSimulation();
+        simulation.openDay();
+
+        Amount newMarketPriceMunichRe = new Amount(1100.0);
+
+        try {
+            simulation.closeDay(newMarketPriceMunichRe);
+        }
+        catch(SimulationStateException ex) {
+            Assert.assertEquals("The single-stock close day function must not be used when multiple stocks registered.", ex.getMessage());
+            return;
+        }
+
+        Assert.fail("SimulationStateException expected.");
+    }
+
+    @Test
     public void forwardDayClosedSignalToTradingStrategy() {
         AtomicBoolean dayClosedSignalReceived = new AtomicBoolean(false);
 

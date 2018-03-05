@@ -5,35 +5,24 @@ import trading.ISIN;
 import trading.account.Account;
 import trading.broker.Broker;
 import trading.market.HistoricalMarketData;
-import trading.strategy.*;
+import trading.strategy.NotImplementedTrigger;
+import trading.strategy.TradingStrategy;
+import trading.strategy.TradingStrategyTestBase;
 
 public abstract class ProgressiveTradingStrategyTestBase extends TradingStrategyTestBase {
-    protected ISIN isin;
-    protected int buyTriggerRisingDaysInSequence;
-    protected int sellTriggerDecliningDays;
-    protected int sellTriggerMaxDays;
-    protected int restartTriggerDecliningDays;
+    protected ProgressiveTradingStrategyParametersBuilder parametersBuilder = new ProgressiveTradingStrategyParametersBuilder();
 
     @Before
     public void progressiveTradingStrategyTestBaseBefore() {
-        ProgressiveTradingStrategyParameters defaultParameters = ProgressiveTradingStrategyParameters.getDefault();
-
-        isin = defaultParameters.getISIN();
-        buyTriggerRisingDaysInSequence = defaultParameters.getBuyTriggerRisingDaysInSequence();
-        sellTriggerDecliningDays = defaultParameters.getSellTriggerDecliningDays();
-        sellTriggerMaxDays = defaultParameters.getSellTriggerMaxDays();
-        restartTriggerDecliningDays = defaultParameters.getRestartTriggerDecliningDays();
+        parametersBuilder.setISIN(ISIN.MunichRe);
+        parametersBuilder.setBuyTrigger(new NotImplementedTrigger());
+        parametersBuilder.setSellTrigger(new NotImplementedTrigger());
+        parametersBuilder.setResetTrigger(new NotImplementedTrigger());
     }
 
     @Override
     protected TradingStrategy initializeTradingStrategy(Account account, Broker broker, HistoricalMarketData historicalMarketData) {
-        ProgressiveTradingStrategyParameters parameters = new ProgressiveTradingStrategyParameters(
-                isin,
-                buyTriggerRisingDaysInSequence,
-                sellTriggerDecliningDays,
-                sellTriggerMaxDays,
-                restartTriggerDecliningDays);
-
+        ProgressiveTradingStrategyParameters parameters = parametersBuilder.build();
         return new ProgressiveTradingStrategy(parameters, account, broker, historicalMarketData);
     }
 }

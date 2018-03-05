@@ -2,7 +2,6 @@ package trading.market;
 
 import org.junit.Assert;
 import org.junit.Test;
-import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 import trading.Amount;
 import trading.ISIN;
 
@@ -10,15 +9,22 @@ import java.util.Set;
 
 public class HistoricalMarketDataTest {
     @Test
-    public void retrieveStockDataForInitiallyRegisteredStocks() {
-        Amount initialMarketPrice = new Amount(1000.0);
+    public void retrieveLastMarketPriceForInitiallyRegisteredStocks() {
+        Amount initialClosingMarketPrice = new Amount(1000.0);
 
         MarketPriceSnapshotBuilder marketPriceSnapshotBuilder = new MarketPriceSnapshotBuilder();
-        marketPriceSnapshotBuilder.setMarketPrice(ISIN.MunichRe, initialMarketPrice);
+        marketPriceSnapshotBuilder.setMarketPrice(ISIN.MunichRe, initialClosingMarketPrice);
 
         HistoricalMarketData historicalMarketData = new HistoricalMarketData(marketPriceSnapshotBuilder.build());
 
-        Assert.assertEquals(initialMarketPrice, historicalMarketData.getStockData(ISIN.MunichRe).getLastClosingMarketPrice());
+        Assert.assertEquals(initialClosingMarketPrice, historicalMarketData.getStockData(ISIN.MunichRe).getLastClosingMarketPrice());
+    }
+
+    @Test
+    public void retrieveLastMarketPriceForInitiallyRegisteredSingleStock() {
+        Amount initialClosingMarketPrice = new Amount(1000.0);
+        HistoricalMarketData historicalMarketData = new HistoricalMarketData(ISIN.MunichRe, initialClosingMarketPrice);
+        Assert.assertEquals(initialClosingMarketPrice, historicalMarketData.getStockData(ISIN.MunichRe).getLastClosingMarketPrice());
     }
 
     @Test
@@ -52,6 +58,35 @@ public class HistoricalMarketDataTest {
     }
 
     @Test
+    public void registerMarketPriceUpdateForSingleStock() {
+        Amount initialClosingMarketPrice = new Amount(1000.0);
+        HistoricalMarketData historicalMarketData = new HistoricalMarketData(ISIN.MunichRe, initialClosingMarketPrice);
+
+        Amount newClosingMarketPrice = new Amount(1100.0);
+        historicalMarketData.registerClosedDay(newClosingMarketPrice);
+
+        Assert.assertEquals(newClosingMarketPrice, historicalMarketData.getStockData(ISIN.MunichRe).getLastClosingMarketPrice());
+    }
+
+    @Test
+    public void registerMarketPriceUpdateForSingleStockFailsSinceMultipleStocksAvailable() {
+        MarketPriceSnapshotBuilder marketPriceSnapshotBuilder = new MarketPriceSnapshotBuilder();
+        marketPriceSnapshotBuilder.setMarketPrice(ISIN.MunichRe, new Amount(1000.0));
+        marketPriceSnapshotBuilder.setMarketPrice(ISIN.Allianz, new Amount(500.0));
+        HistoricalMarketData historicalMarketData = new HistoricalMarketData(marketPriceSnapshotBuilder.build());
+
+        try {
+            historicalMarketData.registerClosedDay(new Amount(1100.0));
+        }
+        catch(RuntimeException ex) {
+            Assert.assertEquals("The single-stock market update function must not be used when multiple stocks registered.", ex.getMessage());
+            return;
+        }
+
+        Assert.fail("RuntimeException expected.");
+    }
+
+    @Test
     public void derivesAvailableStocksFromMarketPriceSnapshot() {
         MarketPriceSnapshotBuilder marketPriceSnapshotBuilder = new MarketPriceSnapshotBuilder();
         marketPriceSnapshotBuilder.setMarketPrice(ISIN.MunichRe, new Amount(1000.0));
@@ -82,5 +117,37 @@ public class HistoricalMarketDataTest {
         }
 
         Assert.fail("MissingDataException expected.");
+    }
+
+    @Test
+    public void constructionFailsIfISINNotSpecified() {
+        ISIN isin = null;
+        Amount initialClosingMarketPrice = new Amount(1000.0);
+
+        try {
+            new HistoricalMarketData(isin, initialClosingMarketPrice);
+        }
+        catch(RuntimeException ex) {
+            Assert.assertEquals("The ISIN must be specified.", ex.getMessage());
+            return;
+        }
+
+        Assert.fail("RuntimeException expected.");
+    }
+
+    @Test
+    public void constructionFailsIfInitialClosingMarketPriceNotSpecified() {
+        ISIN isin = ISIN.MunichRe;
+        Amount initialClosingMarketPrice = null;
+
+        try {
+            new HistoricalMarketData(isin, initialClosingMarketPrice);
+        }
+        catch(RuntimeException ex) {
+            Assert.assertEquals("The initialClosingMarketPrice must be specified.", ex.getMessage());
+            return;
+        }
+
+        Assert.fail("RuntimeException expected.");
     }
 }

@@ -10,59 +10,41 @@ import trading.broker.Broker;
 import trading.broker.VirtualBroker;
 import trading.market.HistoricalMarketData;
 import trading.market.MarketPriceSnapshot;
-import trading.market.MarketPriceSnapshotBuilder;
 import trading.simulation.Simulation;
 import trading.simulation.SimulationBuilder;
 
 public abstract class TradingStrategyTestBase {
     protected Account account;
     private VirtualBroker broker;
-    private Simulation simulation;
-
-    protected TradingStrategy tradingStrategy;
-
-    protected abstract TradingStrategy initializeTradingStrategy(Account account, Broker broker, HistoricalMarketData historicalMarketData);
+    private TradingStrategy tradingStrategy;
 
     private HistoricalMarketData historicalMarketData;
+    private Simulation simulation;
+
+    protected abstract TradingStrategy initializeTradingStrategy(Account account, Broker broker, HistoricalMarketData historicalMarketData);
 
     @Before()
     public void tradingStrategyTestBaseBefore() {
         this.account = new Account(new Amount(50000.0));
     }
 
-    protected void beginHistory(ISIN isin, Amount initialMarketPrice) {
-        MarketPriceSnapshotBuilder marketPriceSnapshotBuilder = new MarketPriceSnapshotBuilder();
-        marketPriceSnapshotBuilder.setMarketPrice(isin, initialMarketPrice);
-        this.beginHistory(marketPriceSnapshotBuilder.build());
-    }
-
-    protected void beginHistory(MarketPriceSnapshot marketPriceSnapshot) {
+    private void ensureBeginHistoryPreConditions() {
         if(historicalMarketData != null) {
             throw new RuntimeException("The history has already been started.");
         }
-
-        historicalMarketData = new HistoricalMarketData(marketPriceSnapshot);
     }
 
-    protected void addHistory(Amount marketPrice) {
-        if(historicalMarketData == null) {
-            throw new RuntimeException("The history has not been started.");
-        }
-
-        if(historicalMarketData.getAvailableStocks().size() != 1) {
-            throw new RuntimeException("This method is only allowed when one stock available.");
-        }
-
-        ISIN isin = historicalMarketData.getAvailableStocks().stream().findFirst().get();
-
-        MarketPriceSnapshotBuilder marketPriceSnapshotBuilder = new MarketPriceSnapshotBuilder();
-        marketPriceSnapshotBuilder.setMarketPrice(isin, marketPrice);
-        MarketPriceSnapshot marketPriceSnapshot = marketPriceSnapshotBuilder.build();
-
-        addHistory(marketPriceSnapshot);
+    protected void beginHistory(ISIN isin, Amount initialClosingMarketPrice) {
+        ensureBeginHistoryPreConditions();
+        historicalMarketData = new HistoricalMarketData(isin, initialClosingMarketPrice);
     }
 
-    protected void addHistory(MarketPriceSnapshot marketPriceSnapshot) {
+    protected void beginHistory(MarketPriceSnapshot initialClosingMarketPrices) {
+        ensureBeginHistoryPreConditions();
+        historicalMarketData = new HistoricalMarketData(initialClosingMarketPrices);
+    }
+
+    private void ensureAddHistoryPreconditions() {
         if(historicalMarketData == null) {
             throw new RuntimeException("The history has not been started.");
         }
@@ -70,8 +52,16 @@ public abstract class TradingStrategyTestBase {
         if(simulation != null) {
             throw new RuntimeException("The simulation has already been started.");
         }
+    }
 
-        historicalMarketData.registerClosedDay(marketPriceSnapshot);
+    protected void addHistory(Amount closingMarketPrice) {
+        ensureAddHistoryPreconditions();
+        historicalMarketData.registerClosedDay(closingMarketPrice);
+    }
+
+    protected void addHistory(MarketPriceSnapshot closingMarketPrices) {
+        ensureAddHistoryPreconditions();
+        historicalMarketData.registerClosedDay(closingMarketPrices);
     }
 
     protected void beginSimulation() {
@@ -94,29 +84,6 @@ public abstract class TradingStrategyTestBase {
         this.simulation = simulationBuilder.beginSimulation();
     }
 
-    protected void passDay(Amount closingMarketPrice) {
-        if(simulation == null) {
-            throw new RuntimeException("The simulation has not been started yet.");
-        }
-
-        if(historicalMarketData.getAvailableStocks().size() != 1) {
-            throw new RuntimeException("This method is only allowed when one stock available.");
-        }
-
-        ISIN isin = historicalMarketData.getAvailableStocks().stream().findFirst().get();
-
-        MarketPriceSnapshotBuilder marketPriceSnapshotBuilder = new MarketPriceSnapshotBuilder();
-        marketPriceSnapshotBuilder.setMarketPrice(isin, closingMarketPrice);
-        MarketPriceSnapshot closingMarketPrices = marketPriceSnapshotBuilder.build();
-
-        passDay(closingMarketPrices);
-    }
-
-    protected void passDay(MarketPriceSnapshot closingMarketPrices) {
-        openDay();
-        closeDay(closingMarketPrices);
-    }
-
     protected void openDay() {
         if(simulation == null) {
             throw new RuntimeException("The simulation has not been started yet.");
@@ -125,29 +92,19 @@ public abstract class TradingStrategyTestBase {
         simulation.openDay();
     }
 
-    protected void closeDay(Amount closingMarketPrice) {
+    private void ensureCloseDayPreconditions() {
         if(simulation == null) {
             throw new RuntimeException("The simulation has not been started yet.");
         }
+    }
 
-        if(historicalMarketData.getAvailableStocks().size() != 1) {
-            throw new RuntimeException("This method is only allowed when one stock available.");
-        }
-
-        ISIN isin = historicalMarketData.getAvailableStocks().stream().findFirst().get();
-
-        MarketPriceSnapshotBuilder marketPriceSnapshotBuilder = new MarketPriceSnapshotBuilder();
-        marketPriceSnapshotBuilder.setMarketPrice(isin, closingMarketPrice);
-        MarketPriceSnapshot closingMarketPrices = marketPriceSnapshotBuilder.build();
-
-        closeDay(closingMarketPrices);
+    protected void closeDay(Amount closingMarketPrice) {
+        ensureCloseDayPreconditions();
+        simulation.closeDay(closingMarketPrice);
     }
 
     protected void closeDay(MarketPriceSnapshot closingMarketPrices) {
-        if(simulation == null) {
-            throw new RuntimeException("The simulation has not been started yet.");
-        }
-
+        ensureCloseDayPreconditions();
         simulation.closeDay(closingMarketPrices);
     }
 

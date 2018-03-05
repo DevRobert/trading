@@ -3,102 +3,73 @@ package trading.strategy.progressive;
 import org.junit.Assert;
 import org.junit.Test;
 import trading.Amount;
+import trading.ISIN;
 import trading.Quantity;
 import trading.account.Position;
+import trading.strategy.WaitFixedPeriodTrigger;
 
 public class ProgressiveTradingStrategyTest extends ProgressiveTradingStrategyTestBase {
     /**
      * Default Parameters
      *
      *  - ISIN: MunichRe
-     *  - buyTriggerRisingDaysInSequence: 1
-     *  - sellTriggerDecliningDays: 1
-     *  - sellTriggerMaxDays: 1
-     *  - restartTriggerDecliningDays: 0
+     *  - buyTrigger: NotImplementedTrigger
+     *  - sellTrigger: NotImplementedTrigger
+     *  - resetTrigger: NotImplementedTrigger
      */
 
     /**
      * Phase A: Wait and buy stocks
-     * <p>
-     * Sets buy order for given ISIN after a series of {buyTriggerRisingDaysInSequence} days has passed.
+     *
+     * Activates buy trigger and sets buy order for given ISIN when buy trigger fires.
      * The maximum possible amount of available money is used for this order.
+     * Afterwards, phase B is entered.
      */
 
     @Test
-    public void buyOrderIsSetInitially_IfParameterBuyTriggerNumRisingDaysInSequenceIsZero_AndNumRisingDaysInSequenceIsZero() {
-        this.buyTriggerRisingDaysInSequence = 0;
+    public void buyOrderIsSetInitially_ifBuyTriggerFiresImmediately() {
+        parametersBuilder.setBuyTrigger(new WaitFixedPeriodTrigger(0));
 
-        beginHistory(isin, new Amount(1000.0));
-
-        beginSimulation();
-        openDay();
-
-        assertPositionHasPositiveQuantity(isin);
-    }
-
-    @Test
-    public void buyOrderIsNotSetInitially_IfParameterBuyTriggerNumRisingDaysInSequenceIsOne_AndNumRisingDaysInSequenceIsZero() {
-        this.buyTriggerRisingDaysInSequence = 1;
-
-        beginHistory(isin, new Amount(1000.0));
+        beginHistory(ISIN.MunichRe, new Amount(1000.0));
 
         beginSimulation();
         openDay();
 
-        assertNoneOrEmptyPosition(isin);
+        assertPositionHasPositiveQuantity(ISIN.MunichRe);
     }
 
     @Test
-    public void buyOrderIsSetInitially_IfParameterBuyTriggerNumRisingDaysInSequenceIsOne_AndNumRisingDaysInSequenceIsOne() {
-        this.buyTriggerRisingDaysInSequence = 1;
+    public void buyOrderIsNotSetInitially_ifBuyTriggerFiresAfterOneDay() {
+        parametersBuilder.setBuyTrigger(new WaitFixedPeriodTrigger(1));
 
-        beginHistory(isin, new Amount(1000.0));
-        addHistory(new Amount(1100.0)); // raised - 1 day in sequence
+        beginHistory(ISIN.MunichRe, new Amount(1000.0));
 
         beginSimulation();
         openDay();
 
-        assertPositionHasPositiveQuantity(isin);
+        assertNoneOrEmptyPosition(ISIN.MunichRe);
     }
 
     @Test
-    public void buyOrderIsSetInitially_IfParameterBuyTriggerNumRisingDaysInSequenceIsOne_AndNumRisingDaysInSequenceIsTwo() {
-        this.buyTriggerRisingDaysInSequence = 1;
+    public void buyOrderIsSetAfterOneDay_ifBuyTriggerFiresAfterOneDay() {
+        parametersBuilder.setBuyTrigger(new WaitFixedPeriodTrigger(1));
 
-        beginHistory(isin, new Amount(1000.0));
-        addHistory(new Amount(1100.0)); // raised - 1 days in sequence
-        addHistory(new Amount(1200.0)); // raised - 2 days in sequence
-
-        // RisingDaysInSequence = 2
-
-        beginSimulation();
-        openDay();
-        assertPositionHasPositiveQuantity(isin);
-    }
-
-    @Test
-    public void buyOrderIsSetAfterOneRisingDay_IfParameterBuyTriggerNumRisingDaysInSequenceIsOne_AndHistoricalNumRisingDaysInSequenceIsZero() {
-        this.buyTriggerRisingDaysInSequence = 1;
-
-        beginHistory(isin, new Amount(1000.0));
+        beginHistory(ISIN.MunichRe, new Amount(1000.0));
 
         beginSimulation();
 
         openDay();
-        assertNoneOrEmptyPosition(isin);
-        closeDay(new Amount(1100.0)); // raised - 1 day in sequence
+        closeDay(new Amount(1100.0));
 
         openDay();
-        assertPositionHasPositiveQuantity(isin);
+        assertPositionHasPositiveQuantity(ISIN.MunichRe);
     }
 
     @Test
-    public void buyOrderMaximumQuantityIsOrdered_IfNoCommissions() {
-        // Seed capital = 50,000
+    public void buyOrderMaximumQuantityIsOrdered_ifNoCommissions() {
+        parametersBuilder.setBuyTrigger(new WaitFixedPeriodTrigger(0));
 
-        this.buyTriggerRisingDaysInSequence = 0;
-
-        beginHistory(isin, new Amount(1000.0));
+        beginHistory(ISIN.MunichRe, new Amount(1000.0));
 
         beginSimulation();
         openDay();
@@ -107,126 +78,126 @@ public class ProgressiveTradingStrategyTest extends ProgressiveTradingStrategyTe
         // Expected quantity = 50
         // Expected full price = 50,000
 
-        Position position = account.getPosition(isin);
+        Position position = account.getPosition(ISIN.MunichRe);
         Assert.assertEquals(new Quantity(50), position.getQuantity());
     }
 
     @Test
-    public void buyOrderIsSetAboutMaximumAmount_IncludingCommissions() {
-
+    public void buyOrderIsSetAboutMaximumAmount_includingCommissions() {
+        // todo
     }
 
     /**
      * Phase B: Wait and sell stocks
      *
-     * Sets sell order for bought position when one of the following condition occurs:
-     *  - {sellTriggerNumNegativeDays} days with negative performance have passed after buying.
-     *  - {sellTriggerNumMaxDays} days have passed after buying.
+     * Activates sell trigger and sets sell order for bought position when sell trigger fires.
+     * Afterwards, phase C is entered.
      */
 
     @Test
-    public void sellOrderIsSetOneDayAfterBuying_IfParameterSellTriggerMaxDaysIsOne_AndRisingSequence() {
-        this.buyTriggerRisingDaysInSequence = 0;
-        this.sellTriggerMaxDays = 1;
+    public void sellOrderIsSetOneDayAfterBuying_ifSellTriggerFiresImmediately() {
+        parametersBuilder.setBuyTrigger(new WaitFixedPeriodTrigger(0));
+        parametersBuilder.setSellTrigger(new WaitFixedPeriodTrigger(0));
+        parametersBuilder.setResetTrigger(new WaitFixedPeriodTrigger(10));
 
-        beginHistory(isin, new Amount(1000.0));
+        beginHistory(ISIN.MunichRe, new Amount(1000.0));
         beginSimulation();
 
         openDay();
-        assertPositionHasPositiveQuantity(isin);
-        closeDay(new Amount(1100.0)); // raised - 1 day in sequence
+        assertPositionHasPositiveQuantity(ISIN.MunichRe);
+        closeDay(new Amount(1100.0));
 
         openDay();
-        assertNoneOrEmptyPosition(isin);
+        assertNoneOrEmptyPosition(ISIN.MunichRe);
     }
 
     @Test
-    public void sellOrderIsSetTwoDaysAfterBuying_IfParameterSellTriggerMaxDaysIsTwo_AndRisingSequence() {
-        this.buyTriggerRisingDaysInSequence = 0;
-        this.sellTriggerMaxDays = 2;
+    public void sellOrderIsSetTwoDaysAfterBuying_ifSellTriggerFiresAfterOneDay() {
+        parametersBuilder.setBuyTrigger(new WaitFixedPeriodTrigger(0));
+        parametersBuilder.setSellTrigger(new WaitFixedPeriodTrigger(1));
+        parametersBuilder.setResetTrigger(new WaitFixedPeriodTrigger(10));
 
-        beginHistory(isin, new Amount(1000.0));
+        beginHistory(ISIN.MunichRe, new Amount(1000.0));
         beginSimulation();
 
         openDay();
-        assertPositionHasPositiveQuantity(isin);
-        closeDay(new Amount(1100.0)); // raised - 1 day in sequence
+        assertPositionHasPositiveQuantity(ISIN.MunichRe);
+        closeDay(new Amount(1100.0));
 
         openDay();
-        assertPositionHasPositiveQuantity(isin);
-        closeDay(new Amount(1200.0)); // raised - 2 days in sequence
+        assertPositionHasPositiveQuantity(ISIN.MunichRe);
+        closeDay(new Amount(1200.0));
 
         openDay();
-        assertNoneOrEmptyPosition(isin);
+        assertNoneOrEmptyPosition(ISIN.MunichRe);
     }
 
     /**
      * Phase C: Wait and reset
      *
-     * {restartTriggerNumNegativeDays} days with negative performance have to be passed, so that Phase A is entered again.
+     * Activates reset trigger and starts phase A immediately when reset trigger fires.
      */
-
     @Test
-    public void sellOrderIsSetAgainAfterZeroDaysWaiting() {
-        this.buyTriggerRisingDaysInSequence = 0;
-        this.sellTriggerMaxDays = 1;
-        this.restartTriggerDecliningDays = 0;
+    public void sellOrderIsSetAgainOneDayAfterSelling_ifResetTriggerFiresImmediately_andBuyTriggerFiresImmediately() {
+        parametersBuilder.setBuyTrigger(new WaitFixedPeriodTrigger(0));
+        parametersBuilder.setSellTrigger(new WaitFixedPeriodTrigger(0));
+        parametersBuilder.setResetTrigger(new WaitFixedPeriodTrigger(0));
 
-        beginHistory(isin, new Amount(1000.0));
+        beginHistory(ISIN.MunichRe, new Amount(1000.0));
 
         beginSimulation();
-        assertNoneOrEmptyPosition(isin);
+        assertNoneOrEmptyPosition(ISIN.MunichRe);
 
-        // First buy expected for next day (due to buyTriggerRisingDaysInSequence = 0)
-
-        openDay();
-        assertPositionHasPositiveQuantity(isin);
-        closeDay(new Amount(1100.0)); // raised - 1 say in sequence
-
-        // First selling for next day expected (due to sellTriggerMaxDays = 1)
+        // First buying expected for next day (due to buy trigger period = 0)
 
         openDay();
-        assertNoneOrEmptyPosition(isin);
-        closeDay(new Amount(900.0)); // declined - 1 day in sequence
+        assertPositionHasPositiveQuantity(ISIN.MunichRe);
+        closeDay(new Amount(1100.0));
 
-        // Second buy expected for next day (due to restartTriggerDecliningDays = 0 and buyTriggerRisingDaysInSequence = 0)
+        // First selling expected for next day (due to sell trigger period = 0)
 
         openDay();
-        assertPositionHasPositiveQuantity(isin);
+        assertNoneOrEmptyPosition(ISIN.MunichRe);
+        closeDay(new Amount(900.0));
+
+        // Second buying expected for next day (due to reset trigger period = 0 and buy trigger period = 0)
+
+        openDay();
+        assertPositionHasPositiveQuantity(ISIN.MunichRe);
     }
 
     @Test
-    public void sellOrderIsSetAgainAfterOneDayWaitingDueToRestartTrigger() {
-        this.buyTriggerRisingDaysInSequence = 0;
-        this.sellTriggerMaxDays = 1;
-        this.restartTriggerDecliningDays = 1;
+    public void sellOrderIsSetAgainTwoDaysAfterSelling_ifResetTriggerFiresAfterOneDay_andBuyTriggerFiresImmediately() {
+        parametersBuilder.setBuyTrigger(new WaitFixedPeriodTrigger(0));
+        parametersBuilder.setSellTrigger(new WaitFixedPeriodTrigger(0));
+        parametersBuilder.setResetTrigger(new WaitFixedPeriodTrigger(1));
 
-        beginHistory(isin, new Amount(1000.0));
+        beginHistory(ISIN.MunichRe, new Amount(1000.0));
 
         beginSimulation();
-        assertNoneOrEmptyPosition(isin);
+        assertNoneOrEmptyPosition(ISIN.MunichRe);
 
-        // First buy expected for next day (due to buyTriggerRisingDaysInSequence = 0)
-
-        openDay();
-        assertPositionHasPositiveQuantity(isin);
-        closeDay(new Amount(1100.0)); // raised (1 day in sequence)
-
-        // First sale expected for next day (due to sellTriggerMaxDays = 1)
+        // First buying expected for next day (due to buy trigger period = 0)
 
         openDay();
-        assertNoneOrEmptyPosition(isin);
-        closeDay(new Amount(1200.0)); // raised (2 days in sequence)
+        assertPositionHasPositiveQuantity(ISIN.MunichRe);
+        closeDay(new Amount(1100.0));
 
-        // Wait expected for next day (due to not fulfilled restartTriggerDecliningDays = 1)
+        // First selling expected for next day (due to sell trigger period = 0)
 
         openDay();
-        assertNoneOrEmptyPosition(isin);
+        assertNoneOrEmptyPosition(ISIN.MunichRe);
+        closeDay(new Amount(1200.0));
+
+        // Wait expected for next day (due to reset trigger period = 1 / not fulfilled yet)
+
+        openDay();
+        assertNoneOrEmptyPosition(ISIN.MunichRe);
         closeDay(new Amount(1100.0)); // declined (1 day in sequence)
 
-        // Second buy expected for next day (due to fulfilled restartTriggerDecliningDays = 1)
+        // Second buying expected for next day (due to reset trigger period = 1 / now fulfilled)
 
         openDay();
-        assertPositionHasPositiveQuantity(isin);
+        assertPositionHasPositiveQuantity(ISIN.MunichRe);
     }
 }
