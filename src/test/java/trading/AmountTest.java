@@ -5,21 +5,28 @@ import org.junit.Test;
 
 public class AmountTest {
     @Test
-    public void testEqualAmounts() {
+    public void returnsValue() {
+        double value = 5.0;
+        Amount amount = new Amount(value);
+        Assert.assertEquals(value, amount.getValue(), 0.0);
+    }
+
+    @Test
+    public void equalAmounts() {
         Amount a = new Amount(1.0);
         Amount b = new Amount(1.0);
         Assert.assertTrue(a.equals(b));
     }
 
     @Test
-    public void testUnequalAmounts() {
+    public void unequalAmounts() {
         Amount a = new Amount(1.0);
         Amount b = new Amount(2.0);
         Assert.assertFalse(a.equals(b));
     }
 
     @Test
-    public void testAddAmount() {
+    public void addAmount() {
         Amount a = new Amount(1.0);
         Amount b = new Amount(2.0);
         Amount result = a.add(b);
@@ -27,7 +34,7 @@ public class AmountTest {
     }
 
     @Test
-    public void testSubtractAmount() {
+    public void subtractAmount() {
         Amount a = new Amount(3.0);
         Amount b = new Amount(2.0);
         Amount result = a.subtract(b);
@@ -35,7 +42,7 @@ public class AmountTest {
     }
 
     @Test
-    public void testMultiply() {
+    public void multiply() {
         Amount a = new Amount(2.0);
         Quantity b = new Quantity(3);
         Amount result = a.multiply(b);
