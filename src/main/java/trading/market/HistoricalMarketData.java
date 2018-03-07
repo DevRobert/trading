@@ -1,6 +1,7 @@
 package trading.market;
 
 import trading.Amount;
+import trading.DayCount;
 import trading.ISIN;
 import java.util.HashMap;
 import java.util.Map;
@@ -9,17 +10,25 @@ import java.util.Set;
 public class HistoricalMarketData {
     private final Map<ISIN, HistoricalStockData> historicalStockDataMap;
     private final ISIN singleISIN;
+    private int durationNumDays = 1;
 
     public HistoricalMarketData(MarketPriceSnapshot initialClosingMarketPrices) {
         this.historicalStockDataMap = new HashMap<>();
 
-        for(ISIN isin: initialClosingMarketPrices.getISINs()) {
+        Set<ISIN> isins = initialClosingMarketPrices.getISINs();
+
+        for(ISIN isin: isins) {
             Amount initialMarketPrice = initialClosingMarketPrices.getMarketPrice(isin);
             HistoricalStockData historicalStockData = new HistoricalStockData(initialMarketPrice);
             this.historicalStockDataMap.put(isin, historicalStockData);
         }
 
-        this.singleISIN = null;
+        if(isins.size() == 1) {
+            singleISIN = isins.stream().findFirst().get();
+        }
+        else {
+            singleISIN = null;
+        }
     }
 
     public HistoricalMarketData(ISIN isin, Amount initialClosingMarketPrice) {
@@ -64,6 +73,8 @@ public class HistoricalMarketData {
             Amount closingMarketPrice = closingMarketPrices.getMarketPrice(isin);
             historicalStockData.registerClosedDay(closingMarketPrice);
         }
+
+        this.durationNumDays++;
     }
 
     public void registerClosedDay(Amount closingMarketPrice) {
@@ -75,5 +86,9 @@ public class HistoricalMarketData {
         marketPriceSnapshotBuilder.setMarketPrice(this.singleISIN, closingMarketPrice);
         MarketPriceSnapshot marketPriceSnapshot = marketPriceSnapshotBuilder.build();
         this.registerClosedDay(marketPriceSnapshot);
+    }
+
+    public DayCount getDuration() {
+        return new DayCount(this.durationNumDays);
     }
 }

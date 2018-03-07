@@ -44,6 +44,10 @@ public class SimulationDriverParameters {
             throw new SimulationDriverInitializationException("The history duration must not be negative.");
         }
 
+        if(historyDuration.getValue() == 0) {
+            throw new SimulationDriverInitializationException("The history duration must not be zero.");
+        }
+
         if(simulationDuration == null) {
             throw new SimulationDriverInitializationException("The simulation duration must be specified.");
         }

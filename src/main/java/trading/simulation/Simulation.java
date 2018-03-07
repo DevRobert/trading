@@ -73,6 +73,11 @@ public class Simulation {
         this.activeDay = false;
 
         this.historicalMarketData.registerClosedDay(closingMarketPrices);
+
+        for(ISIN isin: this.historicalMarketData.getAvailableStocks()) {
+            this.account.reportMarketPrice(isin, this.historicalMarketData.getStockData(isin).getLastClosingMarketPrice());
+        }
+
         this.tradingStrategy.prepareOrdersForNextTradingDay();
     }
 

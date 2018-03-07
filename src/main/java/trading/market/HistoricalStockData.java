@@ -1,6 +1,7 @@
 package trading.market;
 
 import trading.Amount;
+import trading.DayCount;
 
 public class HistoricalStockData {
     private Amount lastClosingMarketPrice;

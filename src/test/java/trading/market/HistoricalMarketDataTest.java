@@ -3,6 +3,7 @@ package trading.market;
 import org.junit.Assert;
 import org.junit.Test;
 import trading.Amount;
+import trading.DayCount;
 import trading.ISIN;
 
 import java.util.Set;
@@ -149,5 +150,30 @@ public class HistoricalMarketDataTest {
         }
 
         Assert.fail("RuntimeException expected.");
+    }
+
+    @Test
+    public void getDurationReturnsOneForOneDayHistory() {
+        HistoricalMarketData historicalMarketData = new HistoricalMarketData(ISIN.MunichRe, new Amount(1000.0));
+        Assert.assertEquals(new DayCount(1), historicalMarketData.getDuration());
+    }
+
+    @Test
+    public void getDurationReturnsTwoForTwoDaysHistory() {
+        HistoricalMarketData historicalMarketData = new HistoricalMarketData(ISIN.MunichRe, new Amount(1000.0));
+        historicalMarketData.registerClosedDay(new Amount(1100.0));
+        Assert.assertEquals(new DayCount(2), historicalMarketData.getDuration());
+    }
+
+    @Test
+    public void singleStockPriceUpdateMethodCanBeUsedIfInitializedWithSingleStockClosingMarketPricesMap() {
+        MarketPriceSnapshotBuilder marketPriceSnapshotBuilder = new MarketPriceSnapshotBuilder();
+        marketPriceSnapshotBuilder.setMarketPrice(ISIN.MunichRe, new Amount(1000.0));
+        MarketPriceSnapshot initialClosingMarketPrices = marketPriceSnapshotBuilder.build();
+
+        HistoricalMarketData historicalMarketData = new HistoricalMarketData(initialClosingMarketPrices);
+        historicalMarketData.registerClosedDay(new Amount(1100.0));
+
+        Assert.assertEquals(new Amount(1100.0), historicalMarketData.getStockData(ISIN.MunichRe).getLastClosingMarketPrice());
     }
 }

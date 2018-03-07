@@ -3,8 +3,7 @@ package trading.simulation;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
-import trading.Amount;
-import trading.ISIN;
+import trading.*;
 import trading.account.Account;
 import trading.broker.Broker;
 import trading.broker.OrderRequest;
@@ -225,7 +224,7 @@ public class SimulationTest {
     }
 
     @Test
-    public void updateHistoricalMarketDataFails_ifForSingleStockCalled_butMultipleStocksAvailable() {
+    public void closeDayFails_ifForSingleStockCalled_butMultipleStocksAvailable() {
         MarketPriceSnapshotBuilder marketPriceSnapshotBuilder = new MarketPriceSnapshotBuilder();
         marketPriceSnapshotBuilder.setMarketPrice(ISIN.MunichRe, new Amount(1000.0));
         marketPriceSnapshotBuilder.setMarketPrice(ISIN.Allianz, new Amount(500.0));
@@ -264,7 +263,20 @@ public class SimulationTest {
     }
 
     @Test
-    public void historicalMarketDataAreUpdatedBeforeDayClosedSignalIsForwardedToTradingStrategy() {
+    public void accountIsUpdatedWithLatestMarketPriceWhenDayClosed() {
+        Amount buyStocksTotalAmount = new Amount(200.0);
+        Amount buyStocksComission = new Amount(0.0);
+        account.registerTransaction(new Transaction(TransactionType.Buy, ISIN.MunichRe, new Quantity(2), buyStocksTotalAmount, buyStocksComission));
 
+        startSimulation();
+        simulation.openDay();
+        simulation.closeDay(new Amount(110.0));
+
+        Assert.assertEquals(new Amount(220.0), account.getPosition(ISIN.MunichRe).getFullMarketPrice());
+    }
+
+    @Test
+    public void historicalMarketDataAreUpdatedBeforeDayClosedSignalIsForwardedToTradingStrategy() {
+        // TODO write test
     }
 }

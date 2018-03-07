@@ -30,4 +30,9 @@ public class DayCount {
     public boolean isZero() {
         return this.value == 0;
     }
+
+    @Override
+    public String toString() {
+        return ((Integer) this.value).toString();
+    }
 }

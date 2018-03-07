@@ -41,4 +41,16 @@ public class DayCountTest {
         DayCount dayCount = new DayCount(-1);
         Assert.assertFalse(dayCount.isZero());
     }
+
+    @Test
+    public void toStringReturnsZero_ForZeroDays() {
+        DayCount dayCount = new DayCount(0);
+        Assert.assertEquals("0", dayCount.toString());
+    }
+
+    @Test
+    public void toStringReturnsOne_forOneDay() {
+        DayCount dayCount = new DayCount(1);
+        Assert.assertEquals("1", dayCount.toString());
+    }
 }
