@@ -2,7 +2,12 @@
 
 ## To be implemented
 
-* Simulation driver
-* Reporting/ Challenge
-* Historical market data source for simulation
+* Triggers
+    * RaisingPricesTrigger
+    * RaisingPricesSinceActivationTrigger
+    * DecliningPricesTrigger
+    * DecliningPricesSinceActivationTrigger
+    * RelativeIncreaseSinceActivationTrigger
+    * RelativeDeclineSinceActivationTrigger
+    * CompositeTrigger
 * Indicators (separate from historical market data)
