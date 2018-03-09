@@ -3,6 +3,7 @@ package trading.strategy.progressive;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
+import trading.DayCount;
 import trading.ISIN;
 import trading.strategy.StrategyInitializationException;
 import trading.strategy.WaitFixedPeriodTrigger;
@@ -14,9 +15,9 @@ public class ProgressiveTradingStrategyParametersTest {
     public void before() {
         this.builder = new ProgressiveTradingStrategyParametersBuilder();
         this.builder.setISIN(ISIN.MunichRe);
-        this.builder.setBuyTrigger(new WaitFixedPeriodTrigger(1));
-        this.builder.setSellTrigger(new WaitFixedPeriodTrigger(1));
-        this.builder.setResetTrigger(new WaitFixedPeriodTrigger(1));
+        this.builder.setBuyTrigger(new WaitFixedPeriodTrigger(new DayCount(1)));
+        this.builder.setSellTrigger(new WaitFixedPeriodTrigger(new DayCount(1)));
+        this.builder.setResetTrigger(new WaitFixedPeriodTrigger(new DayCount(1)));
     }
 
     @Test

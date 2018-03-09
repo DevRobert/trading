@@ -3,6 +3,7 @@ package trading.strategy.progressive;
 import org.junit.Assert;
 import org.junit.Test;
 import trading.Amount;
+import trading.DayCount;
 import trading.ISIN;
 import trading.Quantity;
 import trading.account.Position;
@@ -28,7 +29,7 @@ public class ProgressiveTradingStrategyTest extends ProgressiveTradingStrategyTe
 
     @Test
     public void buyOrderIsSetInitially_ifBuyTriggerFiresImmediately() {
-        parametersBuilder.setBuyTrigger(new WaitFixedPeriodTrigger(0));
+        parametersBuilder.setBuyTrigger(new WaitFixedPeriodTrigger(new DayCount(0)));
 
         beginHistory(ISIN.MunichRe, new Amount(1000.0));
 
@@ -40,7 +41,7 @@ public class ProgressiveTradingStrategyTest extends ProgressiveTradingStrategyTe
 
     @Test
     public void buyOrderIsNotSetInitially_ifBuyTriggerFiresAfterOneDay() {
-        parametersBuilder.setBuyTrigger(new WaitFixedPeriodTrigger(1));
+        parametersBuilder.setBuyTrigger(new WaitFixedPeriodTrigger(new DayCount(1)));
 
         beginHistory(ISIN.MunichRe, new Amount(1000.0));
 
@@ -52,7 +53,7 @@ public class ProgressiveTradingStrategyTest extends ProgressiveTradingStrategyTe
 
     @Test
     public void buyOrderIsSetAfterOneDay_ifBuyTriggerFiresAfterOneDay() {
-        parametersBuilder.setBuyTrigger(new WaitFixedPeriodTrigger(1));
+        parametersBuilder.setBuyTrigger(new WaitFixedPeriodTrigger(new DayCount(1)));
 
         beginHistory(ISIN.MunichRe, new Amount(1000.0));
 
@@ -67,7 +68,7 @@ public class ProgressiveTradingStrategyTest extends ProgressiveTradingStrategyTe
 
     @Test
     public void buyOrderMaximumQuantityIsOrdered_ifNoCommissions() {
-        parametersBuilder.setBuyTrigger(new WaitFixedPeriodTrigger(0));
+        parametersBuilder.setBuyTrigger(new WaitFixedPeriodTrigger(new DayCount(0)));
 
         beginHistory(ISIN.MunichRe, new Amount(1000.0));
 
@@ -96,9 +97,9 @@ public class ProgressiveTradingStrategyTest extends ProgressiveTradingStrategyTe
 
     @Test
     public void sellOrderIsSetOneDayAfterBuying_ifSellTriggerFiresImmediately() {
-        parametersBuilder.setBuyTrigger(new WaitFixedPeriodTrigger(0));
-        parametersBuilder.setSellTrigger(new WaitFixedPeriodTrigger(0));
-        parametersBuilder.setResetTrigger(new WaitFixedPeriodTrigger(10));
+        parametersBuilder.setBuyTrigger(new WaitFixedPeriodTrigger(new DayCount(0)));
+        parametersBuilder.setSellTrigger(new WaitFixedPeriodTrigger(new DayCount(0)));
+        parametersBuilder.setResetTrigger(new WaitFixedPeriodTrigger(new DayCount(10)));
 
         beginHistory(ISIN.MunichRe, new Amount(1000.0));
         beginSimulation();
@@ -113,9 +114,9 @@ public class ProgressiveTradingStrategyTest extends ProgressiveTradingStrategyTe
 
     @Test
     public void sellOrderIsSetTwoDaysAfterBuying_ifSellTriggerFiresAfterOneDay() {
-        parametersBuilder.setBuyTrigger(new WaitFixedPeriodTrigger(0));
-        parametersBuilder.setSellTrigger(new WaitFixedPeriodTrigger(1));
-        parametersBuilder.setResetTrigger(new WaitFixedPeriodTrigger(10));
+        parametersBuilder.setBuyTrigger(new WaitFixedPeriodTrigger(new DayCount(0)));
+        parametersBuilder.setSellTrigger(new WaitFixedPeriodTrigger(new DayCount(1)));
+        parametersBuilder.setResetTrigger(new WaitFixedPeriodTrigger(new DayCount(10)));
 
         beginHistory(ISIN.MunichRe, new Amount(1000.0));
         beginSimulation();
@@ -139,9 +140,9 @@ public class ProgressiveTradingStrategyTest extends ProgressiveTradingStrategyTe
      */
     @Test
     public void sellOrderIsSetAgainOneDayAfterSelling_ifResetTriggerFiresImmediately_andBuyTriggerFiresImmediately() {
-        parametersBuilder.setBuyTrigger(new WaitFixedPeriodTrigger(0));
-        parametersBuilder.setSellTrigger(new WaitFixedPeriodTrigger(0));
-        parametersBuilder.setResetTrigger(new WaitFixedPeriodTrigger(0));
+        parametersBuilder.setBuyTrigger(new WaitFixedPeriodTrigger(new DayCount(0)));
+        parametersBuilder.setSellTrigger(new WaitFixedPeriodTrigger(new DayCount(0)));
+        parametersBuilder.setResetTrigger(new WaitFixedPeriodTrigger(new DayCount(0)));
 
         beginHistory(ISIN.MunichRe, new Amount(1000.0));
 
@@ -168,9 +169,9 @@ public class ProgressiveTradingStrategyTest extends ProgressiveTradingStrategyTe
 
     @Test
     public void sellOrderIsSetAgainTwoDaysAfterSelling_ifResetTriggerFiresAfterOneDay_andBuyTriggerFiresImmediately() {
-        parametersBuilder.setBuyTrigger(new WaitFixedPeriodTrigger(0));
-        parametersBuilder.setSellTrigger(new WaitFixedPeriodTrigger(0));
-        parametersBuilder.setResetTrigger(new WaitFixedPeriodTrigger(1));
+        parametersBuilder.setBuyTrigger(new WaitFixedPeriodTrigger(new DayCount(0)));
+        parametersBuilder.setSellTrigger(new WaitFixedPeriodTrigger(new DayCount(0)));
+        parametersBuilder.setResetTrigger(new WaitFixedPeriodTrigger(new DayCount(1)));
 
         beginHistory(ISIN.MunichRe, new Amount(1000.0));
 

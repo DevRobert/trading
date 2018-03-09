@@ -4,6 +4,7 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import trading.Amount;
+import trading.DayCount;
 import trading.ISIN;
 import trading.account.Account;
 import trading.broker.Broker;
@@ -24,9 +25,9 @@ public class ProgressiveTradingStrategyInitializationTest {
     public void before() {
         parametersBuilder = new ProgressiveTradingStrategyParametersBuilder();
         parametersBuilder.setISIN(ISIN.MunichRe);
-        parametersBuilder.setBuyTrigger(new WaitFixedPeriodTrigger(1));
-        parametersBuilder.setSellTrigger(new WaitFixedPeriodTrigger(1));
-        parametersBuilder.setResetTrigger(new WaitFixedPeriodTrigger(1));
+        parametersBuilder.setBuyTrigger(new WaitFixedPeriodTrigger(new DayCount(1)));
+        parametersBuilder.setSellTrigger(new WaitFixedPeriodTrigger(new DayCount(1)));
+        parametersBuilder.setResetTrigger(new WaitFixedPeriodTrigger(new DayCount(1)));
 
         Amount availableMoney = new Amount(50000.0);
         account = new Account(availableMoney);

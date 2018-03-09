@@ -1,12 +1,14 @@
 package trading.strategy;
 
+import trading.DayCount;
+
 public class WaitFixedPeriodTrigger implements Trigger {
     private final int waitDaysBeforeFire;
     private int daysPassed = 0;
     private boolean activated;
 
-    public WaitFixedPeriodTrigger(int waitDaysBeforeFire) {
-        this.waitDaysBeforeFire = waitDaysBeforeFire;
+    public WaitFixedPeriodTrigger(DayCount waitDaysBeforeFire) {
+        this.waitDaysBeforeFire = waitDaysBeforeFire.getValue();
         this.activated = false;
     }
 
