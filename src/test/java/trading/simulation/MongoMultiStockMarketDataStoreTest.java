@@ -49,7 +49,7 @@ public class MongoMultiStockMarketDataStoreTest {
 
             documents.add(new Document()
                     .append("_id", new GregorianCalendar(2000, 0, 1).getTime())
-                    .append("quotes", new BasicBSONObject()
+                    .append("stocks", new BasicBSONObject()
                             .append(ISIN.MunichRe.getText(), new BasicBSONObject()
                                     .append("close", 100.0))
                             .append(ISIN.Allianz.getText(), new BasicBSONObject()
@@ -61,7 +61,7 @@ public class MongoMultiStockMarketDataStoreTest {
 
             documents.add(new Document()
                     .append("_id", new GregorianCalendar(2000, 0, 3).getTime())
-                    .append("quotes", new BasicBSONObject()
+                    .append("stocks", new BasicBSONObject()
                             .append(ISIN.MunichRe.getText(), new BasicBSONObject()
                                     .append("close", 102.5))
                             .append(ISIN.Allianz.getText(), new BasicBSONObject()
@@ -73,11 +73,11 @@ public class MongoMultiStockMarketDataStoreTest {
 
             documents.add(new Document()
                     .append("_id", new GregorianCalendar(2000, 0, 2).getTime())
-                    .append("quotes", new BasicBSONObject()
+                    .append("stocks", new BasicBSONObject()
                             .append(ISIN.MunichRe.getText(), new BasicBSONObject()
                                     .append("close", 101.5))
                             .append(ISIN.Allianz.getText(), new BasicBSONObject()
-                                    .append("close", 49.0))
+                                    .append("close", 49))
                     )
             );
 

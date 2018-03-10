@@ -43,11 +43,21 @@ public class MongoMultiStockMarketDataStore {
             for(Document document: documents) {
                 MarketPriceSnapshotBuilder marketPriceSnapshotBuilder = new MarketPriceSnapshotBuilder();
 
-                Document quotesDocument = (Document) document.get("quotes");
+                Document quotesDocument = (Document) document.get("stocks");
 
                 for(String isinText: quotesDocument.keySet()) {
                     Document stockDocument = (Document) quotesDocument.get(isinText);
-                    double closingPrice = stockDocument.getDouble("close");
+
+                    Object value = stockDocument.get("close");
+                    double closingPrice;
+
+                    if(value instanceof Integer) {
+                        closingPrice = ((Integer) value).doubleValue();
+                    }
+                    else {
+                        closingPrice = (double) value;
+                    }
+
                     marketPriceSnapshotBuilder.setMarketPrice(new ISIN(isinText), new Amount(closingPrice));
                 }
 
