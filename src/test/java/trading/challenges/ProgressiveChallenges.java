@@ -11,6 +11,7 @@ import trading.Transaction;
 import trading.market.HistoricalStockData;
 import trading.market.MarketPriceSnapshot;
 import trading.simulation.*;
+import trading.strategy.AlwaysFiresTrigger;
 import trading.strategy.DelegateTrigger;
 import trading.strategy.WaitFixedPeriodTrigger;
 import trading.strategy.progressive.ProgressiveTradingStrategy;
@@ -60,29 +61,32 @@ public class ProgressiveChallenges {
 
         System.out.println("Initial account balance: " + simulationReport.getInitialAccountBalance());
         System.out.println("Final account balance: " + simulationReport.getFinalAccountBalance());
+        System.out.println();
+
         System.out.println(simulationReport.getTransactions().size() + " transactions:");
+        System.out.println();
 
         for (Transaction transaction : simulationReport.getTransactions()) {
             System.out.println(transaction.toString());
         }
 
-        System.out.println("");
+        System.out.println();
     }
 
     @Test
     public void buyAndHoldForever() {
         this.progressiveTradingStrategyParametersBuilder.setISIN(ISIN.MunichRe);
-        this.progressiveTradingStrategyParametersBuilder.setBuyTriggerFactory(historicalMarketData -> new WaitFixedPeriodTrigger(new DayCount(0)));
+        this.progressiveTradingStrategyParametersBuilder.setBuyTriggerFactory(historicalMarketData -> new AlwaysFiresTrigger());
         this.progressiveTradingStrategyParametersBuilder.setSellTriggerFactory(historicalMarketData -> new WaitFixedPeriodTrigger(new DayCount(10000)));
-        this.progressiveTradingStrategyParametersBuilder.setResetTriggerFactory(historicalMarketData -> new WaitFixedPeriodTrigger(new DayCount(0)));
+        this.progressiveTradingStrategyParametersBuilder.setResetTriggerFactory(historicalMarketData -> new AlwaysFiresTrigger());
     }
 
     @Test
     public void buyAndSellAlternating() {
         this.progressiveTradingStrategyParametersBuilder.setISIN(ISIN.MunichRe);
-        this.progressiveTradingStrategyParametersBuilder.setBuyTriggerFactory(historicalMarketData -> new WaitFixedPeriodTrigger(new DayCount(0)));
-        this.progressiveTradingStrategyParametersBuilder.setSellTriggerFactory(historicalMarketData -> new WaitFixedPeriodTrigger(new DayCount(0)));
-        this.progressiveTradingStrategyParametersBuilder.setResetTriggerFactory(historicalMarketData -> new WaitFixedPeriodTrigger(new DayCount(0)));
+        this.progressiveTradingStrategyParametersBuilder.setBuyTriggerFactory(historicalMarketData -> new AlwaysFiresTrigger());
+        this.progressiveTradingStrategyParametersBuilder.setSellTriggerFactory(historicalMarketData -> new AlwaysFiresTrigger());
+        this.progressiveTradingStrategyParametersBuilder.setResetTriggerFactory(historicalMarketData -> new AlwaysFiresTrigger());
     }
 
     @Test
@@ -101,8 +105,6 @@ public class ProgressiveChallenges {
             return new DelegateTrigger(() -> historicalStockData.getDecliningDaysInSequence() >= 1);
         });
 
-        this.progressiveTradingStrategyParametersBuilder.setResetTriggerFactory(historicalMarketData -> {
-            return new WaitFixedPeriodTrigger(new DayCount(0));
-        });
+        this.progressiveTradingStrategyParametersBuilder.setResetTriggerFactory(historicalMarketData -> new AlwaysFiresTrigger());
     }
 }
