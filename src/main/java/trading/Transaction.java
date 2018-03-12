@@ -34,4 +34,13 @@ public class Transaction {
         this.totalPrice = totalPrice;
         this.commission = commission;
     }
+
+    @Override
+    public String toString() {
+        return this.transactionType.toString() +
+                " " + this.quantity.toString() +
+                " " + this.isin.toString() +
+                " for total " + this.getTotalPrice().toString() +
+                " plus " + this.commission + " commission";
+    }
 }

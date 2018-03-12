@@ -34,7 +34,7 @@ public class SimulationDriver {
 
         Amount finalAccountBalance = account.getBalance();
 
-        SimulationReport simulationReport = new SimulationReport(finalAccountBalance);
+        SimulationReport simulationReport = new SimulationReport(this.parameters.getSeedCapital(), finalAccountBalance, account.getProcessedTransactions());
         return simulationReport;
     }
 

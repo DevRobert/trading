@@ -28,4 +28,9 @@ public class ISIN {
     public int hashCode() {
         return Objects.hash(text);
     }
+
+    @Override
+    public String toString() {
+        return this.text;
+    }
 }

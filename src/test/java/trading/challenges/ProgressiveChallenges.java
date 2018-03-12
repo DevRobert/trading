@@ -7,6 +7,7 @@ import org.junit.Test;
 import trading.Amount;
 import trading.DayCount;
 import trading.ISIN;
+import trading.Transaction;
 import trading.market.HistoricalStockData;
 import trading.market.MarketPriceSnapshot;
 import trading.simulation.*;
@@ -56,7 +57,16 @@ public class ProgressiveChallenges {
 
         SimulationDriver simulationDriver = new SimulationDriver(this.simulationDriverParametersBuilder.build());
         SimulationReport simulationReport = simulationDriver.runSimulation();
+
+        System.out.println("Initial account balance: " + simulationReport.getInitialAccountBalance());
         System.out.println("Final account balance: " + simulationReport.getFinalAccountBalance());
+        System.out.println(simulationReport.getTransactions().size() + " transactions:");
+
+        for (Transaction transaction : simulationReport.getTransactions()) {
+            System.out.println(transaction.toString());
+        }
+
+        System.out.println("");
     }
 
     @Test

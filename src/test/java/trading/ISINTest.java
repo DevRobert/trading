@@ -12,16 +12,22 @@ public class ISINTest {
     }
 
     @Test
-    public void testEqualISINs() {
+    public void equalsReturnsTrueForEqualISINs() {
         ISIN a = new ISIN("A");
         ISIN b = new ISIN("A");
         Assert.assertTrue(a.equals(b));
     }
 
     @Test
-    public void testUnequalISINs() {
+    public void equalsReturnsFalseForUnequalISINs() {
         ISIN a = new ISIN("A");
         ISIN b = new ISIN("B");
         Assert.assertFalse(a.equals(b));
+    }
+
+    @Test
+    public void toStringReturnsISIN() {
+        ISIN a = new ISIN("A");
+        Assert.assertEquals("A", a.toString());
     }
 }

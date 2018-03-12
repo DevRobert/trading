@@ -3,10 +3,7 @@ package trading.simulation;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
-import trading.Amount;
-import trading.DayCount;
-import trading.ISIN;
-import trading.Quantity;
+import trading.*;
 import trading.broker.OrderRequest;
 import trading.broker.OrderType;
 import trading.market.HistoricalStockData;
@@ -356,6 +353,49 @@ public class SimulationDriverTest {
         // Expected balance = 75,000 (available amount) + 5,500 = 80,500
 
         Assert.assertEquals(new Amount(80500.0), simulationReport.getFinalAccountBalance());
+    }
+
+    // Report correct initial account balance in the end
+
+    @Test
+    public void reportsCorrectInitialBalance_ifDifferentFromFinalBalance() {
+        Amount seedCapital = new Amount(50000.0);
+        this.parametersBuilder.setSeedCapital(seedCapital);
+
+        TradingStrategyFactory tradingStrategyFactory = (account, broker, historicalMarketData) -> {
+            // The transaction ensures that initial and final balance are not equal
+            ManualTradingStrategy manualTradingStrategy = new ManualTradingStrategy(broker);
+            manualTradingStrategy.registerOrderRequest(new OrderRequest(OrderType.BuyMarket, ISIN.MunichRe, new Quantity(1)));
+            return manualTradingStrategy;
+        };
+
+        this.parametersBuilder.setTradingStrategyFactory(tradingStrategyFactory);
+
+        SimulationDriver simulationDriver = new SimulationDriver(this.parametersBuilder.build());
+        SimulationReport simulationReport = simulationDriver.runSimulation();
+
+        Assert.assertEquals(seedCapital, simulationReport.getInitialAccountBalance());
+    }
+
+    // Report transactions in the end
+
+    @Test
+    public void reportsTransactions() {
+        TradingStrategyFactory tradingStrategyFactory = (account, broker, historicalMarketData) -> {
+            ManualTradingStrategy manualTradingStrategy = new ManualTradingStrategy(broker);
+            manualTradingStrategy.registerOrderRequest(new OrderRequest(OrderType.BuyMarket, ISIN.MunichRe, new Quantity(1)));
+            return manualTradingStrategy;
+        };
+
+        this.parametersBuilder.setTradingStrategyFactory(tradingStrategyFactory);
+
+        SimulationDriver simulationDriver = new SimulationDriver(this.parametersBuilder.build());
+        SimulationReport simulationReport = simulationDriver.runSimulation();
+
+        Assert.assertEquals(1, simulationReport.getTransactions().size());
+        Assert.assertEquals(ISIN.MunichRe, simulationReport.getTransactions().get(0).getIsin());
+        Assert.assertEquals(new Quantity(1), simulationReport.getTransactions().get(0).getQuantity());
+        Assert.assertEquals(TransactionType.Buy, simulationReport.getTransactions().get(0).getTransactionType());
     }
 
     // TODO commission strategy

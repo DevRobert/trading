@@ -2,13 +2,16 @@ package trading.account;
 
 import trading.*;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 
 public class Account {
     private Amount availableMoney;
     private HashMap<ISIN, Position> positions = new HashMap<>();
     private Amount commissions;
     private Amount balance;
+    private final List<Transaction> processedTransactions;
 
     public Amount getCommissions() {
         return commissions;
@@ -36,10 +39,15 @@ public class Account {
         return this.positions.containsKey(isin);
     }
 
+    public List<Transaction> getProcessedTransactions() {
+        return processedTransactions;
+    }
+
     public Account(Amount availableMoney) {
         this.commissions = Amount.Zero;
         this.availableMoney = availableMoney;
         this.balance = availableMoney;
+        this.processedTransactions = new ArrayList<>();
     }
 
     public void registerTransaction(Transaction transaction) throws AccountStateException {
@@ -63,6 +71,8 @@ public class Account {
         }
 
         this.updateBalances(transaction);
+
+        this.processedTransactions.add(transaction);
     }
 
     private Position getPositionOrCreatePending(ISIN isin) {

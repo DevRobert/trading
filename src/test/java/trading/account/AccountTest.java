@@ -4,6 +4,8 @@ import org.junit.Assert;
 import org.junit.Test;
 import trading.*;
 
+import java.util.List;
+
 public class AccountTest extends AccountTestBase {
     @Test
     public void retrievalOfUnknownPositionFails() {
@@ -205,5 +207,27 @@ public class AccountTest extends AccountTestBase {
         }
 
         Assert.fail("PositionNotFoundException expected.");
+    }
+
+    @Test
+    public void returnsInitiallyEmptyTransactionLists() {
+        Account account = new Account(new Amount(50000.0));
+        List<Transaction> transaction = account.getProcessedTransactions();
+        Assert.assertEquals(0, transaction.size());
+    }
+
+    @Test
+    public void returnsRegisteredTransactions() {
+        Account account = new Account(new Amount(50000.0));
+
+        Transaction firstTransaction = new Transaction(TransactionType.Buy, ISIN.MunichRe, new Quantity(1), new Amount(100.0), new Amount(0.0));
+        Transaction secondTransaction = new Transaction(TransactionType.Sell, ISIN.MunichRe, new Quantity(1), new Amount(110.0), new Amount(0.0));
+
+        account.registerTransaction(firstTransaction);
+        account.registerTransaction(secondTransaction);
+
+        Assert.assertEquals(2, account.getProcessedTransactions().size());
+        Assert.assertTrue(account.getProcessedTransactions().contains(firstTransaction));
+        Assert.assertTrue(account.getProcessedTransactions().contains(secondTransaction));
     }
 }
