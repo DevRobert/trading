@@ -3,13 +3,20 @@ package trading.market;
 import trading.Amount;
 import trading.DayCount;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class HistoricalStockData {
     private Amount lastClosingMarketPrice;
     private int risingDaysInSequence = 0;
     private int decliningDaysInSequence = 0;
+    private final List<Amount> closingMarketPrices;
 
     public HistoricalStockData(Amount initialClosingMarketPrice) {
         this.lastClosingMarketPrice = initialClosingMarketPrice;
+
+        this.closingMarketPrices = new ArrayList<>();
+        this.closingMarketPrices.add(initialClosingMarketPrice);
     }
 
     protected void registerClosedDay(Amount closingMarketPrice) {
@@ -28,6 +35,7 @@ public class HistoricalStockData {
         }
 
         this.lastClosingMarketPrice = closingMarketPrice;
+        this.closingMarketPrices.add(closingMarketPrice);
     }
 
     public Amount getLastClosingMarketPrice() {
@@ -40,5 +48,41 @@ public class HistoricalStockData {
 
     public int getDecliningDaysInSequence() {
         return this.decliningDaysInSequence;
+    }
+
+    public Amount getMaximumClosingMarketPrice(DayCount lookBehindPeriod) {
+        // TODO Potential refactoring: add method "extractHistory(maxDays)" and remove param lookBehindPeriod from this method
+        // should be conducted if more indicators are going to be limited to a certain look behind period
+
+        if(lookBehindPeriod == null) {
+            throw new RuntimeException("The look behind period must be specified.");
+        }
+
+        if(lookBehindPeriod.isZero()) {
+            throw new RuntimeException("The look behind period must not be zero.");
+        }
+
+        if(lookBehindPeriod.getValue() < 0) {
+            throw new RuntimeException("The look behind period must not be negative.");
+        }
+
+        Amount maximumClosingMarketPrice = this.getLastClosingMarketPrice();
+        final int numClosingMarketPrices = this.closingMarketPrices.size();
+
+        for(int lookBehindDays = 2; lookBehindDays <= lookBehindPeriod.getValue(); lookBehindDays++) {
+            int closingMarketPriceIndex = numClosingMarketPrices - lookBehindDays;
+
+            if(closingMarketPriceIndex < 0) {
+                break;
+            }
+
+            Amount closingMarketPrice = this.closingMarketPrices.get(closingMarketPriceIndex);
+
+            if(closingMarketPrice.getValue() > maximumClosingMarketPrice.getValue()) {
+                maximumClosingMarketPrice = closingMarketPrice;
+            }
+        }
+
+        return maximumClosingMarketPrice;
     }
 }

@@ -4,6 +4,7 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import trading.Amount;
+import trading.DayCount;
 
 public class HistoricalStockDataTest {
     private HistoricalStockData historicalStockData;
@@ -14,15 +15,15 @@ public class HistoricalStockDataTest {
         historicalStockData = new HistoricalStockData(initialMarketPrice);
     }
 
-    // marketPrice
+    // closingMarketPrice
 
     @Test
-    public void returnsInitialMarketPriceAsMarketPrice() {
+    public void returnsInitialClosingMarketPriceAsClosingMarketPrice() {
         Assert.assertEquals(new Amount(1000.0), historicalStockData.getLastClosingMarketPrice());
     }
 
     @Test
-    public void returnsPushedMarketPriceAsMarketPrice() {
+    public void returnsPushedClosingMarketPriceAsClosingMarketPrice() {
         Amount newMarketPrice = new Amount(1100.0);
         historicalStockData.registerClosedDay(newMarketPrice);
         Assert.assertEquals(newMarketPrice, historicalStockData.getLastClosingMarketPrice());
@@ -94,5 +95,86 @@ public class HistoricalStockDataTest {
         historicalStockData.registerClosedDay(new Amount(900.0));
         historicalStockData.registerClosedDay(new Amount(900.0));
         Assert.assertEquals(0, historicalStockData.getDecliningDaysInSequence());
+    }
+
+    // maximumPrice
+
+    @Test
+    public void maximumClosingMarketPriceCalculationFails_ifNoLookBehindSpecified() {
+        DayCount lookBehindPeriod = null;
+
+        try {
+            historicalStockData.getMaximumClosingMarketPrice(lookBehindPeriod);
+        } catch (RuntimeException ex) {
+            Assert.assertEquals("The look behind period must be specified.", ex.getMessage());
+            return;
+        }
+
+        Assert.fail("RuntimeException expected.");
+    }
+
+    @Test
+    public void maximumClosingMarketPriceCalculationFails_ifNegativeLookBehindSpecified() {
+        DayCount lookBehindPeriod = new DayCount(-1);
+
+        try {
+            historicalStockData.getMaximumClosingMarketPrice(lookBehindPeriod);
+        } catch (RuntimeException ex) {
+            Assert.assertEquals("The look behind period must not be negative.", ex.getMessage());
+            return;
+        }
+
+        Assert.fail("RuntimeException expected.");
+    }
+
+    @Test
+    public void maximumClosingMarketPriceCalculationFails_ifZeroLookBehindSpecified() {
+        DayCount lookBehindPeriod = new DayCount(0);
+
+        try {
+            historicalStockData.getMaximumClosingMarketPrice(lookBehindPeriod);
+        } catch (RuntimeException ex) {
+            Assert.assertEquals("The look behind period must not be zero.", ex.getMessage());
+            return;
+        }
+
+        Assert.fail("RuntimeException expected.");
+    }
+
+    @Test
+    public void returnsInitialClosingMarketPriceAsMaximumClosingPrice() {
+        DayCount lookBehindPeriod = new DayCount(1);
+        Amount maximumClosingPrice = historicalStockData.getMaximumClosingMarketPrice(lookBehindPeriod);
+
+        Assert.assertEquals(new Amount(1000.0), maximumClosingPrice);
+    }
+
+    @Test
+    public void returnsLastClosingMarketPrice_ifLookBehindIsOneDay_andDayBeforeWasHigher() {
+        historicalStockData.registerClosedDay(new Amount(800.0));
+
+        DayCount lookBehindPeriod = new DayCount(1);
+        Amount maximumClosingPrice = historicalStockData.getMaximumClosingMarketPrice(lookBehindPeriod);
+
+        Assert.assertEquals(new Amount(800.0), maximumClosingPrice);
+    }
+
+    @Test
+    public void returnsPreviousDayPrice_ifLookBehindIsTwoDays_andDayBeforeWasHigher() {
+        historicalStockData.registerClosedDay(new Amount(900.0));
+        historicalStockData.registerClosedDay(new Amount(800.0));
+
+        DayCount lookBehindPeriod = new DayCount(2);
+        Amount maximumClosingPrice = historicalStockData.getMaximumClosingMarketPrice(lookBehindPeriod);
+
+        Assert.assertEquals(new Amount(900.0), maximumClosingPrice);
+    }
+
+    @Test
+    public void returnsInitialClosingMarketPriceAsMaximum_ifLookBehindTwoDays() {
+        DayCount lookBehindPeriod = new DayCount(2);
+        Amount maximumClosingPrice = historicalStockData.getMaximumClosingMarketPrice(lookBehindPeriod);
+
+        Assert.assertEquals(new Amount(1000.0), maximumClosingPrice);
     }
 }

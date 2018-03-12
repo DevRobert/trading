@@ -19,6 +19,7 @@ import trading.strategy.progressive.ProgressiveTradingStrategyParameters;
 import trading.strategy.progressive.ProgressiveTradingStrategyParametersBuilder;
 
 import java.util.List;
+import java.util.concurrent.atomic.AtomicReference;
 
 public class ProgressiveChallenges {
     private static List<MarketPriceSnapshot> HistoricalClosingPrices;
@@ -103,6 +104,46 @@ public class ProgressiveChallenges {
         this.progressiveTradingStrategyParametersBuilder.setSellTriggerFactory(historicalMarketData -> {
             HistoricalStockData historicalStockData = historicalMarketData.getStockData(isin);
             return new DelegateTrigger(() -> historicalStockData.getDecliningDaysInSequence() >= 1);
+        });
+
+        this.progressiveTradingStrategyParametersBuilder.setResetTriggerFactory(historicalMarketData -> new AlwaysFiresTrigger());
+    }
+
+    @Test
+    public void buyAfterDistanceFromLocalMaximumReachedAndSellAfterLocalMaximumReachedAgain() {
+        ISIN isin = ISIN.MunichRe;
+        DayCount localMaximumLookBehindPeriod = new DayCount(20);
+        double minDistanceFromLocalMaxmiumPercentage = 0.02;
+
+        this.progressiveTradingStrategyParametersBuilder.setISIN(isin);
+
+        AtomicReference<Double> buyLocalMaxmium = new AtomicReference<>((double) 0);
+
+        this.progressiveTradingStrategyParametersBuilder.setBuyTriggerFactory(historicalMarketData -> {
+            HistoricalStockData historicalStockData = historicalMarketData.getStockData(isin);
+
+            return new DelegateTrigger(() -> {
+                double localMaximum = historicalStockData.getMaximumClosingMarketPrice(localMaximumLookBehindPeriod).getValue();
+                double minDelta = localMaximum * minDistanceFromLocalMaxmiumPercentage;
+                double maxBuyPrice = localMaximum - minDelta;
+                double lastClosingMarketPrice = historicalStockData.getLastClosingMarketPrice().getValue();
+
+                if(lastClosingMarketPrice <= maxBuyPrice) {
+                    buyLocalMaxmium.set(localMaximum);
+                    return true;
+                }
+                else {
+                    return false;
+                }
+            });
+        });
+
+        this.progressiveTradingStrategyParametersBuilder.setSellTriggerFactory(historicalMarketData -> {
+            HistoricalStockData historicalStockData = historicalMarketData.getStockData(isin);
+
+            return new DelegateTrigger(() -> {
+                return historicalStockData.getLastClosingMarketPrice().getValue() >= buyLocalMaxmium.get();
+            });
         });
 
         this.progressiveTradingStrategyParametersBuilder.setResetTriggerFactory(historicalMarketData -> new AlwaysFiresTrigger());
