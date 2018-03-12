@@ -3,9 +3,7 @@
 ## To be implemented
 
 * Triggers
-    * RaisingPricesTrigger
     * RaisingPricesSinceActivationTrigger
-    * DecliningPricesTrigger
     * DecliningPricesSinceActivationTrigger
     * RelativeIncreaseSinceActivationTrigger
     * RelativeDeclineSinceActivationTrigger

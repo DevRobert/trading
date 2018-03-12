@@ -13,7 +13,7 @@ import trading.market.MarketPriceSnapshot;
 import trading.simulation.*;
 import trading.strategy.AlwaysFiresTrigger;
 import trading.strategy.DelegateTrigger;
-import trading.strategy.WaitFixedPeriodTrigger;
+import trading.strategy.NeverFiresTrigger;
 import trading.strategy.progressive.ProgressiveTradingStrategy;
 import trading.strategy.progressive.ProgressiveTradingStrategyParameters;
 import trading.strategy.progressive.ProgressiveTradingStrategyParametersBuilder;
@@ -77,7 +77,7 @@ public class ProgressiveChallenges {
     public void buyAndHoldForever() {
         this.progressiveTradingStrategyParametersBuilder.setISIN(ISIN.MunichRe);
         this.progressiveTradingStrategyParametersBuilder.setBuyTriggerFactory(historicalMarketData -> new AlwaysFiresTrigger());
-        this.progressiveTradingStrategyParametersBuilder.setSellTriggerFactory(historicalMarketData -> new WaitFixedPeriodTrigger(new DayCount(10000)));
+        this.progressiveTradingStrategyParametersBuilder.setSellTriggerFactory(historicalMarketData -> new NeverFiresTrigger());
         this.progressiveTradingStrategyParametersBuilder.setResetTriggerFactory(historicalMarketData -> new AlwaysFiresTrigger());
     }
 
