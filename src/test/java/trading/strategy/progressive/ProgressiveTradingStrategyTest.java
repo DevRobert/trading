@@ -21,7 +21,7 @@ public class ProgressiveTradingStrategyTest extends ProgressiveTradingStrategyTe
 
     /**
      * Phase A: Wait and buy stocks
-     *
+     * <p>
      * Activates buy trigger and sets buy order for given ISIN when buy trigger fires.
      * The maximum possible amount of available money is used for this order.
      * Afterwards, phase B is entered.
@@ -29,7 +29,7 @@ public class ProgressiveTradingStrategyTest extends ProgressiveTradingStrategyTe
 
     @Test
     public void buyOrderIsSetInitially_ifBuyTriggerFiresImmediately() {
-        parametersBuilder.setBuyTrigger(new WaitFixedPeriodTrigger(new DayCount(0)));
+        parametersBuilder.setBuyTriggerFactory((historicalMarketData) -> new WaitFixedPeriodTrigger(new DayCount(0)));
 
         beginHistory(ISIN.MunichRe, new Amount(1000.0));
 
@@ -41,7 +41,7 @@ public class ProgressiveTradingStrategyTest extends ProgressiveTradingStrategyTe
 
     @Test
     public void buyOrderIsNotSetInitially_ifBuyTriggerFiresAfterOneDay() {
-        parametersBuilder.setBuyTrigger(new WaitFixedPeriodTrigger(new DayCount(1)));
+        parametersBuilder.setBuyTriggerFactory((historicalMarketData) -> new WaitFixedPeriodTrigger(new DayCount(1)));
 
         beginHistory(ISIN.MunichRe, new Amount(1000.0));
 
@@ -53,7 +53,7 @@ public class ProgressiveTradingStrategyTest extends ProgressiveTradingStrategyTe
 
     @Test
     public void buyOrderIsSetAfterOneDay_ifBuyTriggerFiresAfterOneDay() {
-        parametersBuilder.setBuyTrigger(new WaitFixedPeriodTrigger(new DayCount(1)));
+        parametersBuilder.setBuyTriggerFactory((historicalMarketData) -> new WaitFixedPeriodTrigger(new DayCount(1)));
 
         beginHistory(ISIN.MunichRe, new Amount(1000.0));
 
@@ -68,7 +68,7 @@ public class ProgressiveTradingStrategyTest extends ProgressiveTradingStrategyTe
 
     @Test
     public void buyOrderMaximumQuantityIsOrdered_ifNoCommissions() {
-        parametersBuilder.setBuyTrigger(new WaitFixedPeriodTrigger(new DayCount(0)));
+        parametersBuilder.setBuyTriggerFactory((historicalMarketData) -> new WaitFixedPeriodTrigger(new DayCount(0)));
 
         beginHistory(ISIN.MunichRe, new Amount(1000.0));
 
@@ -90,16 +90,16 @@ public class ProgressiveTradingStrategyTest extends ProgressiveTradingStrategyTe
 
     /**
      * Phase B: Wait and sell stocks
-     *
+     * <p>
      * Activates sell trigger and sets sell order for bought position when sell trigger fires.
      * Afterwards, phase C is entered.
      */
 
     @Test
     public void sellOrderIsSetOneDayAfterBuying_ifSellTriggerFiresImmediately() {
-        parametersBuilder.setBuyTrigger(new WaitFixedPeriodTrigger(new DayCount(0)));
-        parametersBuilder.setSellTrigger(new WaitFixedPeriodTrigger(new DayCount(0)));
-        parametersBuilder.setResetTrigger(new WaitFixedPeriodTrigger(new DayCount(10)));
+        parametersBuilder.setBuyTriggerFactory((historicalMarketData) -> new WaitFixedPeriodTrigger(new DayCount(0)));
+        parametersBuilder.setSellTriggerFactory((historicalMarketData) -> new WaitFixedPeriodTrigger(new DayCount(0)));
+        parametersBuilder.setResetTriggerFactory((historicalMarketData) -> new WaitFixedPeriodTrigger(new DayCount(10)));
 
         beginHistory(ISIN.MunichRe, new Amount(1000.0));
         beginSimulation();
@@ -114,9 +114,9 @@ public class ProgressiveTradingStrategyTest extends ProgressiveTradingStrategyTe
 
     @Test
     public void sellOrderIsSetTwoDaysAfterBuying_ifSellTriggerFiresAfterOneDay() {
-        parametersBuilder.setBuyTrigger(new WaitFixedPeriodTrigger(new DayCount(0)));
-        parametersBuilder.setSellTrigger(new WaitFixedPeriodTrigger(new DayCount(1)));
-        parametersBuilder.setResetTrigger(new WaitFixedPeriodTrigger(new DayCount(10)));
+        parametersBuilder.setBuyTriggerFactory((historicalMarketData) -> new WaitFixedPeriodTrigger(new DayCount(0)));
+        parametersBuilder.setSellTriggerFactory((historicalMarketData) -> new WaitFixedPeriodTrigger(new DayCount(1)));
+        parametersBuilder.setResetTriggerFactory((historicalMarketData) -> new WaitFixedPeriodTrigger(new DayCount(10)));
 
         beginHistory(ISIN.MunichRe, new Amount(1000.0));
         beginSimulation();
@@ -135,14 +135,14 @@ public class ProgressiveTradingStrategyTest extends ProgressiveTradingStrategyTe
 
     /**
      * Phase C: Wait and reset
-     *
+     * <p>
      * Activates reset trigger and starts phase A immediately when reset trigger fires.
      */
     @Test
     public void sellOrderIsSetAgainOneDayAfterSelling_ifResetTriggerFiresImmediately_andBuyTriggerFiresImmediately() {
-        parametersBuilder.setBuyTrigger(new WaitFixedPeriodTrigger(new DayCount(0)));
-        parametersBuilder.setSellTrigger(new WaitFixedPeriodTrigger(new DayCount(0)));
-        parametersBuilder.setResetTrigger(new WaitFixedPeriodTrigger(new DayCount(0)));
+        parametersBuilder.setBuyTriggerFactory((historicalMarketData) -> new WaitFixedPeriodTrigger(new DayCount(0)));
+        parametersBuilder.setSellTriggerFactory((historicalMarketData) -> new WaitFixedPeriodTrigger(new DayCount(0)));
+        parametersBuilder.setResetTriggerFactory((historicalMarketData) -> new WaitFixedPeriodTrigger(new DayCount(0)));
 
         beginHistory(ISIN.MunichRe, new Amount(1000.0));
 
@@ -169,9 +169,9 @@ public class ProgressiveTradingStrategyTest extends ProgressiveTradingStrategyTe
 
     @Test
     public void sellOrderIsSetAgainTwoDaysAfterSelling_ifResetTriggerFiresAfterOneDay_andBuyTriggerFiresImmediately() {
-        parametersBuilder.setBuyTrigger(new WaitFixedPeriodTrigger(new DayCount(0)));
-        parametersBuilder.setSellTrigger(new WaitFixedPeriodTrigger(new DayCount(0)));
-        parametersBuilder.setResetTrigger(new WaitFixedPeriodTrigger(new DayCount(1)));
+        parametersBuilder.setBuyTriggerFactory((historicalMarketData) -> new WaitFixedPeriodTrigger(new DayCount(0)));
+        parametersBuilder.setSellTriggerFactory((historicalMarketData) -> new WaitFixedPeriodTrigger(new DayCount(0)));
+        parametersBuilder.setResetTriggerFactory((historicalMarketData) -> new WaitFixedPeriodTrigger(new DayCount(1)));
 
         beginHistory(ISIN.MunichRe, new Amount(1000.0));
 

@@ -25,9 +25,9 @@ public class ProgressiveTradingStrategyInitializationTest {
     public void before() {
         parametersBuilder = new ProgressiveTradingStrategyParametersBuilder();
         parametersBuilder.setISIN(ISIN.MunichRe);
-        parametersBuilder.setBuyTrigger(new WaitFixedPeriodTrigger(new DayCount(1)));
-        parametersBuilder.setSellTrigger(new WaitFixedPeriodTrigger(new DayCount(1)));
-        parametersBuilder.setResetTrigger(new WaitFixedPeriodTrigger(new DayCount(1)));
+        parametersBuilder.setBuyTriggerFactory((historicalMarketData) -> new WaitFixedPeriodTrigger(new DayCount(1)));
+        parametersBuilder.setSellTriggerFactory((historicalMarketData) -> new WaitFixedPeriodTrigger(new DayCount(1)));
+        parametersBuilder.setResetTriggerFactory((historicalMarketData) -> new WaitFixedPeriodTrigger(new DayCount(1)));
 
         Amount availableMoney = new Amount(50000.0);
         account = new Account(availableMoney);

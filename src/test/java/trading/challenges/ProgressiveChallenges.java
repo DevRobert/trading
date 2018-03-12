@@ -7,8 +7,10 @@ import org.junit.Test;
 import trading.Amount;
 import trading.DayCount;
 import trading.ISIN;
+import trading.market.HistoricalStockData;
 import trading.market.MarketPriceSnapshot;
 import trading.simulation.*;
+import trading.strategy.DelegateTrigger;
 import trading.strategy.WaitFixedPeriodTrigger;
 import trading.strategy.progressive.ProgressiveTradingStrategy;
 import trading.strategy.progressive.ProgressiveTradingStrategyParameters;
@@ -60,16 +62,37 @@ public class ProgressiveChallenges {
     @Test
     public void buyAndHoldForever() {
         this.progressiveTradingStrategyParametersBuilder.setISIN(ISIN.MunichRe);
-        this.progressiveTradingStrategyParametersBuilder.setBuyTrigger(new WaitFixedPeriodTrigger(new DayCount(0)));
-        this.progressiveTradingStrategyParametersBuilder.setSellTrigger(new WaitFixedPeriodTrigger(new DayCount(10000)));
-        this.progressiveTradingStrategyParametersBuilder.setResetTrigger(new WaitFixedPeriodTrigger(new DayCount(0)));
+        this.progressiveTradingStrategyParametersBuilder.setBuyTriggerFactory(historicalMarketData -> new WaitFixedPeriodTrigger(new DayCount(0)));
+        this.progressiveTradingStrategyParametersBuilder.setSellTriggerFactory(historicalMarketData -> new WaitFixedPeriodTrigger(new DayCount(10000)));
+        this.progressiveTradingStrategyParametersBuilder.setResetTriggerFactory(historicalMarketData -> new WaitFixedPeriodTrigger(new DayCount(0)));
     }
 
     @Test
     public void buyAndSellAlternating() {
         this.progressiveTradingStrategyParametersBuilder.setISIN(ISIN.MunichRe);
-        this.progressiveTradingStrategyParametersBuilder.setBuyTrigger(new WaitFixedPeriodTrigger(new DayCount(0)));
-        this.progressiveTradingStrategyParametersBuilder.setSellTrigger(new WaitFixedPeriodTrigger(new DayCount(0)));
-        this.progressiveTradingStrategyParametersBuilder.setResetTrigger(new WaitFixedPeriodTrigger(new DayCount(0)));
+        this.progressiveTradingStrategyParametersBuilder.setBuyTriggerFactory(historicalMarketData -> new WaitFixedPeriodTrigger(new DayCount(0)));
+        this.progressiveTradingStrategyParametersBuilder.setSellTriggerFactory(historicalMarketData -> new WaitFixedPeriodTrigger(new DayCount(0)));
+        this.progressiveTradingStrategyParametersBuilder.setResetTriggerFactory(historicalMarketData -> new WaitFixedPeriodTrigger(new DayCount(0)));
+    }
+
+    @Test
+    public void buyAfterOneRisingDayAndSellAfterOneDecliningDay() {
+        ISIN isin = ISIN.MunichRe;
+
+        this.progressiveTradingStrategyParametersBuilder.setISIN(isin);
+
+        this.progressiveTradingStrategyParametersBuilder.setBuyTriggerFactory(historicalMarketData -> {
+            HistoricalStockData historicalStockData = historicalMarketData.getStockData(isin);
+            return new DelegateTrigger(() -> historicalStockData.getRisingDaysInSequence() >= 1);
+        });
+
+        this.progressiveTradingStrategyParametersBuilder.setSellTriggerFactory(historicalMarketData -> {
+            HistoricalStockData historicalStockData = historicalMarketData.getStockData(isin);
+            return new DelegateTrigger(() -> historicalStockData.getDecliningDaysInSequence() >= 1);
+        });
+
+        this.progressiveTradingStrategyParametersBuilder.setResetTriggerFactory(historicalMarketData -> {
+            return new WaitFixedPeriodTrigger(new DayCount(0));
+        });
     }
 }

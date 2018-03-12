@@ -11,6 +11,7 @@ import trading.market.HistoricalMarketData;
 import trading.market.HistoricalStockData;
 import trading.strategy.StrategyInitializationException;
 import trading.strategy.TradingStrategy;
+import trading.strategy.Trigger;
 
 /**
  * Progressive Trading Strategy
@@ -48,6 +49,7 @@ public class ProgressiveTradingStrategy implements TradingStrategy {
     private final Account account;
     private final Broker broker;
     private final HistoricalStockData historicalStockData;
+    private final HistoricalMarketData historicalMarketData;
 
     private boolean initialization = true;
     private boolean inStateWaitAndBuyStocks = true;
@@ -56,6 +58,10 @@ public class ProgressiveTradingStrategy implements TradingStrategy {
 
     private boolean activateSellTriggerAfterDayPassed = false;
     private boolean activateResetTriggerAfterDayPassed = false;
+
+    private Trigger buyTrigger;
+    private Trigger sellTrigger;
+    private Trigger resetTrigger;
 
     public ProgressiveTradingStrategy(ProgressiveTradingStrategyParameters parameters, Account account, Broker broker, HistoricalMarketData historicalMarketData) {
         if (parameters == null) {
@@ -82,52 +88,62 @@ public class ProgressiveTradingStrategy implements TradingStrategy {
         this.account = account;
         this.broker = broker;
         this.historicalStockData = historicalMarketData.getStockData(parameters.getISIN());
+        this.historicalMarketData = historicalMarketData;
 
-        this.parameters.getBuyTrigger().activateTrigger();
+        this.buyTrigger = this.parameters.getBuyTriggerFactory().createTrigger(historicalMarketData);
+        this.sellTrigger = null;
+        this.resetTrigger = null;
     }
 
     @Override
     public void prepareOrdersForNextTradingDay() {
-        if(initialization) {
+        if (initialization) {
             initialization = false;
-        }
-        else {
-            this.parameters.getBuyTrigger().notifyDayPassed();
-            this.parameters.getSellTrigger().notifyDayPassed();
-            this.parameters.getResetTrigger().notifyDayPassed();
+        } else {
+            if (this.buyTrigger != null) {
+                this.buyTrigger.notifyDayPassed();
+            }
+
+            if (this.sellTrigger != null) {
+                this.sellTrigger.notifyDayPassed();
+            }
+
+            if (this.resetTrigger != null) {
+                this.resetTrigger.notifyDayPassed();
+            }
         }
 
-        if(activateSellTriggerAfterDayPassed) {
+        if (activateSellTriggerAfterDayPassed) {
             activateSellTriggerAfterDayPassed = false;
-            this.parameters.getSellTrigger().activateTrigger();
+            this.sellTrigger = this.parameters.getSellTriggerFactory().createTrigger(this.historicalMarketData);
         }
 
-        if(activateResetTriggerAfterDayPassed) {
+        if (activateResetTriggerAfterDayPassed) {
             activateResetTriggerAfterDayPassed = false;
-            this.parameters.getResetTrigger().activateTrigger();
+            this.resetTrigger = this.parameters.getResetTriggerFactory().createTrigger(this.historicalMarketData);
         }
 
-        if(this.inStateWaitAndReset) {
+        if (this.inStateWaitAndReset) {
             this.waitAndReset();
             // can lead to a state change that has to be processed
             // immediately within this prepare orders call
         }
 
-        if(this.inStateWaitAndBuyStocks) {
+        if (this.inStateWaitAndBuyStocks) {
             this.waitAndBuyStocks();
-        }
-        else if(this.inStateWaitAndSellStocks) {
+        } else if (this.inStateWaitAndSellStocks) {
             this.waitAndSellStocks();
         }
     }
 
     private void waitAndBuyStocks() {
-        if(this.parameters.getBuyTrigger().checkFires()) {
+        if (this.buyTrigger.checkFires()) {
             this.setBuyMarketOrder();
 
             this.inStateWaitAndBuyStocks = false;
-            this.inStateWaitAndSellStocks  = true;
+            this.inStateWaitAndSellStocks = true;
             this.activateSellTriggerAfterDayPassed = true;
+            this.buyTrigger = null;
         }
     }
 
@@ -142,12 +158,13 @@ public class ProgressiveTradingStrategy implements TradingStrategy {
     }
 
     private void waitAndSellStocks() {
-        if(this.parameters.getSellTrigger().checkFires()) {
+        if (this.sellTrigger.checkFires()) {
             this.setSellMarketOrder();
 
             this.inStateWaitAndSellStocks = false;
             this.inStateWaitAndReset = true;
             this.activateResetTriggerAfterDayPassed = true;
+            this.sellTrigger = null;
         }
     }
 
@@ -158,10 +175,12 @@ public class ProgressiveTradingStrategy implements TradingStrategy {
     }
 
     private void waitAndReset() {
-        if(this.parameters.getResetTrigger().checkFires()) {
+        if (this.resetTrigger.checkFires()) {
             this.inStateWaitAndReset = false;
             this.inStateWaitAndBuyStocks = true;
-            this.parameters.getBuyTrigger().activateTrigger();
+
+            this.buyTrigger = this.parameters.getBuyTriggerFactory().createTrigger(this.historicalMarketData);
+            this.resetTrigger = null;
         }
     }
 }

@@ -1,6 +1,5 @@
 package trading.strategy;
 
-public interface Trigger {
-    void notifyDayPassed();
+public interface DelegateTriggerCondition {
     boolean checkFires();
 }

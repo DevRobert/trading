@@ -3,8 +3,7 @@ package trading.strategy;
 import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 
 public class NotImplementedTrigger implements Trigger {
-    @Override
-    public void activateTrigger() {
+    public NotImplementedTrigger() {
         throw new NotImplementedException();
     }
 

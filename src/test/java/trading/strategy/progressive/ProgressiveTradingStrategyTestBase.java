@@ -15,9 +15,9 @@ public abstract class ProgressiveTradingStrategyTestBase extends TradingStrategy
     @Before
     public void progressiveTradingStrategyTestBaseBefore() {
         parametersBuilder.setISIN(ISIN.MunichRe);
-        parametersBuilder.setBuyTrigger(new NotImplementedTrigger());
-        parametersBuilder.setSellTrigger(new NotImplementedTrigger());
-        parametersBuilder.setResetTrigger(new NotImplementedTrigger());
+        parametersBuilder.setBuyTriggerFactory((historicalMarketData) -> new NotImplementedTrigger());
+        parametersBuilder.setSellTriggerFactory((historicalMarketData) -> new NotImplementedTrigger());
+        parametersBuilder.setResetTriggerFactory((historicalMarketData) -> new NotImplementedTrigger());
     }
 
     @Override

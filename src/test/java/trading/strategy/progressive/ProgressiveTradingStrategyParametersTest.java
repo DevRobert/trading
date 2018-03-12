@@ -15,9 +15,9 @@ public class ProgressiveTradingStrategyParametersTest {
     public void before() {
         this.builder = new ProgressiveTradingStrategyParametersBuilder();
         this.builder.setISIN(ISIN.MunichRe);
-        this.builder.setBuyTrigger(new WaitFixedPeriodTrigger(new DayCount(1)));
-        this.builder.setSellTrigger(new WaitFixedPeriodTrigger(new DayCount(1)));
-        this.builder.setResetTrigger(new WaitFixedPeriodTrigger(new DayCount(1)));
+        this.builder.setBuyTriggerFactory((historicalMarketData) -> new WaitFixedPeriodTrigger(new DayCount(1)));
+        this.builder.setSellTriggerFactory((historicalMarketData) -> new WaitFixedPeriodTrigger(new DayCount(1)));
+        this.builder.setResetTriggerFactory((historicalMarketData) -> new WaitFixedPeriodTrigger(new DayCount(1)));
     }
 
     @Test
@@ -36,14 +36,14 @@ public class ProgressiveTradingStrategyParametersTest {
     }
 
     @Test
-    public void failsIfNoBuyTriggerSpecified() {
-        this.builder.setBuyTrigger(null);
+    public void failsIfNoBuyTriggerFactorySpecified() {
+        this.builder.setBuyTriggerFactory(null);
 
         try {
             this.builder.build();
         }
         catch(StrategyInitializationException ex) {
-            Assert.assertEquals("The buy trigger must be specified.", ex.getMessage());
+            Assert.assertEquals("The buy trigger factory must be specified.", ex.getMessage());
             return;
         }
 
@@ -51,14 +51,14 @@ public class ProgressiveTradingStrategyParametersTest {
     }
 
     @Test
-    public void failsIfNoSellTriggerSpecified() {
-        this.builder.setSellTrigger(null);
+    public void failsIfNoSellTriggerFactorySpecified() {
+        this.builder.setSellTriggerFactory(null);
 
         try {
             this.builder.build();
         }
         catch(StrategyInitializationException ex) {
-            Assert.assertEquals("The sell trigger must be specified.", ex.getMessage());
+            Assert.assertEquals("The sell trigger factory must be specified.", ex.getMessage());
             return;
         }
 
@@ -66,14 +66,14 @@ public class ProgressiveTradingStrategyParametersTest {
     }
 
     @Test
-    public void failsIfNoResetTriggerSpecified() {
-        this.builder.setResetTrigger(null);
+    public void failsIfNoResetTriggerFactorySpecified() {
+        this.builder.setResetTriggerFactory(null);
 
         try {
             this.builder.build();
         }
         catch(StrategyInitializationException ex) {
-            Assert.assertEquals("The reset trigger must be specified.", ex.getMessage());
+            Assert.assertEquals("The reset trigger factory must be specified.", ex.getMessage());
             return;
         }
 

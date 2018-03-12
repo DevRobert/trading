@@ -1,36 +1,36 @@
 package trading.strategy.progressive;
 
 import trading.ISIN;
-import trading.strategy.Trigger;
+import trading.strategy.TriggerFactory;
 
 public class ProgressiveTradingStrategyParametersBuilder {
     private ISIN isin;
-    private Trigger buyTrigger;
-    private Trigger sellTrigger;
-    private Trigger resetTrigger;
+    private TriggerFactory buyTriggerFactory;
+    private TriggerFactory sellTriggerFactory;
+    private TriggerFactory resetTriggerFactory;
 
     public void setISIN(ISIN isin) {
         this.isin = isin;
     }
 
-    public void setBuyTrigger(Trigger buyTrigger) {
-        this.buyTrigger = buyTrigger;
+    public void setBuyTriggerFactory(TriggerFactory buyTriggerFactory) {
+        this.buyTriggerFactory = buyTriggerFactory;
     }
 
-    public void setSellTrigger(Trigger sellTrigger) {
-        this.sellTrigger = sellTrigger;
+    public void setSellTriggerFactory(TriggerFactory sellTriggerFactory) {
+        this.sellTriggerFactory = sellTriggerFactory;
     }
 
-    public void setResetTrigger(Trigger resetTrigger) {
-        this.resetTrigger = resetTrigger;
+    public void setResetTriggerFactory(TriggerFactory resetTriggerFactory) {
+        this.resetTriggerFactory = resetTriggerFactory;
     }
 
     public ProgressiveTradingStrategyParameters build() {
         return new ProgressiveTradingStrategyParameters(
                 isin,
-                buyTrigger,
-                sellTrigger,
-                resetTrigger
+                buyTriggerFactory,
+                sellTriggerFactory,
+                resetTriggerFactory
         );
     }
 }

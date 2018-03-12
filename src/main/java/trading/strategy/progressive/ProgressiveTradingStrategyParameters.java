@@ -2,50 +2,50 @@ package trading.strategy.progressive;
 
 import trading.ISIN;
 import trading.strategy.StrategyInitializationException;
-import trading.strategy.Trigger;
+import trading.strategy.TriggerFactory;
 
 public class ProgressiveTradingStrategyParameters {
     private final ISIN isin;
-    private final Trigger buyTrigger;
-    private final Trigger sellTrigger;
-    private final Trigger resetTrigger;
+    private final TriggerFactory buyTriggerFactory;
+    private final TriggerFactory sellTriggerFactory;
+    private final TriggerFactory resetTriggerFactory;
 
     public ISIN getISIN() {
         return isin;
     }
 
-    public Trigger getBuyTrigger() {
-        return buyTrigger;
+    public TriggerFactory getBuyTriggerFactory() {
+        return this.buyTriggerFactory;
     }
 
-    public Trigger getSellTrigger() {
-        return sellTrigger;
+    public TriggerFactory getSellTriggerFactory() {
+        return this.sellTriggerFactory;
     }
 
-    public Trigger getResetTrigger() {
-        return resetTrigger;
+    public TriggerFactory getResetTriggerFactory() {
+        return this.resetTriggerFactory;
     }
 
-    public ProgressiveTradingStrategyParameters(ISIN isin, Trigger buyTrigger, Trigger sellTrigger, Trigger resetTrigger) {
+    public ProgressiveTradingStrategyParameters(ISIN isin, TriggerFactory buyTriggerFactory, TriggerFactory sellTriggerFactory, TriggerFactory resetTriggerFactory) {
         if(isin == null) {
             throw new StrategyInitializationException("The ISIN must be specified.");
         }
 
-        if(buyTrigger == null) {
-            throw new StrategyInitializationException("The buy trigger must be specified.");
+        if(buyTriggerFactory == null) {
+            throw new StrategyInitializationException("The buy trigger factory must be specified.");
         }
 
-        if(sellTrigger == null) {
-            throw new StrategyInitializationException("The sell trigger must be specified.");
+        if(sellTriggerFactory == null) {
+            throw new StrategyInitializationException("The sell trigger factory must be specified.");
         }
 
-        if(resetTrigger == null) {
-            throw new StrategyInitializationException("The reset trigger must be specified.");
+        if(resetTriggerFactory == null) {
+            throw new StrategyInitializationException("The reset trigger factory must be specified.");
         }
 
         this.isin = isin;
-        this.buyTrigger = buyTrigger;
-        this.sellTrigger = sellTrigger;
-        this.resetTrigger = resetTrigger;
+        this.buyTriggerFactory = buyTriggerFactory;
+        this.sellTriggerFactory = sellTriggerFactory;
+        this.resetTriggerFactory = resetTriggerFactory;
     }
 }
