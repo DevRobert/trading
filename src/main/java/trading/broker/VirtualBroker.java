@@ -13,11 +13,25 @@ import java.util.concurrent.LinkedBlockingQueue;
 public class VirtualBroker implements Broker {
     private final Account account;
     private final HistoricalMarketData historicalMarketData;
+    private final CommissionStrategy commissionStrategy;
     private Queue<OrderRequest> registeredOrderRequests;
 
-    public VirtualBroker(Account account, HistoricalMarketData historicalMarketData) {
+    public VirtualBroker(Account account, HistoricalMarketData historicalMarketData, CommissionStrategy commissionStrategy) {
+        if(account == null) {
+            throw new RuntimeException("The account must be specified.");
+        }
+
+        if(historicalMarketData == null) {
+            throw new RuntimeException("The historical market data must be specified.");
+        }
+
+        if(commissionStrategy == null) {
+            throw new RuntimeException("The commission strategy must be specified.");
+        }
+
         this.account = account;
         this.historicalMarketData = historicalMarketData;
+        this.commissionStrategy = commissionStrategy;
         this.registeredOrderRequests = new LinkedBlockingQueue<>();
     }
 
@@ -53,7 +67,7 @@ public class VirtualBroker implements Broker {
         ISIN isin = orderRequest.getIsin();
         Amount lastMarketPrice = this.historicalMarketData.getStockData(isin).getLastClosingMarketPrice();
         Amount totalPrice = lastMarketPrice.multiply(orderRequest.getQuantity());
-        Amount commission = new Amount(0.0);
+        Amount commission = this.commissionStrategy.calculateCommission(totalPrice);
         Transaction transaction = new Transaction(TransactionType.Buy, isin, orderRequest.getQuantity(), totalPrice, commission);
         account.registerTransaction(transaction);
     }
@@ -62,7 +76,7 @@ public class VirtualBroker implements Broker {
         ISIN isin = orderRequest.getIsin();
         Amount lastMarketPrice = this.historicalMarketData.getStockData(isin).getLastClosingMarketPrice();
         Amount totalPrice = lastMarketPrice.multiply(orderRequest.getQuantity());
-        Amount commission = new Amount(0.0);
+        Amount commission = this.commissionStrategy.calculateCommission(totalPrice);
         Transaction transaction = new Transaction(TransactionType.Sell, isin, orderRequest.getQuantity(), totalPrice, commission);
         account.registerTransaction(transaction);
     }

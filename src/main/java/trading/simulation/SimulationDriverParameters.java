@@ -2,6 +2,7 @@ package trading.simulation;
 
 import trading.Amount;
 import trading.DayCount;
+import trading.broker.CommissionStrategy;
 import trading.strategy.TradingStrategyFactory;
 
 public class SimulationDriverParameters {
@@ -10,6 +11,7 @@ public class SimulationDriverParameters {
     private final DayCount simulationDuration;
     private final Amount seedCapital;
     private final TradingStrategyFactory tradingStrategyFactory;
+    private final CommissionStrategy commissionStrategy;
 
     public SimulationMarketDataSource getSimulationMarketDataSource() {
         return this.simulationMarketDataSource;
@@ -31,7 +33,18 @@ public class SimulationDriverParameters {
         return this.tradingStrategyFactory;
     }
 
-    public SimulationDriverParameters(SimulationMarketDataSource simulationMarketDataSource, DayCount historyDuration, DayCount simulationDuration, Amount seedCapital, TradingStrategyFactory tradingStrategyFactory) {
+    public CommissionStrategy getCommissionStrategy() {
+         return this.commissionStrategy;
+    }
+
+    public SimulationDriverParameters(
+            SimulationMarketDataSource simulationMarketDataSource,
+            DayCount historyDuration,
+            DayCount simulationDuration,
+            Amount seedCapital,
+            TradingStrategyFactory tradingStrategyFactory,
+            CommissionStrategy commissionStrategy
+    ){
         if(simulationMarketDataSource == null) {
             throw new SimulationDriverInitializationException("The simulation market data source must be specified.");
         }
@@ -68,10 +81,15 @@ public class SimulationDriverParameters {
             throw new SimulationDriverInitializationException("The trading strategy factory must be specified.");
         }
 
+        if(commissionStrategy == null) {
+            throw new SimulationDriverInitializationException("The commission strategy must be specified.");
+        }
+
         this.simulationMarketDataSource = simulationMarketDataSource;
         this.historyDuration = historyDuration;
         this.simulationDuration = simulationDuration;
         this.seedCapital = seedCapital;
         this.tradingStrategyFactory = tradingStrategyFactory;
+        this.commissionStrategy = commissionStrategy;
     }
 }

@@ -8,6 +8,7 @@ import trading.account.Account;
 import trading.broker.Broker;
 import trading.broker.OrderRequest;
 import trading.broker.VirtualBroker;
+import trading.broker.ZeroCommissionStrategy;
 import trading.market.HistoricalMarketData;
 import trading.market.MarketPriceSnapshot;
 import trading.market.MarketPriceSnapshotBuilder;
@@ -32,7 +33,7 @@ public class SimulationTest {
 
         Amount availableMoney = new Amount(50000.0);
         account = new Account(availableMoney);
-        broker = new VirtualBroker(account, historicalMarketData);
+        broker = new VirtualBroker(account, historicalMarketData, new ZeroCommissionStrategy());
         tradingStrategy = new ManualTradingStrategy(broker);
     }
 

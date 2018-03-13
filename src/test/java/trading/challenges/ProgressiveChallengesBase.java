@@ -7,6 +7,9 @@ import org.junit.BeforeClass;
 import trading.Amount;
 import trading.DayCount;
 import trading.ISIN;
+import trading.broker.CommissionStrategy;
+import trading.broker.DynamicCommissionStrategy;
+import trading.broker.DynamicCommissionStrategyParametersBuilder;
 import trading.simulation.MultiStockListDataSource;
 import trading.simulation.SimulationDriver;
 import trading.simulation.SimulationDriverParametersBuilder;
@@ -54,6 +57,14 @@ public abstract class ProgressiveChallengesBase {
         this.simulationDriverParametersBuilder.setSeedCapital(new Amount(50000.0));
 
         this.progressiveTradingStrategyParametersBuilder = new ProgressiveTradingStrategyParametersBuilder();
+
+        DynamicCommissionStrategyParametersBuilder dynamicCommissionStrategyParametersBuilder = new DynamicCommissionStrategyParametersBuilder();
+        dynamicCommissionStrategyParametersBuilder.setFixedAmount(new Amount(4.95 + 1.50));
+        dynamicCommissionStrategyParametersBuilder.setVariableAmountRate(0.0025);
+        dynamicCommissionStrategyParametersBuilder.setMinimumVariableAmount(new Amount(9.95));
+        dynamicCommissionStrategyParametersBuilder.setMaximumVariableAmount(new Amount(69.00));
+        CommissionStrategy commissionStrategy = new DynamicCommissionStrategy(dynamicCommissionStrategyParametersBuilder.build());
+        this.simulationDriverParametersBuilder.setCommissionStrategy(commissionStrategy);
     }
 
     @After

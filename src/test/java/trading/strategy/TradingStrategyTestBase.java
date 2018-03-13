@@ -6,8 +6,7 @@ import trading.Amount;
 import trading.ISIN;
 import trading.account.Account;
 import trading.account.Position;
-import trading.broker.Broker;
-import trading.broker.VirtualBroker;
+import trading.broker.*;
 import trading.market.HistoricalMarketData;
 import trading.market.MarketPriceSnapshot;
 import trading.simulation.Simulation;
@@ -20,12 +19,14 @@ public abstract class TradingStrategyTestBase {
 
     private HistoricalMarketData historicalMarketData;
     private Simulation simulation;
+    private CommissionStrategy commissionStrategy;
 
     protected abstract TradingStrategy initializeTradingStrategy(Account account, Broker broker, HistoricalMarketData historicalMarketData);
 
     @Before()
     public void tradingStrategyTestBaseBefore() {
         this.account = new Account(new Amount(50000.0));
+        this.commissionStrategy = new ZeroCommissionStrategy();
     }
 
     private void ensureBeginHistoryPreConditions() {
@@ -73,7 +74,7 @@ public abstract class TradingStrategyTestBase {
             throw new RuntimeException("The simulation has already been started.");
         }
 
-        this.broker = new VirtualBroker(this.account, this.historicalMarketData);
+        this.broker = new VirtualBroker(this.account, this.historicalMarketData, this.commissionStrategy);
         this.tradingStrategy = this.initializeTradingStrategy(this.account, this.broker, historicalMarketData);
 
         SimulationBuilder simulationBuilder = new SimulationBuilder();

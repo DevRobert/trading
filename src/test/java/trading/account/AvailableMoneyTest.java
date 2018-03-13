@@ -61,7 +61,7 @@ public class AvailableMoneyTest extends AccountTestBase {
         try {
             account.registerTransaction(transaction);
         } catch (AccountStateException ex) {
-            Assert.assertEquals("The transaction amount (total price and commission) exceeds the available money.", ex.getMessage());
+            Assert.assertEquals("The total price exceeds the available money.", ex.getMessage());
             return;
         }
 
@@ -69,20 +69,16 @@ public class AvailableMoneyTest extends AccountTestBase {
     }
 
     @Test
-    public void buyTransactionFailsIfEnoughAvailableMoneyForTotalPriceButNotForCommission() {
+    public void buyTransactionSucceedsIfEnoughAvailableMoneyForTotalPriceButNotForCommission() {
         Amount buyTotalPrice = new Amount(10000.0);
         Amount buyCommission = new Amount(1000.0);
 
         Transaction transaction = new Transaction(TransactionType.Buy, ISIN.MunichRe, new Quantity(1), buyTotalPrice, buyCommission);
+        account.registerTransaction(transaction);
 
-        try {
-            account.registerTransaction(transaction);
-        } catch (AccountStateException ex) {
-            Assert.assertEquals("The transaction amount (total price and commission) exceeds the available money.", ex.getMessage());
-            return;
-        }
+        Assert.assertEquals(new Amount(-1000.0), account.getAvailableMoney());
 
-        Assert.fail("AccountStateException expected.");
+        // TODO develop pricing model for tolerated overdraft
     }
 
     @Test
@@ -125,5 +121,40 @@ public class AvailableMoneyTest extends AccountTestBase {
         // Available money: 0 + 5 - 10 = -5
 
         Assert.assertEquals(new Amount(-5.0), account.getAvailableMoney());
+    }
+
+    @Test
+    public void sellTransactionSucceedsEvenIfCommissionExceedsTotalPriceAvailableMoneyIsNegative() {
+        Amount buyTotalPrice1 = new Amount(8000.0);
+        Amount buyCommission1 = new Amount(0.0);
+
+        Transaction buyTransaction1 = new Transaction(TransactionType.Buy, ISIN.MunichRe, new Quantity(1), buyTotalPrice1, buyCommission1);
+        account.registerTransaction(buyTransaction1);
+
+        // Interim available money: 10,000 - 8,000 = 2,000
+
+        Amount buyTotalPrice2 = new Amount(2000.0);
+        Amount buyCommission2 = new Amount(0.0);
+
+        Transaction buyTransaction2 = new Transaction(TransactionType.Buy, ISIN.Allianz, new Quantity(1), buyTotalPrice2, buyCommission2);
+        account.registerTransaction(buyTransaction2);
+
+        // Interim available money: 2,000 - 2,000 = 0
+
+        Amount sellTotalPrice1 = new Amount(5.0);
+        Amount sellCommission1 = new Amount(10.0);
+        Transaction sellTransaction1 = new Transaction(TransactionType.Sell, ISIN.MunichRe, new Quantity(1), sellTotalPrice1, sellCommission1);
+        account.registerTransaction(sellTransaction1);
+
+        // Interim available money: 0 + 5 - 10 = -5
+
+        Amount sellTotalPrice2 = new Amount(5.0);
+        Amount sellCommission2 = new Amount(10.0);
+        Transaction sellTransaction2 = new Transaction(TransactionType.Sell, ISIN.Allianz, new Quantity(1), sellTotalPrice2, sellCommission2);
+        account.registerTransaction(sellTransaction2);
+
+        // Available money: -5 + 5 - 10 = -10
+
+        Assert.assertEquals(new Amount(-10.0), account.getAvailableMoney());
     }
 }

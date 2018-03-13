@@ -4,8 +4,9 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import trading.*;
-import trading.broker.OrderRequest;
-import trading.broker.OrderType;
+import trading.account.Account;
+import trading.broker.*;
+import trading.market.HistoricalMarketData;
 import trading.market.HistoricalStockData;
 import trading.strategy.TradingStrategy;
 import trading.strategy.TradingStrategyFactory;
@@ -44,12 +45,14 @@ public class SimulationDriverTest {
         parametersBuilder.setSimulationDuration(new DayCount(1));
 
         parametersBuilder.setTradingStrategyFactory((account, broker, historicalMarketData) -> null);
+
+        parametersBuilder.setCommissionStrategy(new ZeroCommissionStrategy());
     }
 
     // Initialization
 
     @Test
-    public void initializationFails_ifNoMarketDataSourceSpecified() {
+    public void initializationFails_ifMarketDataSourceNotSpecified() {
         parametersBuilder.setSimulationMarketDataSource(null);
 
         try {
@@ -64,7 +67,7 @@ public class SimulationDriverTest {
     }
 
     @Test
-    public void initializationFails_ifNoSeedCapitalSpecified() {
+    public void initializationFails_ifSeedCapitalNotSpecified() {
         parametersBuilder.setSeedCapital(null);
 
         try {
@@ -79,7 +82,7 @@ public class SimulationDriverTest {
     }
 
     @Test
-    public void initializationFails_ifNoHistoryDurationSpecified() {
+    public void initializationFails_ifHistoryDurationNotSpecified() {
         parametersBuilder.setHistoryDuration(null);
 
         try {
@@ -124,7 +127,7 @@ public class SimulationDriverTest {
     }
 
     @Test
-    public void initializationFails_ifNoSimulationDurationSpecified() {
+    public void initializationFails_ifSimulationDurationNotSpecified() {
         parametersBuilder.setSimulationDuration(null);
 
         try {
@@ -169,7 +172,7 @@ public class SimulationDriverTest {
     }
 
     @Test
-    public void initializationFails_ifNoTradingStrategyFactorySpecified() {
+    public void initializationFails_ifTradingStrategyFactoryNotSpecified() {
         parametersBuilder.setTradingStrategyFactory(null);
 
         try {
@@ -177,6 +180,21 @@ public class SimulationDriverTest {
         }
         catch(SimulationDriverInitializationException ex) {
             Assert.assertEquals("The trading strategy factory must be specified.", ex.getMessage());
+            return;
+        }
+
+        Assert.fail("SimulationDriverInitializationException expected.");
+    }
+
+    @Test
+    public void initializationFails_ifCommissionStrategyNotSpecified() {
+        parametersBuilder.setCommissionStrategy(null);
+
+        try {
+            new SimulationDriver(parametersBuilder.build());
+        }
+        catch(SimulationDriverInitializationException ex) {
+            Assert.assertEquals("The commission strategy must be specified.", ex.getMessage());
             return;
         }
 
@@ -288,6 +306,38 @@ public class SimulationDriverTest {
         Assert.assertEquals(2, numAskedForNewOrders.get());
     }
 
+    // Call of commission strategy
+
+    @Test
+    public void specifiedCommissionStrategyUsed() {
+        AtomicBoolean commissionStrategyCalled = new AtomicBoolean(false);
+
+        this.parametersBuilder.setTradingStrategyFactory(new TradingStrategyFactory() {
+            @Override
+            public TradingStrategy createTradingStrategy(Account account, Broker broker, HistoricalMarketData historicalMarketData) {
+                return new TradingStrategy() {
+                    @Override
+                    public void prepareOrdersForNextTradingDay() {
+                        broker.setOrder(new OrderRequest(OrderType.BuyMarket, ISIN.MunichRe, new Quantity(1)));
+                    }
+                };
+            }
+        });
+
+        CommissionStrategy commissionStrategy = totalPrice -> {
+            Assert.assertEquals(new Amount(1000.0), totalPrice);
+            commissionStrategyCalled.set(true);
+            return Amount.Zero;
+        };
+
+        this.parametersBuilder.setCommissionStrategy(commissionStrategy);
+
+        SimulationDriver simulationDriver = new SimulationDriver(this.parametersBuilder.build());
+        simulationDriver.runSimulation();
+
+        Assert.assertTrue("The commission strategy has not been called.", commissionStrategyCalled.get());
+    }
+
     @Test
     public void tradingStrategyIsAskedForNewOrders_threeTimes_ifSimulationDurationIsTwoDays() {
         this.parametersBuilder.setSimulationDuration(new DayCount(2));
@@ -397,6 +447,4 @@ public class SimulationDriverTest {
         Assert.assertEquals(new Quantity(1), simulationReport.getTransactions().get(0).getQuantity());
         Assert.assertEquals(TransactionType.Buy, simulationReport.getTransactions().get(0).getTransactionType());
     }
-
-    // TODO commission strategy
 }

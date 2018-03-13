@@ -2,6 +2,7 @@ package trading.simulation;
 
 import trading.Amount;
 import trading.DayCount;
+import trading.broker.CommissionStrategy;
 import trading.strategy.TradingStrategyFactory;
 
 public class SimulationDriverParametersBuilder {
@@ -10,6 +11,7 @@ public class SimulationDriverParametersBuilder {
     private DayCount simulationDuration;
     private Amount seedCapital;
     private TradingStrategyFactory tradingStrategyFactory;
+    private CommissionStrategy commissionStrategy;
 
     public void setSimulationMarketDataSource(SimulationMarketDataSource simulationMarketDataSource) {
         this.simulationMarketDataSource = simulationMarketDataSource;
@@ -31,13 +33,18 @@ public class SimulationDriverParametersBuilder {
         this.tradingStrategyFactory = tradingStrategyFactory;
     }
 
+    public void setCommissionStrategy(CommissionStrategy commissionStrategy) {
+        this.commissionStrategy = commissionStrategy;
+    }
+
     public SimulationDriverParameters build() {
         return new SimulationDriverParameters(
                 this.simulationMarketDataSource,
                 this.historyDuration,
                 this.simulationDuration,
                 this.seedCapital,
-                this.tradingStrategyFactory
+                this.tradingStrategyFactory,
+                this.commissionStrategy
         );
     }
 }

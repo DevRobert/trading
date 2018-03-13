@@ -18,7 +18,7 @@ public class SimulationDriver {
     public SimulationReport runSimulation() {
         HistoricalMarketData historicalMarketData = this.buildHistoricalMarketData();
         Account account = new Account(this.parameters.getSeedCapital());
-        Broker broker = new VirtualBroker(account, historicalMarketData);
+        Broker broker = new VirtualBroker(account, historicalMarketData, this.parameters.getCommissionStrategy());
 
         TradingStrategy tradingStrategy = parameters.getTradingStrategyFactory().createTradingStrategy(account, broker, historicalMarketData);
 

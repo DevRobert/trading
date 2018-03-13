@@ -89,7 +89,7 @@ public class Account {
         Amount requiredAmount;
 
         if(transaction.getTransactionType() == TransactionType.Buy) {
-            requiredAmount = transaction.getTotalPrice().add(transaction.getCommission());
+            requiredAmount = transaction.getTotalPrice();
         }
         else if(transaction.getTransactionType() == TransactionType.Sell) {
             requiredAmount = Amount.Zero;
@@ -98,8 +98,9 @@ public class Account {
             throw new RuntimeException("Transaction type not supported: " + transaction.getTransactionType());
         }
 
-        if(requiredAmount.getValue() > this.availableMoney.getValue()) {
-            throw new AccountStateException("The transaction amount (total price and commission) exceeds the available money.");
+        if(requiredAmount.getValue() > 0 && requiredAmount.getValue() > this.availableMoney.getValue()) {
+            System.out.println("Failed transaction: " + transaction.toString());
+            throw new AccountStateException("The total price exceeds the available money.");
         }
     }
 

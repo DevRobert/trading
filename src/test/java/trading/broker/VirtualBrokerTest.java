@@ -17,23 +17,74 @@ import trading.market.MarketPriceSnapshotBuilder;
 public class VirtualBrokerTest {
     private Account account;
     private HistoricalMarketData historicalMarketData;
-    private VirtualBroker virtualBroker;
+    private CommissionStrategy commissionStrategy;
 
     @Before
     public void before() {
         Amount availableMoney = new Amount(50000.0);
-        account = new Account(availableMoney);
+        this.account = new Account(availableMoney);
 
         MarketPriceSnapshotBuilder marketPriceSnapshotBuilder = new MarketPriceSnapshotBuilder();
         marketPriceSnapshotBuilder.setMarketPrice(ISIN.MunichRe, new Amount(1000.0));
         marketPriceSnapshotBuilder.setMarketPrice(ISIN.Allianz, new Amount(500.0));
-        historicalMarketData = new HistoricalMarketData(marketPriceSnapshotBuilder.build());
+        this.historicalMarketData = new HistoricalMarketData(marketPriceSnapshotBuilder.build());
 
-        virtualBroker = new VirtualBroker(account, historicalMarketData);
+        this.commissionStrategy = new ZeroCommissionStrategy();
+    }
+
+    private VirtualBroker createVirtualBroker() {
+        return new VirtualBroker(this.account, this.historicalMarketData, this.commissionStrategy);
+    }
+
+    @Test
+    public void constructionFailsIfAccountNotSpecified() {
+        this.account = null;
+
+        try {
+            createVirtualBroker();
+        }
+        catch(RuntimeException ex) {
+            Assert.assertEquals("The account must be specified.", ex.getMessage());
+            return;
+        }
+
+        Assert.fail("RuntimeException expected.");
+    }
+
+    @Test
+    public void constructionFailsIfHistoricalMarketDataNotSpecified() {
+        this.historicalMarketData = null;
+
+        try {
+            createVirtualBroker();
+        }
+        catch(RuntimeException ex) {
+            Assert.assertEquals("The historical market data must be specified.", ex.getMessage());
+            return;
+        }
+
+        Assert.fail("RuntimeException expected.");
+    }
+
+    @Test
+    public void constructionFailsIfCommissionStrategyNotSpecified() {
+        this.commissionStrategy = null;
+
+        try {
+            createVirtualBroker();
+        }
+        catch(RuntimeException ex) {
+            Assert.assertEquals("The commission strategy must be specified.", ex.getMessage());
+            return;
+        }
+
+        Assert.fail("RuntimeException expected.");
     }
 
     @Test
     public void transactionForBuyMarketOrderRequestIsNotCreatedBeforeDayOpened() {
+        VirtualBroker virtualBroker = this.createVirtualBroker();
+
         Quantity quantity = new Quantity(1);
 
         OrderRequest orderRequest = new OrderRequest(OrderType.BuyMarket, ISIN.MunichRe, quantity);
@@ -44,6 +95,8 @@ public class VirtualBrokerTest {
 
     @Test
     public void transactionForBuyMarketOrderRequestIsCreatedAfterDayOpened() {
+        VirtualBroker virtualBroker = this.createVirtualBroker();
+
         Quantity quantity = new Quantity(10);
         OrderRequest orderRequest = new OrderRequest(OrderType.BuyMarket, ISIN.MunichRe, quantity);
 
@@ -56,6 +109,8 @@ public class VirtualBrokerTest {
 
     @Test
     public void transactionForSellMarketOrderRequestIsCreatedAfterDayOpened() {
+        VirtualBroker virtualBroker = this.createVirtualBroker();
+
         Quantity quantity = new Quantity(10);
         Amount buyTotalPrice = new Amount(10000.0);
         Amount buyCommission = new Amount(0.0);
@@ -71,6 +126,8 @@ public class VirtualBrokerTest {
 
     @Test
     public void lastMarkedPriceIsUsedForBuyMarketOrderRequest() {
+        VirtualBroker virtualBroker = this.createVirtualBroker();
+
         Quantity quantity = new Quantity(10);
 
         OrderRequest orderRequest = new OrderRequest(OrderType.BuyMarket, ISIN.MunichRe, quantity);
@@ -84,6 +141,8 @@ public class VirtualBrokerTest {
 
     @Test
     public void lastMarketPriceIsUsedForSellMarketOrderRequest() {
+        VirtualBroker virtualBroker = this.createVirtualBroker();
+
         // Seed capital: 50,000
 
         Quantity quantity = new Quantity(10);
@@ -112,23 +171,57 @@ public class VirtualBrokerTest {
     }
 
     @Test
-    public void noCommissionsAreComputedForBuyMarketOrderIfZeroCommissionsConfigured() {
-
-    }
-
-    @Test
     public void commissionsAreComputedForBuyMarketOrderIfCommissionsConfigured() {
+        Amount buyTotalPrice = new Amount(10000.0);
+        Amount buyCommission = new Amount(10.0);
 
-    }
+        this.commissionStrategy = totalPrice -> {
+            Assert.assertEquals(buyTotalPrice, totalPrice);
+            return buyCommission;
+        };
 
-    @Test
-    public void noCommissionAreComputedForSellMarketOrderIfZeroCommissionsConfigured() {
+        VirtualBroker virtualBroker = this.createVirtualBroker();
 
+        // Seed capital: 50,000
+
+        Quantity quantity = new Quantity(10);
+        OrderRequest orderRequest = new OrderRequest(OrderType.BuyMarket, ISIN.MunichRe, quantity);
+        virtualBroker.setOrder(orderRequest);
+        virtualBroker.notifyDayOpened();
+
+        // Available money after buying: 50,000 - 10,000 - 10 = 39,990
+
+        Assert.assertEquals(new Amount(39990.0), account.getAvailableMoney());
     }
 
     @Test
     public void commissionsAreComputedForSellMarketOrderIfCommissionsConfigured() {
+        Amount sellTotalPrice = new Amount(10000.0);
+        Amount sellCommission = new Amount(10.0);
 
+        this.commissionStrategy = totalPrice -> {
+            Assert.assertEquals(sellTotalPrice, totalPrice);
+            return sellCommission;
+        };
+
+        VirtualBroker virtualBroker = this.createVirtualBroker();
+
+        // Seed capital: 50,000
+
+        Quantity quantity = new Quantity(10);
+        Amount buyTotalPrice = new Amount(10000.0);
+        Amount buyCommission = new Amount(0.0);
+        account.registerTransaction(new Transaction(TransactionType.Buy, ISIN.MunichRe, quantity, buyTotalPrice, buyCommission));
+
+        // Available money after buying: 50,000 - 10,000 = 40,000
+
+        OrderRequest orderRequest = new OrderRequest(OrderType.SellMarket, ISIN.MunichRe, quantity);
+        virtualBroker.setOrder(orderRequest);
+        virtualBroker.notifyDayOpened();
+
+        // Available money after selling: 40,000 + 10,000 - 10 = 49,990
+
+        Assert.assertEquals(new Amount(49990.0), account.getAvailableMoney());
     }
 
     // TODO Tests for feasibility checks of order requests
