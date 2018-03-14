@@ -18,6 +18,9 @@ import trading.strategy.progressive.ProgressiveTradingStrategy;
 import trading.strategy.progressive.ProgressiveTradingStrategyParameters;
 import trading.strategy.progressive.ProgressiveTradingStrategyParametersBuilder;
 
+import java.io.FileNotFoundException;
+import java.io.PrintWriter;
+import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
@@ -41,9 +44,20 @@ public abstract class ProgressiveChallengesBase {
     }
 
     @AfterClass
-    public static void endReporting() {
-        System.out.println(String.join("\n", reportLines));
+    public static void endReporting() throws FileNotFoundException, UnsupportedEncodingException {
+        String fileName = "/Users/robert/GitHub/data/data.csv";
+
+        PrintWriter writer = new PrintWriter(fileName, "UTF-8");
+
+        for(String line: reportLines) {
+            writer.println(line);
+        }
+
+        writer.close();
+
         reportLines = null;
+
+        System.out.println("Report saved: " + fileName);
     }
 
     @Before
@@ -52,17 +66,27 @@ public abstract class ProgressiveChallengesBase {
 
         this.multiStockListDataSource = new MultiStockListDataSource(HistoricalTestDataProvider.getHistoricalClosingPrices());
         this.simulationDriverParametersBuilder.setSimulationMarketDataSource(this.multiStockListDataSource);
-        this.simulationDriverParametersBuilder.setHistoryDuration(new DayCount(1));
-        this.simulationDriverParametersBuilder.setSimulationDuration(new DayCount(1489));
+        this.simulationDriverParametersBuilder.setHistoryDuration(new DayCount(120));
+        this.simulationDriverParametersBuilder.setSimulationDuration(new DayCount(1370));
         this.simulationDriverParametersBuilder.setSeedCapital(new Amount(50000.0));
 
         this.progressiveTradingStrategyParametersBuilder = new ProgressiveTradingStrategyParametersBuilder();
 
+        /* Consors
         DynamicCommissionStrategyParametersBuilder dynamicCommissionStrategyParametersBuilder = new DynamicCommissionStrategyParametersBuilder();
         dynamicCommissionStrategyParametersBuilder.setFixedAmount(new Amount(4.95 + 1.50));
         dynamicCommissionStrategyParametersBuilder.setVariableAmountRate(0.0025);
         dynamicCommissionStrategyParametersBuilder.setMinimumVariableAmount(new Amount(9.95));
         dynamicCommissionStrategyParametersBuilder.setMaximumVariableAmount(new Amount(69.00));
+        */
+
+        /* Degiro */
+        DynamicCommissionStrategyParametersBuilder dynamicCommissionStrategyParametersBuilder = new DynamicCommissionStrategyParametersBuilder();
+        dynamicCommissionStrategyParametersBuilder.setFixedAmount(new Amount(2.0));
+        dynamicCommissionStrategyParametersBuilder.setVariableAmountRate(0.00008);
+        dynamicCommissionStrategyParametersBuilder.setMinimumVariableAmount(new Amount(0.0));
+        dynamicCommissionStrategyParametersBuilder.setMaximumVariableAmount(new Amount(28.0));
+
         CommissionStrategy commissionStrategy = new DynamicCommissionStrategy(dynamicCommissionStrategyParametersBuilder.build());
         this.simulationDriverParametersBuilder.setCommissionStrategy(commissionStrategy);
     }
