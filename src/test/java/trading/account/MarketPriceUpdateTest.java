@@ -4,8 +4,16 @@ import org.junit.Assert;
 import org.junit.Test;
 import trading.Amount;
 import trading.ISIN;
+import trading.market.MarketPriceSnapshot;
+import trading.market.MarketPriceSnapshotBuilder;
 
 public class MarketPriceUpdateTest extends AccountTestBase {
+    private void reportMarketPrice(ISIN isin, Amount marketPrice) {
+        MarketPriceSnapshotBuilder marketPriceSnapshotBuilder = new MarketPriceSnapshotBuilder();
+        marketPriceSnapshotBuilder.setMarketPrice(isin, marketPrice);
+        MarketPriceSnapshot marketPriceSnapshot = marketPriceSnapshotBuilder.build();
+        account.reportMarketPrices(marketPriceSnapshot);
+    }
     @Test
     public void increasingMarketPriceIncreasesPositionTotalMarketPrice() throws AccountStateException {
         // Seeding money 10,000
@@ -14,7 +22,7 @@ public class MarketPriceUpdateTest extends AccountTestBase {
 
         this.prepareAccountWithBuyTransaction();
 
-        account.reportMarketPrice(ISIN.MunichRe, new Amount(600.0));
+        this.reportMarketPrice(ISIN.MunichRe, new Amount(600.0));
 
         // New price: 6,000 for 10 shares (600 per share)
 
@@ -30,7 +38,7 @@ public class MarketPriceUpdateTest extends AccountTestBase {
 
         this.prepareAccountWithBuyTransaction();
 
-        account.reportMarketPrice(ISIN.MunichRe, new Amount(400.0));
+        this.reportMarketPrice(ISIN.MunichRe, new Amount(400.0));
 
         // New price: 4,000 for 10 shares (400 per share)
 
@@ -48,7 +56,7 @@ public class MarketPriceUpdateTest extends AccountTestBase {
 
         // Intermediate balance: 9,990
 
-        account.reportMarketPrice(ISIN.MunichRe, new Amount(600.0));
+        this.reportMarketPrice(ISIN.MunichRe, new Amount(600.0));
 
         // New price: 6,000 for 10 shares (600 per share)
         // New balance: 9,990 + 1,000 = 10,990
@@ -66,7 +74,7 @@ public class MarketPriceUpdateTest extends AccountTestBase {
 
         // Intermediate balance: 9,990
 
-        account.reportMarketPrice(ISIN.MunichRe, new Amount(400.0));
+        this.reportMarketPrice(ISIN.MunichRe, new Amount(400.0));
 
         // New price: 4,000 for 10 shares (400 per share)
         // New balance: 9,990 - 1,000 = 8,990
@@ -85,7 +93,7 @@ public class MarketPriceUpdateTest extends AccountTestBase {
         // Available money: 4,990
         // Intermediate balance: 9,990
 
-        account.reportMarketPrice(ISIN.MunichRe, new Amount(600.0));
+        this.reportMarketPrice(ISIN.MunichRe, new Amount(600.0));
 
         // New price: 6,000 for 10 shares (600 per share)
         // New balance: 9,990 + 1,000 = 10,990

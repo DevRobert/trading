@@ -1,6 +1,7 @@
 package trading.account;
 
 import trading.*;
+import trading.market.MarketPriceSnapshot;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -99,7 +100,6 @@ public class Account {
         }
 
         if(requiredAmount.getValue() > 0 && requiredAmount.getValue() > this.availableMoney.getValue()) {
-            System.out.println("Failed transaction: " + transaction.toString());
             throw new AccountStateException("The total price exceeds the available money.");
         }
     }
@@ -171,18 +171,14 @@ public class Account {
         }
     }
 
-    public void reportMarketPrice(ISIN isin, Amount marketPrice) {
-        if(!this.hasPosition(isin)) {
-            return;
+    public void reportMarketPrices(MarketPriceSnapshot marketPriceSnapshot) {
+        for(Position position: this.positions.values()) {
+            Amount marketPrice = marketPriceSnapshot.getMarketPrice(position.getISIN());
+            Amount previousFullMarketPrice = position.getFullMarketPrice();
+            Amount newFullMarketPrice = marketPrice.multiply(position.getQuantity());
+            Amount delta = newFullMarketPrice.subtract(previousFullMarketPrice);
+            position.setFullMarketPrice(newFullMarketPrice);
+            this.balance = this.balance.add(delta);
         }
-
-        Position position = this.getPosition(isin);
-
-        Amount previousFullMarketPrice = position.getFullMarketPrice();
-        Amount newFullMarketPrice = marketPrice.multiply(position.getQuantity());
-        Amount delta = newFullMarketPrice.subtract(previousFullMarketPrice);
-
-        position.setFullMarketPrice(newFullMarketPrice);
-        this.balance = this.balance.add(delta);
     }
 }
