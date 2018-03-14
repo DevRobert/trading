@@ -6,13 +6,18 @@ import trading.simulation.SimulationReport;
 
 import java.io.PrintWriter;
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 public class ChallengeExecutor {
-    private List<String> reportLines;
+    private Collection<String> reportLines;
 
     private void prepareReporting() {
-        this.reportLines = new ArrayList<>();
+        this.reportLines = Collections.synchronizedCollection(new ArrayList<String>());
     }
 
     private void endReporting() {
@@ -43,14 +48,35 @@ public class ChallengeExecutor {
 
         List<Object[]> runParametersList = challenge.buildParametersForDifferentRuns();
 
-        System.out.println("Running " + runParametersList.size() + " simulations...");
+        final int numThreads = Runtime.getRuntime().availableProcessors();
 
-        for(Object[] runParameters: runParametersList) {
-            SimulationDriverParameters simulationDriverParameters = challenge.buildSimulationDriverParametersForRun(runParameters);
+        System.out.println("Running " + runParametersList.size() + " simulations in " + numThreads + " threads...");
 
-            SimulationDriver simulationDriver = new SimulationDriver(simulationDriverParameters);
-            SimulationReport simulationReport = simulationDriver.runSimulation();
-            this.trackSimulationReport(simulationReport, runParameters);
+        final ExecutorService threads = Executors.newFixedThreadPool(numThreads);
+
+        try {
+            final CountDownLatch countDownLatch = new CountDownLatch(runParametersList.size());
+
+            for(Object[] runParameters: runParametersList) {
+                threads.execute(() -> {
+                    try {
+                        SimulationDriverParameters simulationDriverParameters = challenge.buildSimulationDriverParametersForRun(runParameters);
+                        SimulationDriver simulationDriver = new SimulationDriver(simulationDriverParameters);
+                        SimulationReport simulationReport = simulationDriver.runSimulation();
+                        this.trackSimulationReport(simulationReport, runParameters);
+                    } finally {
+                        countDownLatch.countDown();
+                    }
+                });
+            }
+
+            countDownLatch.await();
+        }
+        catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        }
+        finally {
+            threads.shutdown();
         }
 
         System.out.println("All simulations completed.");
