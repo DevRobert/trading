@@ -13,6 +13,6 @@ public class MarketPriceSnapshotBuilder {
     }
 
     public MarketPriceSnapshot build() {
-        return new MarketPriceSnapshot(this.marketPrices);
+        return new MarketPriceSnapshot((HashMap<ISIN, Amount>) this.marketPrices.clone());
     }
 }
