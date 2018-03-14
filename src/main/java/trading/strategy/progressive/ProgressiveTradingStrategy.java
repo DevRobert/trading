@@ -2,15 +2,13 @@ package trading.strategy.progressive;
 
 import trading.Amount;
 import trading.Quantity;
-import trading.account.Account;
 import trading.account.Position;
-import trading.broker.Broker;
 import trading.broker.OrderRequest;
 import trading.broker.OrderType;
-import trading.market.HistoricalMarketData;
 import trading.market.HistoricalStockData;
 import trading.strategy.StrategyInitializationException;
 import trading.strategy.TradingStrategy;
+import trading.strategy.TradingStrategyContext;
 import trading.strategy.Trigger;
 
 /**
@@ -46,10 +44,8 @@ import trading.strategy.Trigger;
  */
 public class ProgressiveTradingStrategy implements TradingStrategy {
     private final ProgressiveTradingStrategyParameters parameters;
-    private final Account account;
-    private final Broker broker;
+    private final TradingStrategyContext context;
     private final HistoricalStockData historicalStockData;
-    private final HistoricalMarketData historicalMarketData;
 
     private boolean initialization = true;
     private boolean inStateWaitAndBuyStocks = true;
@@ -63,34 +59,24 @@ public class ProgressiveTradingStrategy implements TradingStrategy {
     private Trigger sellTrigger;
     private Trigger resetTrigger;
 
-    public ProgressiveTradingStrategy(ProgressiveTradingStrategyParameters parameters, Account account, Broker broker, HistoricalMarketData historicalMarketData) {
+    public ProgressiveTradingStrategy(ProgressiveTradingStrategyParameters parameters, TradingStrategyContext context) {
         if (parameters == null) {
-            throw new StrategyInitializationException("The strategy parameters were not specified.");
+            throw new StrategyInitializationException("The strategy parameters must be specified.");
         }
 
-        if (account == null) {
-            throw new StrategyInitializationException("The account was not specified.");
+        if(context == null) {
+            throw new StrategyInitializationException("The context must be specified.");
         }
 
-        if (broker == null) {
-            throw new StrategyInitializationException("The broker was not specified.");
-        }
-
-        if (historicalMarketData == null) {
-            throw new StrategyInitializationException("The historical market data were not specified.");
-        }
-
-        if (!historicalMarketData.getAvailableStocks().contains(parameters.getISIN())) {
+        if (!context.getHistoricalMarketData().getAvailableStocks().contains(parameters.getISIN())) {
             throw new StrategyInitializationException(String.format("The ISIN parameter '%s' does not refer to an available stock.", parameters.getISIN().getText()));
         }
 
         this.parameters = parameters;
-        this.account = account;
-        this.broker = broker;
-        this.historicalStockData = historicalMarketData.getStockData(parameters.getISIN());
-        this.historicalMarketData = historicalMarketData;
+        this.context = context;
+        this.historicalStockData = context.getHistoricalMarketData().getStockData(parameters.getISIN());
 
-        this.buyTrigger = this.parameters.getBuyTriggerFactory().createTrigger(historicalMarketData);
+        this.buyTrigger = this.parameters.getBuyTriggerFactory().createTrigger(context.getHistoricalMarketData());
         this.sellTrigger = null;
         this.resetTrigger = null;
     }
@@ -115,12 +101,12 @@ public class ProgressiveTradingStrategy implements TradingStrategy {
 
         if (activateSellTriggerAfterDayPassed) {
             activateSellTriggerAfterDayPassed = false;
-            this.sellTrigger = this.parameters.getSellTriggerFactory().createTrigger(this.historicalMarketData);
+            this.sellTrigger = this.parameters.getSellTriggerFactory().createTrigger(this.context.getHistoricalMarketData());
         }
 
         if (activateResetTriggerAfterDayPassed) {
             activateResetTriggerAfterDayPassed = false;
-            this.resetTrigger = this.parameters.getResetTriggerFactory().createTrigger(this.historicalMarketData);
+            this.resetTrigger = this.parameters.getResetTriggerFactory().createTrigger(this.context.getHistoricalMarketData());
         }
 
         if (this.inStateWaitAndReset) {
@@ -148,13 +134,13 @@ public class ProgressiveTradingStrategy implements TradingStrategy {
     }
 
     private void setBuyMarketOrder() {
-        Amount availableMoney = account.getAvailableMoney();
+        Amount availableMoney = this.context.getAccount().getAvailableMoney();
         Amount lastClosingMarketPrice = historicalStockData.getLastClosingMarketPrice();
         double maxQuantity = Math.floor(availableMoney.getValue() / lastClosingMarketPrice.getValue());
 
         Quantity quantity = new Quantity((int) maxQuantity);
         OrderRequest orderRequest = new OrderRequest(OrderType.BuyMarket, this.parameters.getISIN(), quantity);
-        this.broker.setOrder(orderRequest);
+        this.context.getBroker().setOrder(orderRequest);
     }
 
     private void waitAndSellStocks() {
@@ -169,9 +155,9 @@ public class ProgressiveTradingStrategy implements TradingStrategy {
     }
 
     private void setSellMarketOrder() {
-        Position position = account.getPosition(this.parameters.getISIN());
+        Position position = this.context.getAccount().getPosition(this.parameters.getISIN());
         OrderRequest orderRequest = new OrderRequest(OrderType.SellMarket, position.getISIN(), position.getQuantity());
-        this.broker.setOrder(orderRequest);
+        this.context.getBroker().setOrder(orderRequest);
     }
 
     private void waitAndReset() {
@@ -179,7 +165,7 @@ public class ProgressiveTradingStrategy implements TradingStrategy {
             this.inStateWaitAndReset = false;
             this.inStateWaitAndBuyStocks = true;
 
-            this.buyTrigger = this.parameters.getBuyTriggerFactory().createTrigger(this.historicalMarketData);
+            this.buyTrigger = this.parameters.getBuyTriggerFactory().createTrigger(this.context.getHistoricalMarketData());
             this.resetTrigger = null;
         }
     }

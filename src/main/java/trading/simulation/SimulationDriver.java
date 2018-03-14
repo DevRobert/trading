@@ -7,6 +7,7 @@ import trading.broker.VirtualBroker;
 import trading.market.HistoricalMarketData;
 import trading.market.MarketPriceSnapshot;
 import trading.strategy.TradingStrategy;
+import trading.strategy.TradingStrategyContext;
 
 public class SimulationDriver {
     private final SimulationDriverParameters parameters;
@@ -20,7 +21,8 @@ public class SimulationDriver {
         Account account = new Account(this.parameters.getSeedCapital());
         Broker broker = new VirtualBroker(account, historicalMarketData, this.parameters.getCommissionStrategy());
 
-        TradingStrategy tradingStrategy = parameters.getTradingStrategyFactory().createTradingStrategy(account, broker, historicalMarketData);
+        TradingStrategyContext tradingStrategyContext = new TradingStrategyContext(account, broker, historicalMarketData);
+        TradingStrategy tradingStrategy = parameters.getTradingStrategyFactory().createTradingStrategy(tradingStrategyContext);
 
         Simulation simulation = new Simulation(historicalMarketData, account, broker, tradingStrategy);
         SimulationMarketDataSource simulationMarketDataSource = this.parameters.getSimulationMarketDataSource();

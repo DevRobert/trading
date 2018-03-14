@@ -15,6 +15,7 @@ import trading.market.HistoricalMarketData;
 import trading.market.MarketPriceSnapshot;
 import trading.market.MarketPriceSnapshotBuilder;
 import trading.strategy.StrategyInitializationException;
+import trading.strategy.TradingStrategyContext;
 import trading.strategy.WaitFixedPeriodTrigger;
 
 public class ProgressiveTradingStrategyInitializationTest {
@@ -49,18 +50,20 @@ public class ProgressiveTradingStrategyInitializationTest {
         }
 
         Broker broker = new VirtualBroker(this.account, this.historicalMarketData, this.commissionStrategy);
-        new ProgressiveTradingStrategy(parameters, this.account, broker, this.historicalMarketData);
+
+        TradingStrategyContext tradingStrategyContext = new TradingStrategyContext(this.account, broker, this.historicalMarketData);
+        new ProgressiveTradingStrategy(parameters, tradingStrategyContext);
     }
 
     @Test
-    public void initializationFailsIfNoParametersSpecified() {
+    public void initializationFails_ifParametersNotSpecified() {
         parametersBuilder = null;
 
         try {
-            initializeTradingStrategy();;
+            initializeTradingStrategy();
         }
         catch(StrategyInitializationException ex) {
-            Assert.assertEquals("The strategy parameters were not specified.", ex.getMessage());
+            Assert.assertEquals("The strategy parameters must be specified.", ex.getMessage());
             return;
         }
 
@@ -68,51 +71,15 @@ public class ProgressiveTradingStrategyInitializationTest {
     }
 
     @Test
-    public void initializationFailsIfNoAccountSpecified() {
+    public void initializationFails_ifContextNotSpecified() {
         ProgressiveTradingStrategyParameters parameters = this.parametersBuilder.build();
-        Account account = null;
-        Broker broker = new VirtualBroker(this.account, this.historicalMarketData, this.commissionStrategy);
-        HistoricalMarketData historicalMarketData = this.historicalMarketData;
+        TradingStrategyContext context = null;
 
         try {
-            new ProgressiveTradingStrategy(parameters, account, broker, historicalMarketData);
-        }
-        catch(RuntimeException ex) {
-            Assert.assertEquals("The account was not specified.", ex.getMessage());
-            return;
-        }
-
-        Assert.fail("StrategyInitializationException expected.");
-    }
-
-    @Test
-    public void initializationFailsIfNoBrokerSpecified() {
-        Broker broker = null;
-        ProgressiveTradingStrategyParameters parameters = this.parametersBuilder.build();
-
-        try {
-            new ProgressiveTradingStrategy(parameters, this.account, broker, this.historicalMarketData);
+            new ProgressiveTradingStrategy(parameters, context);
         }
         catch(StrategyInitializationException ex) {
-            Assert.assertEquals("The broker was not specified.", ex.getMessage());
-            return;
-        }
-
-        Assert.fail("StrategyInitializationException expected.");
-    }
-
-    @Test
-    public void initializationFailsIfNoHistoricalDataSpecified() {
-        ProgressiveTradingStrategyParameters parameters = this.parametersBuilder.build();
-        Account account = this.account;
-        Broker broker = new VirtualBroker(this.account, this.historicalMarketData, this.commissionStrategy);
-        HistoricalMarketData historicalMarketData = null;
-
-        try {
-            new ProgressiveTradingStrategy(parameters, account, broker, historicalMarketData);
-        }
-        catch(StrategyInitializationException ex) {
-            Assert.assertEquals("The historical market data were not specified.", ex.getMessage());
+            Assert.assertEquals("The context must be specified.", ex.getMessage());
             return;
         }
 

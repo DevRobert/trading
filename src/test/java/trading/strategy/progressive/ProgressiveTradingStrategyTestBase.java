@@ -7,6 +7,7 @@ import trading.broker.Broker;
 import trading.market.HistoricalMarketData;
 import trading.strategy.NotImplementedTrigger;
 import trading.strategy.TradingStrategy;
+import trading.strategy.TradingStrategyContext;
 import trading.strategy.TradingStrategyTestBase;
 
 public abstract class ProgressiveTradingStrategyTestBase extends TradingStrategyTestBase {
@@ -23,6 +24,7 @@ public abstract class ProgressiveTradingStrategyTestBase extends TradingStrategy
     @Override
     protected TradingStrategy initializeTradingStrategy(Account account, Broker broker, HistoricalMarketData historicalMarketData) {
         ProgressiveTradingStrategyParameters parameters = parametersBuilder.build();
-        return new ProgressiveTradingStrategy(parameters, account, broker, historicalMarketData);
+        TradingStrategyContext tradingStrategyContext = new TradingStrategyContext(account, broker, historicalMarketData);
+        return new ProgressiveTradingStrategy(parameters, tradingStrategyContext);
     }
 }

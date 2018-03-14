@@ -9,6 +9,7 @@ import trading.broker.*;
 import trading.market.HistoricalMarketData;
 import trading.market.HistoricalStockData;
 import trading.strategy.TradingStrategy;
+import trading.strategy.TradingStrategyContext;
 import trading.strategy.TradingStrategyFactory;
 import trading.strategy.manual.ManualTradingStrategy;
 
@@ -44,7 +45,7 @@ public class SimulationDriverTest {
         parametersBuilder.setHistoryDuration(new DayCount(1));
         parametersBuilder.setSimulationDuration(new DayCount(1));
 
-        parametersBuilder.setTradingStrategyFactory((account, broker, historicalMarketData) -> null);
+        parametersBuilder.setTradingStrategyFactory(context -> null);
 
         parametersBuilder.setCommissionStrategy(new ZeroCommissionStrategy());
     }
@@ -209,11 +210,11 @@ public class SimulationDriverTest {
 
         AtomicBoolean assertDone = new AtomicBoolean(false);
 
-        TradingStrategyFactory tradingStrategyFactory = (account, broker, historicalMarketData) -> {
-            Assert.assertEquals(new DayCount(1), historicalMarketData.getDuration());
-            Assert.assertEquals(new Amount(1000.0), historicalMarketData.getStockData(ISIN.MunichRe).getLastClosingMarketPrice());
+        TradingStrategyFactory tradingStrategyFactory = context -> {
+            Assert.assertEquals(new DayCount(1), context.getHistoricalMarketData().getDuration());
+            Assert.assertEquals(new Amount(1000.0), context.getHistoricalMarketData().getStockData(ISIN.MunichRe).getLastClosingMarketPrice());
             assertDone.set(true);
-            return new ManualTradingStrategy(broker);
+            return new ManualTradingStrategy(context.getBroker());
         };
 
         this.parametersBuilder.setTradingStrategyFactory(tradingStrategyFactory);
@@ -230,11 +231,11 @@ public class SimulationDriverTest {
 
         AtomicBoolean assertDone = new AtomicBoolean(false);
 
-        TradingStrategyFactory tradingStrategyFactory = (account, broker, historicalMarketData) -> {
-            Assert.assertEquals(new DayCount(2), historicalMarketData.getDuration());
-            Assert.assertEquals(new Amount(1100.0), historicalMarketData.getStockData(ISIN.MunichRe).getLastClosingMarketPrice());
+        TradingStrategyFactory tradingStrategyFactory = context -> {
+            Assert.assertEquals(new DayCount(2), context.getHistoricalMarketData().getDuration());
+            Assert.assertEquals(new Amount(1100.0), context.getHistoricalMarketData().getStockData(ISIN.MunichRe).getLastClosingMarketPrice());
             assertDone.set(true);
-            return new ManualTradingStrategy(broker);
+            return new ManualTradingStrategy(context.getBroker());
         };
 
         this.parametersBuilder.setTradingStrategyFactory(tradingStrategyFactory);
@@ -254,10 +255,10 @@ public class SimulationDriverTest {
 
         AtomicBoolean assertDone = new AtomicBoolean(false);
 
-        TradingStrategyFactory tradingStrategyFactory = (account, broker, historicalMarketData) -> {
-            Assert.assertEquals(seedCapital, account.getAvailableMoney());
+        TradingStrategyFactory tradingStrategyFactory = context -> {
+            Assert.assertEquals(seedCapital, context.getAccount().getAvailableMoney());
             assertDone.set(true);
-            return new ManualTradingStrategy(broker);
+            return new ManualTradingStrategy(context.getBroker());
         };
 
         this.parametersBuilder.setTradingStrategyFactory(tradingStrategyFactory);
@@ -279,7 +280,9 @@ public class SimulationDriverTest {
 
         AtomicInteger numAskedForNewOrders = new AtomicInteger(0);
 
-        TradingStrategyFactory tradingStrategyFactory = (account, broker, historicalMarketData) -> {
+        TradingStrategyFactory tradingStrategyFactory = tradingStrategyContext -> {
+            final HistoricalMarketData historicalMarketData = tradingStrategyContext.getHistoricalMarketData();
+
             return (TradingStrategy) () -> {
                 int simulationDayIndex = numAskedForNewOrders.get();
 
@@ -312,15 +315,10 @@ public class SimulationDriverTest {
     public void specifiedCommissionStrategyUsed() {
         AtomicBoolean commissionStrategyCalled = new AtomicBoolean(false);
 
-        this.parametersBuilder.setTradingStrategyFactory(new TradingStrategyFactory() {
+        this.parametersBuilder.setTradingStrategyFactory(context -> new TradingStrategy() {
             @Override
-            public TradingStrategy createTradingStrategy(Account account, Broker broker, HistoricalMarketData historicalMarketData) {
-                return new TradingStrategy() {
-                    @Override
-                    public void prepareOrdersForNextTradingDay() {
-                        broker.setOrder(new OrderRequest(OrderType.BuyMarket, ISIN.MunichRe, new Quantity(1)));
-                    }
-                };
+            public void prepareOrdersForNextTradingDay() {
+                context.getBroker().setOrder(new OrderRequest(OrderType.BuyMarket, ISIN.MunichRe, new Quantity(1)));
             }
         });
 
@@ -344,7 +342,7 @@ public class SimulationDriverTest {
 
         AtomicInteger numAskedForNewOrders = new AtomicInteger(0);
 
-        TradingStrategyFactory tradingStrategyFactory = (account, broker, historicalMarketData) -> {
+        TradingStrategyFactory tradingStrategyFactory = context -> {
             return (TradingStrategy) () -> numAskedForNewOrders.incrementAndGet();
         };
 
@@ -363,7 +361,7 @@ public class SimulationDriverTest {
         Amount seedCapital = new Amount(80000.0);
         this.parametersBuilder.setSeedCapital(seedCapital);
 
-        TradingStrategyFactory tradingStrategyFactory = (account, broker, historicalMarketData) -> new ManualTradingStrategy(broker);
+        TradingStrategyFactory tradingStrategyFactory = context -> new ManualTradingStrategy(context.getBroker());
         this.parametersBuilder.setTradingStrategyFactory(tradingStrategyFactory);
 
         SimulationDriver simulationDriver = new SimulationDriver(this.parametersBuilder.build());
@@ -380,8 +378,8 @@ public class SimulationDriverTest {
         Amount seedCapital = new Amount(80000.0);
         this.parametersBuilder.setSeedCapital(seedCapital);
 
-        TradingStrategyFactory tradingStrategyFactory = (account, broker, historicalMarketData) -> {
-            ManualTradingStrategy manualTradingStrategy = new ManualTradingStrategy(broker);
+        TradingStrategyFactory tradingStrategyFactory = context -> {
+            ManualTradingStrategy manualTradingStrategy = new ManualTradingStrategy(context.getBroker());
 
             // Market price should be 1,000 (after first history trading day = before first simulation trading day)
             // Total amount should be 5 x 1,000 = 5,000
@@ -412,9 +410,9 @@ public class SimulationDriverTest {
         Amount seedCapital = new Amount(50000.0);
         this.parametersBuilder.setSeedCapital(seedCapital);
 
-        TradingStrategyFactory tradingStrategyFactory = (account, broker, historicalMarketData) -> {
+        TradingStrategyFactory tradingStrategyFactory = context -> {
             // The transaction ensures that initial and final balance are not equal
-            ManualTradingStrategy manualTradingStrategy = new ManualTradingStrategy(broker);
+            ManualTradingStrategy manualTradingStrategy = new ManualTradingStrategy(context.getBroker());
             manualTradingStrategy.registerOrderRequest(new OrderRequest(OrderType.BuyMarket, ISIN.MunichRe, new Quantity(1)));
             return manualTradingStrategy;
         };
@@ -431,8 +429,8 @@ public class SimulationDriverTest {
 
     @Test
     public void reportsTransactions() {
-        TradingStrategyFactory tradingStrategyFactory = (account, broker, historicalMarketData) -> {
-            ManualTradingStrategy manualTradingStrategy = new ManualTradingStrategy(broker);
+        TradingStrategyFactory tradingStrategyFactory = context -> {
+            ManualTradingStrategy manualTradingStrategy = new ManualTradingStrategy(context.getBroker());
             manualTradingStrategy.registerOrderRequest(new OrderRequest(OrderType.BuyMarket, ISIN.MunichRe, new Quantity(1)));
             return manualTradingStrategy;
         };
