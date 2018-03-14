@@ -132,7 +132,8 @@ public class LocalMaximumChallenge implements Challenge {
 
         SimulationDriverParametersBuilder simulationDriverParametersBuilder = new SimulationDriverParametersBuilder();
 
-        SimulationMarketDataSource simulationMarketDataSource = new MultiStockListDataSource(HistoricalTestDataProvider.getHistoricalClosingPrices());
+        SimulationMarketDataSource simulationMarketDataSource = new MultiStockListDataSource(HistoricalTestDataProvider.getHistoricalClosingPrices(isin));
+
         simulationDriverParametersBuilder.setSimulationMarketDataSource(simulationMarketDataSource);
 
         simulationDriverParametersBuilder.setHistoryDuration(new DayCount(120));
