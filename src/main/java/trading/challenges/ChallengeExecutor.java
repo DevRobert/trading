@@ -23,7 +23,7 @@ public class ChallengeExecutor {
     private void endReporting() {
         String fileName = "/Users/robert/GitHub/data/data.csv";
 
-        PrintWriter writer = null;
+        PrintWriter writer;
 
         try {
             writer = new PrintWriter(fileName, "UTF-8");
@@ -87,8 +87,9 @@ public class ChallengeExecutor {
     private void trackSimulationReport(SimulationReport simulationReport, Object[] runParameters) {
         String line = simulationReport.getInitialAccountBalance().toString() +
                 ";" + simulationReport.getFinalAccountBalance().toString() +
-                ";" + ((Double)simulationReport.getAverageMarketRateOfReturn()).toString() +
-                ";" + ((Double)simulationReport.getRealizedRateOfReturn()).toString();
+                ";" + simulationReport.getAverageMarketRateOfReturn() +
+                ";" + simulationReport.getRealizedRateOfReturn() +
+                ";" + simulationReport.getTransactions().size();
 
         for(Object runParameter: runParameters) {
             line += ";" + runParameter.toString();
