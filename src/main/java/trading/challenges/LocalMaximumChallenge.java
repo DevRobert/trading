@@ -21,7 +21,7 @@ public class LocalMaximumChallenge implements Challenge {
         final int start = 1;
         final int end = 120;
 
-        for(int lookBehind = start; lookBehind <= end; lookBehind++) {
+        for(int lookBehind = start; lookBehind <= end; lookBehind += 2) {
             result.add(lookBehind);
         }
 
@@ -31,19 +31,19 @@ public class LocalMaximumChallenge implements Challenge {
     private List<Double> getMinDistanceFromLocalMaximumPercentage() {
         List<Double> result = new  ArrayList<>();
 
-        for(double value = 0.0001; value < 0.001; value += 0.00001) {
+        for(double value = 0.0001; value < 0.001; value += 0.00002) {
             result.add(value);
         }
 
-        for(double value = 0.001; value < 0.01; value += 0.0001) {
+        for(double value = 0.001; value < 0.01; value += 0.0002) {
             result.add(value);
         }
 
-        for(double value = 0.01; value < 0.1; value += 0.001) {
+        for(double value = 0.01; value < 0.1; value += 0.002) {
             result.add(value);
         }
 
-        for(double value= 0.1; value <= 1; value += 0.01) {
+        for(double value= 0.1; value <= 1; value += 0.02) {
             result.add(value);
         }
 
