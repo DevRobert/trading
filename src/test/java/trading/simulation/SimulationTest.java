@@ -175,7 +175,7 @@ public class SimulationTest {
         Assert.fail("SimulationStateException expected.");
     }
 
-    // Redirect of signals
+    // Redirect signals
 
     @Test
     public void forwardDayOpenedSignalToBroker() {
