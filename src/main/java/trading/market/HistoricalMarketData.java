@@ -98,4 +98,14 @@ public class HistoricalMarketData {
     public DayCount getDuration() {
         return new DayCount(this.durationNumDays);
     }
+
+    public MarketPriceSnapshot getLastClosingMarketPrices() {
+        MarketPriceSnapshotBuilder marketPriceSnapshotBuilder = new MarketPriceSnapshotBuilder();
+
+        for(ISIN isin: this.getAvailableStocks()) {
+            marketPriceSnapshotBuilder.setMarketPrice(isin, this.getStockData(isin).getLastClosingMarketPrice());
+        }
+
+        return marketPriceSnapshotBuilder.build();
+    }
 }

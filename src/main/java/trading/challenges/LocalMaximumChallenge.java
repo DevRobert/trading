@@ -83,7 +83,7 @@ public class LocalMaximumChallenge implements Challenge {
 
         simulationDriverParametersBuilder.setHistoryDuration(new DayCount(120));
         simulationDriverParametersBuilder.setSimulationDuration(new DayCount(1370));
-        simulationDriverParametersBuilder.setSeedCapital(new Amount(50000.0));
+        simulationDriverParametersBuilder.setSeedCapital(new Amount(100000.0));
 
         simulationDriverParametersBuilder.setTradingStrategyFactory(context -> {
             LocalMaximumTradingStrategyParameters parameters = new LocalMaximumTradingStrategyParameters(

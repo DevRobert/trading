@@ -4,15 +4,19 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import trading.*;
-import trading.account.Account;
-import trading.broker.*;
+import trading.broker.CommissionStrategy;
+import trading.broker.OrderRequest;
+import trading.broker.OrderType;
+import trading.broker.ZeroCommissionStrategy;
 import trading.market.HistoricalMarketData;
 import trading.market.HistoricalStockData;
+import trading.market.MarketPriceSnapshot;
+import trading.market.MarketPriceSnapshotBuilder;
 import trading.strategy.TradingStrategy;
-import trading.strategy.TradingStrategyContext;
 import trading.strategy.TradingStrategyFactory;
 import trading.strategy.manual.ManualTradingStrategy;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -444,5 +448,125 @@ public class SimulationDriverTest {
         Assert.assertEquals(ISIN.MunichRe, simulationReport.getTransactions().get(0).getIsin());
         Assert.assertEquals(new Quantity(1), simulationReport.getTransactions().get(0).getQuantity());
         Assert.assertEquals(TransactionType.Buy, simulationReport.getTransactions().get(0).getTransactionType());
+    }
+
+    // Average market rate of return
+
+    @Test
+    public void reportsAverageMarketRateOfReturn_ifOneStock_andOneDayHistory_andOneDaySimulation() {
+        List<Amount> closingMarketPrices = Arrays.asList(
+                new Amount(1000.0),
+                new Amount(1500.0));
+
+        SimulationMarketDataSource marketDataSource = new SingleStockListDataSource(ISIN.MunichRe, closingMarketPrices);
+        this.parametersBuilder.setSimulationMarketDataSource(marketDataSource);
+
+        this.parametersBuilder.setTradingStrategyFactory(context -> new ManualTradingStrategy(context.getBroker()));
+
+        this.parametersBuilder.setHistoryDuration(new DayCount(1));
+        this.parametersBuilder.setSimulationDuration(new DayCount(1));
+
+        SimulationDriver simulationDriver = new SimulationDriver(this.parametersBuilder.build());
+        SimulationReport simulationReport = simulationDriver.runSimulation();
+
+        Assert.assertEquals(0.5, simulationReport.getAverageMarketRateOfReturn(), 0.0);
+    }
+
+    @Test
+    public void reportsAverageMarketRateOfReturn_ifOneStock_andTwoDaysHistory_andOneDaySimulation() {
+        List<Amount> closingMarketPrices = Arrays.asList(
+                new Amount(500.0),
+                new Amount(1000.0),
+                new Amount(2000.0));
+
+        SimulationMarketDataSource marketDataSource = new SingleStockListDataSource(ISIN.MunichRe, closingMarketPrices);
+        this.parametersBuilder.setSimulationMarketDataSource(marketDataSource);
+
+        this.parametersBuilder.setTradingStrategyFactory(context -> new ManualTradingStrategy(context.getBroker()));
+
+        this.parametersBuilder.setHistoryDuration(new DayCount(2));
+        this.parametersBuilder.setSimulationDuration(new DayCount(1));
+
+        SimulationDriver simulationDriver = new SimulationDriver(this.parametersBuilder.build());
+        SimulationReport simulationReport = simulationDriver.runSimulation();
+
+        Assert.assertEquals(1.0, simulationReport.getAverageMarketRateOfReturn(), 0.0);
+    }
+
+    @Test
+    public void reportsAverageMarketRateOfReturn_ifOneStock_andOneDayHistory_andTwoDaySimulation() {
+        List<Amount> closingMarketPrices = Arrays.asList(
+                new Amount(500.0),
+                new Amount(1000.0),
+                new Amount(2000.0));
+
+        SimulationMarketDataSource marketDataSource = new SingleStockListDataSource(ISIN.MunichRe, closingMarketPrices);
+        this.parametersBuilder.setSimulationMarketDataSource(marketDataSource);
+
+        this.parametersBuilder.setTradingStrategyFactory(context -> new ManualTradingStrategy(context.getBroker()));
+
+        this.parametersBuilder.setHistoryDuration(new DayCount(1));
+        this.parametersBuilder.setSimulationDuration(new DayCount(2));
+
+        SimulationDriver simulationDriver = new SimulationDriver(this.parametersBuilder.build());
+        SimulationReport simulationReport = simulationDriver.runSimulation();
+
+        Assert.assertEquals(3.0, simulationReport.getAverageMarketRateOfReturn(), 0.0);
+    }
+
+    @Test
+    public void reportsAverageMarketRateOfReturn_ifTwoStocks_andOneDayHistory_andOneDaySimulation() {
+        List<MarketPriceSnapshot> marketPriceSnapshots = new ArrayList<>();
+
+        MarketPriceSnapshotBuilder builder = new MarketPriceSnapshotBuilder();
+
+        builder.setMarketPrice(ISIN.MunichRe, new Amount(100.0));
+        builder.setMarketPrice(ISIN.Allianz, new Amount(200.0));
+        marketPriceSnapshots.add(builder.build());
+
+        builder.setMarketPrice(ISIN.MunichRe, new Amount(150.0)); // rate of return is 0.5
+        builder.setMarketPrice(ISIN.Allianz, new Amount(400.0)); // rate of return is 1.0
+        marketPriceSnapshots.add(builder.build());
+
+        SimulationMarketDataSource marketDataSource = new MultiStockListDataSource(marketPriceSnapshots);
+        this.parametersBuilder.setSimulationMarketDataSource(marketDataSource);
+
+        this.parametersBuilder.setTradingStrategyFactory(context -> new ManualTradingStrategy(context.getBroker()));
+
+        this.parametersBuilder.setHistoryDuration(new DayCount(1));
+        this.parametersBuilder.setSimulationDuration(new DayCount(1));
+
+        SimulationDriver simulationDriver = new SimulationDriver(this.parametersBuilder.build());
+        SimulationReport simulationReport = simulationDriver.runSimulation();
+
+        Assert.assertEquals(0.75, simulationReport.getAverageMarketRateOfReturn(), 0.0);
+    }
+
+    // Realized rate of return
+
+    @Test
+    public void reportsRealizedRateOfReturn() {
+        this.parametersBuilder.setTradingStrategyFactory(context -> {
+            ManualTradingStrategy tradingStrategy = new ManualTradingStrategy(context.getBroker());
+
+            tradingStrategy.registerOrderRequest(new OrderRequest(OrderType.BuyMarket, ISIN.MunichRe, new Quantity(1)));
+
+            return tradingStrategy;
+        });
+
+        this.parametersBuilder.setSeedCapital(new Amount(2000.0));
+        this.parametersBuilder.setHistoryDuration(new DayCount(1));
+        this.parametersBuilder.setSimulationDuration(new DayCount(1));
+
+        SimulationDriver simulationDriver = new SimulationDriver(this.parametersBuilder.build());
+        SimulationReport simulationReport = simulationDriver.runSimulation();
+
+        // Seed capital: 2,000
+        // Buy one stock for 1,000
+        // Stock market price rises to 1,100
+        // Final balance is: 2,100
+        // Rate of return is: 2,100 / 2,000 - 1 = 0.05
+
+        Assert.assertEquals(0.05, simulationReport.getRealizedRateOfReturn(), 0.000000001);
     }
 }

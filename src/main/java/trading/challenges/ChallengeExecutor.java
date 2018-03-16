@@ -86,7 +86,9 @@ public class ChallengeExecutor {
 
     private void trackSimulationReport(SimulationReport simulationReport, Object[] runParameters) {
         String line = simulationReport.getInitialAccountBalance().toString() +
-                ";" + simulationReport.getFinalAccountBalance().toString();
+                ";" + simulationReport.getFinalAccountBalance().toString() +
+                ";" + ((Double)simulationReport.getAverageMarketRateOfReturn()).toString() +
+                ";" + ((Double)simulationReport.getRealizedRateOfReturn()).toString();
 
         for(Object runParameter: runParameters) {
             line += ";" + runParameter.toString();

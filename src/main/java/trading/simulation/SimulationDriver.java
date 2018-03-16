@@ -1,6 +1,7 @@
 package trading.simulation;
 
 import trading.Amount;
+import trading.ISIN;
 import trading.account.Account;
 import trading.broker.Broker;
 import trading.broker.VirtualBroker;
@@ -8,6 +9,8 @@ import trading.market.HistoricalMarketData;
 import trading.market.MarketPriceSnapshot;
 import trading.strategy.TradingStrategy;
 import trading.strategy.TradingStrategyContext;
+
+import java.util.Set;
 
 public class SimulationDriver {
     private final SimulationDriverParameters parameters;
@@ -24,6 +27,8 @@ public class SimulationDriver {
         TradingStrategyContext tradingStrategyContext = new TradingStrategyContext(account, broker, historicalMarketData);
         TradingStrategy tradingStrategy = parameters.getTradingStrategyFactory().createTradingStrategy(tradingStrategyContext);
 
+        MarketPriceSnapshot initialClosingMarketPrices = historicalMarketData.getLastClosingMarketPrices();
+
         Simulation simulation = new Simulation(historicalMarketData, account, broker, tradingStrategy);
         SimulationMarketDataSource simulationMarketDataSource = this.parameters.getSimulationMarketDataSource();
 
@@ -36,7 +41,18 @@ public class SimulationDriver {
 
         Amount finalAccountBalance = account.getBalance();
 
-        SimulationReport simulationReport = new SimulationReport(this.parameters.getSeedCapital(), finalAccountBalance, account.getProcessedTransactions());
+        MarketPriceSnapshot finalClosingMarketPrices = historicalMarketData.getLastClosingMarketPrices();
+        double averageMarketRateOfReturn = this.calculateAverageMarketRateOfReturn(initialClosingMarketPrices, finalClosingMarketPrices);
+
+        double realizedRateOfReturn = account.getBalance().getValue() / this.parameters.getSeedCapital().getValue() - 1;
+
+        SimulationReport simulationReport = new SimulationReport(
+                this.parameters.getSeedCapital(),
+                finalAccountBalance,
+                account.getProcessedTransactions(),
+                averageMarketRateOfReturn,
+                realizedRateOfReturn);
+
         return simulationReport;
     }
 
@@ -53,5 +69,19 @@ public class SimulationDriver {
         }
 
         return historicalMarketData;
+    }
+
+    private double calculateAverageMarketRateOfReturn(MarketPriceSnapshot initialClosingMarketPrices, MarketPriceSnapshot finalClosingMarketPrices) {
+        Set<ISIN> isins = initialClosingMarketPrices.getISINs();
+        double sumMarketRateOfReturn = 0.0;
+
+        for(ISIN isin: isins) {
+            double initialMarketPrice = initialClosingMarketPrices.getMarketPrice(isin).getValue();
+            double finalMarketPrice = finalClosingMarketPrices.getMarketPrice(isin).getValue();
+            double marketRateOfReturn = finalMarketPrice / initialMarketPrice - 1;
+            sumMarketRateOfReturn += marketRateOfReturn;
+        }
+
+        return sumMarketRateOfReturn / (double) isins.size();
     }
 }
