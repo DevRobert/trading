@@ -31,7 +31,7 @@ public class LocalMaximumTradingStrategy implements TradingStrategy {
 
             return new DelegateTrigger(() -> {
                 double localMaximum = historicalStockData.getMaximumClosingMarketPrice(parameters.getLocalMaximumLookBehindPeriod()).getValue();
-                double minDelta = localMaximum * parameters.getMinDistanceFromLocalMaxmiumPercentage();
+                double minDelta = localMaximum * parameters.getMinDistanceFromLocalMaximumPercentage();
                 double maxBuyPrice = localMaximum - minDelta;
                 double lastClosingMarketPrice = historicalStockData.getLastClosingMarketPrice().getValue();
 
