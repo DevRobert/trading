@@ -5,24 +5,24 @@ import trading.ISIN;
 
 public class LocalMaximumTradingStrategyParameters {
     private ISIN isin;
-    private DayCount localMaxiumLookBehindPeriod;
+    private DayCount localMaximumLookBehindPeriod;
     private double minDistanceFromLocalMaxmiumPercentage;
 
     public ISIN getIsin() {
         return isin;
     }
 
-    public DayCount getLocalMaxiumLookBehindPeriod() {
-        return localMaxiumLookBehindPeriod;
+    public DayCount getLocalMaximumLookBehindPeriod() {
+        return localMaximumLookBehindPeriod;
     }
 
     public double getMinDistanceFromLocalMaxmiumPercentage() {
         return minDistanceFromLocalMaxmiumPercentage;
     }
 
-    public LocalMaximumTradingStrategyParameters(ISIN isin, DayCount localMaxiumLookBehindPeriod, double minDistanceFromLocalMaxmiumPercentage) {
+    public LocalMaximumTradingStrategyParameters(ISIN isin, DayCount localMaximumLookBehindPeriod, double minDistanceFromLocalMaxmiumPercentage) {
         this.isin = isin;
-        this.localMaxiumLookBehindPeriod = localMaxiumLookBehindPeriod;
+        this.localMaximumLookBehindPeriod = localMaximumLookBehindPeriod;
         this.minDistanceFromLocalMaxmiumPercentage = minDistanceFromLocalMaxmiumPercentage;
     }
 }
