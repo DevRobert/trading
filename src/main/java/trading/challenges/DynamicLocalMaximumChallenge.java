@@ -8,14 +8,14 @@ import trading.simulation.MultiStockListDataSource;
 import trading.simulation.SimulationDriverParameters;
 import trading.simulation.SimulationDriverParametersBuilder;
 import trading.simulation.SimulationMarketDataSource;
-import trading.strategy.localMaximum.LocalMaximumTradingStrategy;
-import trading.strategy.localMaximum.LocalMaximumTradingStrategyParameters;
+import trading.strategy.localMaximum.DynamicLocalMaximumTradingStrategy;
+import trading.strategy.localMaximum.DynamicLocalMaximumTradingStrategyParameters;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class LocalMaximumChallenge implements Challenge {
-    private List<Integer> getBuyTriggerLocalMaximumLookBehindPeriods() {
+public class DynamicLocalMaximumChallenge implements Challenge {
+    private List<Integer> getRisingIndicatorLookBehindPeriod() {
         List<Integer> result = new ArrayList<>();
 
         for(int lookBehind = 1; lookBehind < 10; lookBehind += 1) {
@@ -29,7 +29,7 @@ public class LocalMaximumChallenge implements Challenge {
         return result;
     }
 
-    private List<Double> getBuyTriggerMinDistanceFromLocalMaximumPercentage() {
+    private List<Double> getRisingIndicatorMinRisingPercentage() {
         List<Double> result = new  ArrayList<>();
 
         for(double value = 0.0001; value < 0.001; value += 0.00002) {
@@ -51,30 +51,18 @@ public class LocalMaximumChallenge implements Challenge {
         return result;
     }
 
-    private List<Double> getSellTriggerMinDistanceFromMaximumSinceBuyingPercentage() {
-        List<Double> result = new  ArrayList<>();
-
-        result.add(0.0);
-        result.add(0.02);
-
-        return result;
-    }
-
     @Override
     public List<Object[]> buildParametersForDifferentRuns() {
         List<Object[]> parameters = new ArrayList<>();
 
         for(ISIN isin: HistoricalTestDataProvider.getISINs()) {
-            for(int buyTriggerLocalMaximumLookBehindPeriod: getBuyTriggerLocalMaximumLookBehindPeriods()) {
-                for(double buyTriggerMinDistanceFromLocalMaximumPercentage: getBuyTriggerMinDistanceFromLocalMaximumPercentage()) {
-                    for(double sellTriggerMinDistanceFromMaximumSinceBuyingPercentage: getSellTriggerMinDistanceFromMaximumSinceBuyingPercentage()) {
-                        parameters.add(new Object[] {
-                                isin,
-                                buyTriggerLocalMaximumLookBehindPeriod,
-                                buyTriggerMinDistanceFromLocalMaximumPercentage,
-                                sellTriggerMinDistanceFromMaximumSinceBuyingPercentage
-                        });
-                    }
+            for(int risingIndicatorLookBehindPeriod: getRisingIndicatorLookBehindPeriod()) {
+                for (double risingIndicatorMinRisingPercentage : getRisingIndicatorMinRisingPercentage()) {
+                    parameters.add(new Object[]{
+                            isin,
+                            risingIndicatorLookBehindPeriod,
+                            risingIndicatorMinRisingPercentage
+                    });
                 }
             }
         }
@@ -85,9 +73,8 @@ public class LocalMaximumChallenge implements Challenge {
     @Override
     public SimulationDriverParameters buildSimulationDriverParametersForRun(Object[] runParameters) {
         final ISIN isin = (ISIN) runParameters[0];
-        final int buyTriggerLocalMaximumLookBehindPeriod = (int) runParameters[1];
-        final double buyTriggerMinDistanceFromLocalMaximumPercentage = (double) runParameters[2];
-        final double sellTriggerMinDistanceFromMaximumSinceBuyingPercentage = (double) runParameters[3];
+        final int risingIndicatorLookBehindPeriod = (int) runParameters[1];
+        final double risingIndicatorMinRisingPercentage = (double) runParameters[2];
 
         SimulationDriverParametersBuilder simulationDriverParametersBuilder = new SimulationDriverParametersBuilder();
 
@@ -99,15 +86,25 @@ public class LocalMaximumChallenge implements Challenge {
         simulationDriverParametersBuilder.setSimulationDuration(new DayCount(1370));
         simulationDriverParametersBuilder.setSeedCapital(new Amount(100000.0));
 
+        DayCount risingBuyTriggerLocalMaximumLookBehindPeriod = new DayCount(2);
+        double risingBuyTriggerMinDistanceFromLocalMaximumPercentage = 0.001;
+        DayCount decliningBuyTriggerLocalMaximumLookBehindPeriod = new DayCount(9);
+        double decliningBuyTriggerMinDistanceFromLocalMaximumPercentage = 0.2;
+        double sellTriggerMinDistanceFromMaximumSinceBuyingPercentage = 0.02;
+
         simulationDriverParametersBuilder.setTradingStrategyFactory(context -> {
-            LocalMaximumTradingStrategyParameters parameters = new LocalMaximumTradingStrategyParameters(
+            DynamicLocalMaximumTradingStrategyParameters parameters = new DynamicLocalMaximumTradingStrategyParameters(
                     isin,
-                    new DayCount(buyTriggerLocalMaximumLookBehindPeriod),
-                    buyTriggerMinDistanceFromLocalMaximumPercentage,
+                    new DayCount(risingIndicatorLookBehindPeriod),
+                    risingIndicatorMinRisingPercentage,
+                    risingBuyTriggerLocalMaximumLookBehindPeriod,
+                    risingBuyTriggerMinDistanceFromLocalMaximumPercentage,
+                    decliningBuyTriggerLocalMaximumLookBehindPeriod,
+                    decliningBuyTriggerMinDistanceFromLocalMaximumPercentage,
                     sellTriggerMinDistanceFromMaximumSinceBuyingPercentage
             );
 
-            return new LocalMaximumTradingStrategy(parameters, context);
+            return new DynamicLocalMaximumTradingStrategy(parameters, context);
         });
 
         simulationDriverParametersBuilder.setCommissionStrategy(CommissionStrategies.getDegiroXetraCommissionStrategy());

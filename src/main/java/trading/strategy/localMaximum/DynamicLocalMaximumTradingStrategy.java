@@ -1,5 +1,6 @@
 package trading.strategy.localMaximum;
 
+import trading.DayCount;
 import trading.market.HistoricalStockData;
 import trading.strategy.AlwaysFiresTrigger;
 import trading.strategy.DelegateTrigger;
@@ -15,11 +16,14 @@ import java.util.concurrent.atomic.AtomicReference;
  *
  * Buy after distance from local maximum reached and sell after
  * maximum passed and declined under certain level below maximum since buying.
+ *
+ * The buy trigger parameters are selected depending on an detected raise or
+ * decline of the stock.
  */
-public class LocalMaximumTradingStrategy implements TradingStrategy {
+public class DynamicLocalMaximumTradingStrategy implements TradingStrategy {
     private final ProgressiveTradingStrategy progressiveTradingStrategy;
 
-    public LocalMaximumTradingStrategy(LocalMaximumTradingStrategyParameters parameters, TradingStrategyContext context) {
+    public DynamicLocalMaximumTradingStrategy(DynamicLocalMaximumTradingStrategyParameters parameters, TradingStrategyContext context) {
         ProgressiveTradingStrategyParametersBuilder parametersBuilder = new ProgressiveTradingStrategyParametersBuilder();
 
         parametersBuilder.setISIN(parameters.getIsin());
@@ -32,18 +36,34 @@ public class LocalMaximumTradingStrategy implements TradingStrategy {
             HistoricalStockData historicalStockData = historicalMarketData.getStockData(parameters.getIsin());
 
             return new DelegateTrigger(() -> {
-                double localMaximum = historicalStockData.getMaximumClosingMarketPrice(parameters.getBuyTriggerLocalMaximumLookBehindPeriod()).getValue();
-                double minDelta = localMaximum * parameters.getBuyTriggerMinDistanceFromLocalMaximumPercentage();
-                double maxBuyPrice = localMaximum - minDelta;
+                double lookBackMarketPrice = historicalStockData.getClosingMarketPrice(parameters.getRisingIndicatorLookBehindPeriod()).getValue();
+                double minRisingDelta = lookBackMarketPrice * parameters.getRisingIndicatorMinRisingPercentage();
+                double minRisingPrice = lookBackMarketPrice + minRisingDelta;
+
                 double lastClosingMarketPrice = historicalStockData.getLastClosingMarketPrice().getValue();
 
-                if(lastClosingMarketPrice <= maxBuyPrice) {
+                DayCount buyTriggerLocalMaximumLookBehindPeriod;
+                double buyTriggerMinDistanceFromLocalMaximumPercentage;
+
+                if (lastClosingMarketPrice >= minRisingPrice) {
+                    buyTriggerLocalMaximumLookBehindPeriod = parameters.getRisingBuyTriggerLocalMaximumLookBehindPeriod();
+                    buyTriggerMinDistanceFromLocalMaximumPercentage = parameters.getRisingBuyTriggerMinDistanceFromLocalMaximumPercentage();
+                } else {
+                    buyTriggerLocalMaximumLookBehindPeriod = parameters.getDecliningBuyTriggerLocalMaximumLookBehindPeriod();
+                    buyTriggerMinDistanceFromLocalMaximumPercentage = parameters.getDecliningBuyTriggerMinDistanceFromLocalMaximumPercentage();
+                }
+
+                double localMaximum = historicalStockData.getMaximumClosingMarketPrice(buyTriggerLocalMaximumLookBehindPeriod).getValue();
+                double minDelta = localMaximum * buyTriggerMinDistanceFromLocalMaximumPercentage;
+                double maxBuyPrice = localMaximum - minDelta;
+
+
+                if (lastClosingMarketPrice <= maxBuyPrice) {
                     buyLocalMaximum.set(localMaximum);
                     buyLocalMaximumPassed.set(false);
                     maximumSinceBuying.set(0.0);
                     return true;
-                }
-                else {
+                } else {
                     return false;
                 }
             });
@@ -55,22 +75,22 @@ public class LocalMaximumTradingStrategy implements TradingStrategy {
             return new DelegateTrigger(() -> {
                 double lastClosingPrice = historicalStockData.getLastClosingMarketPrice().getValue();
 
-                if(!buyLocalMaximumPassed.get()) {
+                if (!buyLocalMaximumPassed.get()) {
                     buyLocalMaximumPassed.set(lastClosingPrice >= buyLocalMaximum.get());
                 }
 
-                if(!buyLocalMaximumPassed.get()) {
+                if (!buyLocalMaximumPassed.get()) {
                     return false;
                 }
 
-                if(lastClosingPrice > maximumSinceBuying.get()) {
+                if (lastClosingPrice > maximumSinceBuying.get()) {
                     maximumSinceBuying.set(lastClosingPrice);
                 }
 
-                double sellTriggerMinDeltaFromMaximumSinceBuying = parameters.getSellTriggerMinDistanceFromMaximumSinceBuyingPercentage() * maximumSinceBuying.get();
-                double sellTriggerMaxPrice = maximumSinceBuying.get() - sellTriggerMinDeltaFromMaximumSinceBuying;
+                double minDeltaFromMaximumSinceBuying = parameters.getSellTriggerMinDistanceFromMaximumSinceBuyingPercentage() * maximumSinceBuying.get();
+                double maxPriceSelling = maximumSinceBuying.get() - minDeltaFromMaximumSinceBuying;
 
-                return lastClosingPrice <= sellTriggerMaxPrice;
+                return lastClosingPrice <= maxPriceSelling;
             });
         });
 

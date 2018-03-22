@@ -50,6 +50,19 @@ public class HistoricalStockData {
         return this.decliningDaysInSequence;
     }
 
+    public Amount getClosingMarketPrice(DayCount lookBehind) {
+        // TODO write tests
+
+        // TODO validate lookBehind > 1
+
+        int lastDayIndex = this.closingMarketPrices.size() - 1;
+        int specifiedDayIndex = lastDayIndex - lookBehind.getValue() + 1;
+
+        // TODO validate index OK
+
+        return this.closingMarketPrices.get(specifiedDayIndex);
+    }
+
     public Amount getMaximumClosingMarketPrice(DayCount lookBehindPeriod) {
         // TODO Potential refactoring: add method "extractHistory(maxDays)" and remove param lookBehindPeriod from this method
         // should be conducted if more indicators are going to be limited to a certain look behind period

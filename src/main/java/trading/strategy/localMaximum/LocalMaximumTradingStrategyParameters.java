@@ -5,24 +5,30 @@ import trading.ISIN;
 
 public class LocalMaximumTradingStrategyParameters {
     private ISIN isin;
-    private DayCount localMaximumLookBehindPeriod;
-    private double minDistanceFromLocalMaximumPercentage;
+    private DayCount buyTriggerLocalMaximumLookBehindPeriod;
+    private double buyTriggerMinDistanceFromLocalMaximumPercentage;
+    private double sellTriggerMinDistanceFromMaximumSinceBuyingPercentage;
 
     public ISIN getIsin() {
-        return isin;
+        return this.isin;
     }
 
-    public DayCount getLocalMaximumLookBehindPeriod() {
-        return localMaximumLookBehindPeriod;
+    public DayCount getBuyTriggerLocalMaximumLookBehindPeriod() {
+        return this.buyTriggerLocalMaximumLookBehindPeriod;
     }
 
-    public double getMinDistanceFromLocalMaximumPercentage() {
-        return minDistanceFromLocalMaximumPercentage;
+    public double getBuyTriggerMinDistanceFromLocalMaximumPercentage() {
+        return this.buyTriggerMinDistanceFromLocalMaximumPercentage;
     }
 
-    public LocalMaximumTradingStrategyParameters(ISIN isin, DayCount localMaximumLookBehindPeriod, double minDistanceFromLocalMaximumPercentage) {
+    public double getSellTriggerMinDistanceFromMaximumSinceBuyingPercentage() {
+        return this.sellTriggerMinDistanceFromMaximumSinceBuyingPercentage;
+    }
+
+    public LocalMaximumTradingStrategyParameters(ISIN isin, DayCount buyTriggerLocalMaximumLookBehindPeriod, double buyTriggerMinDistanceFromLocalMaximumPercentage, double sellTriggerMinDistanceFromMaximumSinceBuyingPercentage) {
         this.isin = isin;
-        this.localMaximumLookBehindPeriod = localMaximumLookBehindPeriod;
-        this.minDistanceFromLocalMaximumPercentage = minDistanceFromLocalMaximumPercentage;
+        this.buyTriggerLocalMaximumLookBehindPeriod = buyTriggerLocalMaximumLookBehindPeriod;
+        this.buyTriggerMinDistanceFromLocalMaximumPercentage = buyTriggerMinDistanceFromLocalMaximumPercentage;
+        this.sellTriggerMinDistanceFromMaximumSinceBuyingPercentage = sellTriggerMinDistanceFromMaximumSinceBuyingPercentage;
     }
 }
