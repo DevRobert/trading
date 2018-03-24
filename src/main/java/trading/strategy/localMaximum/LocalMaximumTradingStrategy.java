@@ -69,31 +69,46 @@ public class LocalMaximumTradingStrategy implements TradingStrategy {
     private boolean shouldSellStocks() {
         double lastClosingPrice = this.historicalStockData.getLastClosingMarketPrice().getValue();
 
+        this.updateLocalMaximumPassed(lastClosingPrice);
+        this.updateMaximumSinceBuying(lastClosingPrice);
+
         if(this.stopLoss(lastClosingPrice)) {
             return true;
-        }
-
-        if(!this.buyLocalMaximumPassed) {
-            this.buyLocalMaximumPassed = lastClosingPrice >= this.buyLocalMaximum;
         }
 
         if(!this.buyLocalMaximumPassed) {
             return false;
         }
 
+        if(this.trailingStopLoss(lastClosingPrice, maximumSinceBuying)) {
+            return true;
+        }
+
+        return false;
+    }
+
+    private void updateLocalMaximumPassed(double lastClosingPrice) {
+        if(this.buyLocalMaximumPassed) {
+            return;
+        }
+
+        this.buyLocalMaximumPassed = lastClosingPrice >= this.buyLocalMaximum;
+    }
+
+    private void updateMaximumSinceBuying(double lastClosingPrice) {
         if(lastClosingPrice > this.maximumSinceBuying) {
             this.maximumSinceBuying = lastClosingPrice;
         }
-
-        double sellTriggerMinDeltaFromMaximumSinceBuying = this.sellTriggerMinDistanceFromMaximumSinceBuyingPercentage * this.maximumSinceBuying;
-        double sellTriggerMaxPrice = this.maximumSinceBuying - sellTriggerMinDeltaFromMaximumSinceBuying;
-
-        return lastClosingPrice <= sellTriggerMaxPrice;
     }
 
     private boolean stopLoss(double lastClosingPrice) {
         double stopLossPriceMaximumPrice = this.buyPrice * (1.0 - this.sellTriggerStopLossMinDistanceFromBuyingPercentage);
         return lastClosingPrice <= stopLossPriceMaximumPrice;
+    }
+
+    private boolean trailingStopLoss(double lastClosingPrice, double maximumSinceBuying) {
+        double trailingStopLossMaximumPrice = this.maximumSinceBuying * (1.0 - this.sellTriggerMinDistanceFromMaximumSinceBuyingPercentage);
+        return lastClosingPrice <= trailingStopLossMaximumPrice;
     }
 
     @Override
