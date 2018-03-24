@@ -12,8 +12,9 @@ import trading.strategy.progressive.ProgressiveTradingStrategyParametersBuilder;
 /**
  * Trading strategy:
  *
- * Buy after negative distance from local maximum reached and sell after
- * local maximum passed and declined under certain level below maximum since buying.
+ * Buy after declined from local maximum and sell after certain level reached (activation of trailing stop loss)
+ * and then declined under certain level below maximum since buying (trailing stop loss) or declined under
+ * certain level (stop loss).
  */
 public class LocalMaximumTradingStrategy implements TradingStrategy {
     private final ProgressiveTradingStrategy progressiveTradingStrategy;
