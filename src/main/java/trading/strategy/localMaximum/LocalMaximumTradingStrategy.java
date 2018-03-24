@@ -22,7 +22,9 @@ public class LocalMaximumTradingStrategy implements TradingStrategy {
     private final DayCount buyTriggerLocalMaximumLookBehindPeriod;
     private final double buyTriggerMinDistanceFromLocalMaximumPercentage;
     private final double sellTriggerMinDistanceFromMaximumSinceBuyingPercentage;
+    private final double sellTriggerStopLossMinDistanceFromBuyingPercentage;
 
+    private double buyPrice = 0.0;
     private double buyLocalMaximum = 0.0;
     private boolean buyLocalMaximumPassed = false;
     private double maximumSinceBuying = 0.0;
@@ -43,6 +45,7 @@ public class LocalMaximumTradingStrategy implements TradingStrategy {
         this.buyTriggerLocalMaximumLookBehindPeriod = parameters.getBuyTriggerLocalMaximumLookBehindPeriod();
         this.buyTriggerMinDistanceFromLocalMaximumPercentage = parameters.getBuyTriggerMinDistanceFromLocalMaximumPercentage();
         this.sellTriggerMinDistanceFromMaximumSinceBuyingPercentage = parameters.getSellTriggerMinDistanceFromMaximumSinceBuyingPercentage();
+        this.sellTriggerStopLossMinDistanceFromBuyingPercentage = 0.0;
     }
 
     private boolean shouldBuyStocks() {
@@ -55,6 +58,7 @@ public class LocalMaximumTradingStrategy implements TradingStrategy {
             this.buyLocalMaximum = localMaximum;
             this.buyLocalMaximumPassed = false;
             this.maximumSinceBuying = 0.0;
+            this.buyPrice = lastClosingMarketPrice;
 
             return true;
         }
@@ -64,6 +68,10 @@ public class LocalMaximumTradingStrategy implements TradingStrategy {
 
     private boolean shouldSellStocks() {
         double lastClosingPrice = this.historicalStockData.getLastClosingMarketPrice().getValue();
+
+        if(this.stopLoss(lastClosingPrice)) {
+            return true;
+        }
 
         if(!this.buyLocalMaximumPassed) {
             this.buyLocalMaximumPassed = lastClosingPrice >= this.buyLocalMaximum;
@@ -81,6 +89,11 @@ public class LocalMaximumTradingStrategy implements TradingStrategy {
         double sellTriggerMaxPrice = this.maximumSinceBuying - sellTriggerMinDeltaFromMaximumSinceBuying;
 
         return lastClosingPrice <= sellTriggerMaxPrice;
+    }
+
+    private boolean stopLoss(double lastClosingPrice) {
+        double stopLossPriceMaximumPrice = this.buyPrice * (1.0 - this.sellTriggerStopLossMinDistanceFromBuyingPercentage);
+        return lastClosingPrice <= stopLossPriceMaximumPrice;
     }
 
     @Override
