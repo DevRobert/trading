@@ -13,24 +13,17 @@ import trading.strategy.localMaximum.LocalMaximumTradingStrategyParameters;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 public class LocalMaximumChallenge implements Challenge {
-    private List<Integer> getBuyTriggerLocalMaximumLookBehindPeriods() {
-        List<Integer> result = new ArrayList<>();
-
-        for(int lookBehind = 1; lookBehind < 10; lookBehind += 1) {
-            result.add(lookBehind);
-        }
-
-        for(int lookBehind = 10; lookBehind <= 120; lookBehind += 2) {
-            result.add(lookBehind);
-        }
-
-        return result;
+    private Set<ISIN> getISIN() {
+        return HistoricalTestDataProvider.getISINs();
     }
 
-    private List<Double> getBuyTriggerMinDistanceFromLocalMaximumPercentage() {
+    private List<Double> getHighResolutionDoubles() {
         List<Double> result = new  ArrayList<>();
+
+        result.add(0.0);
 
         for(double value = 0.0001; value < 0.001; value += 0.00002) {
             result.add(value);
@@ -44,36 +37,107 @@ public class LocalMaximumChallenge implements Challenge {
             result.add(value);
         }
 
-        for(double value= 0.1; value <= 1; value += 0.02) {
+        for(double value= 0.1; value <= 0.2; value += 0.02) {
             result.add(value);
         }
 
         return result;
     }
 
-    private List<Double> getSellTriggerMinDistanceFromMaximumSinceBuyingPercentage() {
+    private List<Double> getLowResolutionDoubles() {
         List<Double> result = new  ArrayList<>();
 
         result.add(0.0);
-        result.add(0.02);
+
+        for(double value = 0.0001; value < 0.001; value += 0.0001) {
+            result.add(value);
+        }
+
+        for(double value = 0.001; value < 0.01; value += 0.001) {
+            result.add(value);
+        }
+
+        for(double value = 0.01; value < 0.1; value += 0.01) {
+            result.add(value);
+        }
+
+        for(double value= 0.1; value <= 0.2; value += 0.1) {
+            result.add(value);
+        }
 
         return result;
+    }
+
+    private List<Double> getVeryLowResolutionDoubles() {
+        List<Double> result = new  ArrayList<>();
+
+        result.add(0.0);
+
+        for(double value = 0.001; value < 0.01; value += 0.002) {
+            result.add(value);
+        }
+
+        for(double value = 0.01; value < 0.1; value += 0.02) {
+            result.add(value);
+        }
+
+        for(double value = 0.1; value <= 0.2; value += 0.1) {
+            result.add(value);
+        }
+
+        return result;
+    }
+
+    private List<Integer> getBuyTriggerLocalMaximumLookBehindPeriod() {
+        List<Integer> result = new ArrayList<>();
+
+        for(int lookBehind = 1; lookBehind < 10; lookBehind += 1) {
+            result.add(lookBehind);
+        }
+
+        for(int lookBehind = 10; lookBehind <= 120; lookBehind += 10) {
+            result.add(lookBehind);
+        }
+
+        return result;
+    }
+
+    private List<Double> getBuyTriggerMinDeclineFromLocalMaximumPercentage() {
+        return this.getVeryLowResolutionDoubles();
+    }
+
+    private List<Double> getSellTriggerTrailingStopLossMinDeclineFromMaximumAfterBuyingPercentage() {
+        return this.getVeryLowResolutionDoubles();
+    }
+
+    private List<Double> getActivateTrailingStopLossMinRaiseSinceBuyingPercentage() {
+        return this.getVeryLowResolutionDoubles();
+    }
+
+    private List<Double> getSellTriggerStopLossMinimumDeclineSinceBuyingPercentage() {
+        return this.getVeryLowResolutionDoubles();
     }
 
     @Override
     public List<Object[]> buildParametersForDifferentRuns() {
         List<Object[]> parameters = new ArrayList<>();
 
-        for(ISIN isin: HistoricalTestDataProvider.getISINs()) {
-            for(int buyTriggerLocalMaximumLookBehindPeriod: getBuyTriggerLocalMaximumLookBehindPeriods()) {
-                for(double buyTriggerMinDistanceFromLocalMaximumPercentage: getBuyTriggerMinDistanceFromLocalMaximumPercentage()) {
-                    for(double sellTriggerMinDistanceFromMaximumSinceBuyingPercentage: getSellTriggerMinDistanceFromMaximumSinceBuyingPercentage()) {
-                        parameters.add(new Object[] {
-                                isin,
-                                buyTriggerLocalMaximumLookBehindPeriod,
-                                buyTriggerMinDistanceFromLocalMaximumPercentage,
-                                sellTriggerMinDistanceFromMaximumSinceBuyingPercentage
-                        });
+        for(ISIN isin: this.getISIN()) {
+            for(Integer buyTriggerLocalMaximumLookBehindPeriod: this.getBuyTriggerLocalMaximumLookBehindPeriod()) {
+                for(Double buyTriggerMinDeclineFromLocalMaximumPercentage: this.getBuyTriggerMinDeclineFromLocalMaximumPercentage()) {
+                    for(Double sellTriggerTrailingStopLossMinDeclineFromMaximumAfterBuyingPercentage: this.getSellTriggerTrailingStopLossMinDeclineFromMaximumAfterBuyingPercentage()) {
+                        for(Double activateTrailingStopLossMinRaiseSinceBuyingPercentage: this.getActivateTrailingStopLossMinRaiseSinceBuyingPercentage()) {
+                            for(Double sellTriggerStopLossMinimumDeclineSinceBuyingPercentage: this.getSellTriggerStopLossMinimumDeclineSinceBuyingPercentage()) {
+                                parameters.add(new Object[] {
+                                        isin,
+                                        buyTriggerLocalMaximumLookBehindPeriod,
+                                        buyTriggerMinDeclineFromLocalMaximumPercentage,
+                                        sellTriggerTrailingStopLossMinDeclineFromMaximumAfterBuyingPercentage,
+                                        activateTrailingStopLossMinRaiseSinceBuyingPercentage,
+                                        sellTriggerStopLossMinimumDeclineSinceBuyingPercentage
+                                });
+                            }
+                        }
                     }
                 }
             }
@@ -86,8 +150,10 @@ public class LocalMaximumChallenge implements Challenge {
     public SimulationDriverParameters buildSimulationDriverParametersForRun(Object[] runParameters) {
         final ISIN isin = (ISIN) runParameters[0];
         final int buyTriggerLocalMaximumLookBehindPeriod = (int) runParameters[1];
-        final double buyTriggerMinDistanceFromLocalMaximumPercentage = (double) runParameters[2];
-        final double sellTriggerMinDistanceFromMaximumSinceBuyingPercentage = (double) runParameters[3];
+        final double buyTriggerMinDeclineFromLocalMaximumPercentage = (double) runParameters[2];
+        final double sellTriggerTrailingStopLossMinDeclineFromMaximumAfterBuyingPercentage = (double) runParameters[3];
+        final double activateTrailingStopLossMinRaiseSinceBuyingPercentage = (double) runParameters[4];
+        final double sellTriggerStopLossMinimumDeclineSinceBuyingPercentage = (double) runParameters[5];
 
         SimulationDriverParametersBuilder simulationDriverParametersBuilder = new SimulationDriverParametersBuilder();
 
@@ -103,8 +169,10 @@ public class LocalMaximumChallenge implements Challenge {
             LocalMaximumTradingStrategyParameters parameters = new LocalMaximumTradingStrategyParameters(
                     isin,
                     new DayCount(buyTriggerLocalMaximumLookBehindPeriod),
-                    buyTriggerMinDistanceFromLocalMaximumPercentage,
-                    sellTriggerMinDistanceFromMaximumSinceBuyingPercentage
+                    buyTriggerMinDeclineFromLocalMaximumPercentage,
+                    sellTriggerTrailingStopLossMinDeclineFromMaximumAfterBuyingPercentage,
+                    activateTrailingStopLossMinRaiseSinceBuyingPercentage,
+                    sellTriggerStopLossMinimumDeclineSinceBuyingPercentage
             );
 
             return new LocalMaximumTradingStrategy(parameters, context);

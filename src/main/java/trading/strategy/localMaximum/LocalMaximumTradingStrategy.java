@@ -20,14 +20,15 @@ public class LocalMaximumTradingStrategy implements TradingStrategy {
     private final HistoricalStockData historicalStockData;
 
     private final DayCount buyTriggerLocalMaximumLookBehindPeriod;
-    private final double buyTriggerMinDistanceFromLocalMaximumPercentage;
-    private final double sellTriggerMinDistanceFromMaximumSinceBuyingPercentage;
-    private final double sellTriggerStopLossMinDistanceFromBuyingPercentage;
+    private final double buyTriggerMinDeclineSinceMaximumPercentage;
+
+    private final double activateTrailingStopLossMinRaiseSinceBuyingPercentage;
+    private final double sellTriggerTrailingStopLossMinDeclineSinceMaximumAfterBuyingPercentage;
+    private final double sellTriggerStopLossMinimumDeclineSinceBuyingPercentage;
 
     private double buyPrice = 0.0;
-    private double buyLocalMaximum = 0.0;
-    private boolean buyLocalMaximumPassed = false;
-    private double maximumSinceBuying = 0.0;
+    private boolean sellTriggerTrailingStopLossActivated = false;
+    private double maxPriceSinceBuying = 0.0;
 
     public LocalMaximumTradingStrategy(LocalMaximumTradingStrategyParameters parameters, TradingStrategyContext context) {
         this.historicalStockData = context.getHistoricalMarketData().getStockData(parameters.getIsin());
@@ -43,22 +44,22 @@ public class LocalMaximumTradingStrategy implements TradingStrategy {
         this.progressiveTradingStrategy = new ProgressiveTradingStrategy(parametersBuilder.build(), context);
 
         this.buyTriggerLocalMaximumLookBehindPeriod = parameters.getBuyTriggerLocalMaximumLookBehindPeriod();
-        this.buyTriggerMinDistanceFromLocalMaximumPercentage = parameters.getBuyTriggerMinDistanceFromLocalMaximumPercentage();
-        this.sellTriggerMinDistanceFromMaximumSinceBuyingPercentage = parameters.getSellTriggerMinDistanceFromMaximumSinceBuyingPercentage();
-        this.sellTriggerStopLossMinDistanceFromBuyingPercentage = 0.0;
+        this.buyTriggerMinDeclineSinceMaximumPercentage = parameters.getBuyTriggerMinDeclineFromMaximumPercentage();
+        this.activateTrailingStopLossMinRaiseSinceBuyingPercentage = parameters.getActivateTrailingStopLossMinRaiseSinceBuyingPercentage();
+        this.sellTriggerTrailingStopLossMinDeclineSinceMaximumAfterBuyingPercentage = parameters.getSellTriggerTrailingStopLossMinDeclineFromMaximumAfterBuyingPercentage();
+        this.sellTriggerStopLossMinimumDeclineSinceBuyingPercentage = parameters.getSellTriggerStopLossMinimumDeclineSinceBuyingPercentage();
     }
 
     private boolean shouldBuyStocks() {
-        double localMaximum = this.historicalStockData.getMaximumClosingMarketPrice(this.buyTriggerLocalMaximumLookBehindPeriod).getValue();
-        double minDelta = localMaximum * this.buyTriggerMinDistanceFromLocalMaximumPercentage;
-        double maxBuyPrice = localMaximum - minDelta;
-        double lastClosingMarketPrice = this.historicalStockData.getLastClosingMarketPrice().getValue();
+        double lastClosingPrice = this.historicalStockData.getLastClosingMarketPrice().getValue();
 
-        if(lastClosingMarketPrice <= maxBuyPrice) {
-            this.buyLocalMaximum = localMaximum;
-            this.buyLocalMaximumPassed = false;
-            this.maximumSinceBuying = 0.0;
-            this.buyPrice = lastClosingMarketPrice;
+        double localMaximum = this.historicalStockData.getMaximumClosingMarketPrice(this.buyTriggerLocalMaximumLookBehindPeriod).getValue();
+        double maxBuyPrice = localMaximum * (1.0 - this.buyTriggerMinDeclineSinceMaximumPercentage);
+
+        if(lastClosingPrice <= maxBuyPrice) {
+            this.sellTriggerTrailingStopLossActivated = false;
+            this.maxPriceSinceBuying = 0.0;
+            this.buyPrice = lastClosingPrice;
 
             return true;
         }
@@ -69,45 +70,38 @@ public class LocalMaximumTradingStrategy implements TradingStrategy {
     private boolean shouldSellStocks() {
         double lastClosingPrice = this.historicalStockData.getLastClosingMarketPrice().getValue();
 
-        this.updateLocalMaximumPassed(lastClosingPrice);
-        this.updateMaximumSinceBuying(lastClosingPrice);
+        this.updateMaxPriceSinceBuying(lastClosingPrice);
+        this.updateTrailingStopLossActivation(lastClosingPrice);
 
         if(this.stopLoss(lastClosingPrice)) {
             return true;
         }
 
-        if(!this.buyLocalMaximumPassed) {
-            return false;
-        }
-
-        if(this.trailingStopLoss(lastClosingPrice, maximumSinceBuying)) {
-            return true;
-        }
-
-        return false;
+        return this.sellTriggerTrailingStopLossActivated && this.trailingStopLoss(lastClosingPrice, maxPriceSinceBuying);
     }
 
-    private void updateLocalMaximumPassed(double lastClosingPrice) {
-        if(this.buyLocalMaximumPassed) {
-            return;
-        }
-
-        this.buyLocalMaximumPassed = lastClosingPrice >= this.buyLocalMaximum;
-    }
-
-    private void updateMaximumSinceBuying(double lastClosingPrice) {
-        if(lastClosingPrice > this.maximumSinceBuying) {
-            this.maximumSinceBuying = lastClosingPrice;
+    private void updateMaxPriceSinceBuying(double lastClosingPrice) {
+        if(lastClosingPrice > this.maxPriceSinceBuying) {
+            this.maxPriceSinceBuying = lastClosingPrice;
         }
     }
 
     private boolean stopLoss(double lastClosingPrice) {
-        double stopLossPriceMaximumPrice = this.buyPrice * (1.0 - this.sellTriggerStopLossMinDistanceFromBuyingPercentage);
-        return lastClosingPrice <= stopLossPriceMaximumPrice;
+        double stopLossMaximumPrice = this.buyPrice * (1.0 - this.sellTriggerStopLossMinimumDeclineSinceBuyingPercentage);
+        return lastClosingPrice <= stopLossMaximumPrice;
+    }
+
+    private void updateTrailingStopLossActivation(double lastClosingPrice) {
+        if(this.sellTriggerTrailingStopLossActivated) {
+            return;
+        }
+
+        double minimumActivationPrice = this.buyPrice * (1.0 + this.activateTrailingStopLossMinRaiseSinceBuyingPercentage);
+        this.sellTriggerTrailingStopLossActivated = lastClosingPrice >= minimumActivationPrice;
     }
 
     private boolean trailingStopLoss(double lastClosingPrice, double maximumSinceBuying) {
-        double trailingStopLossMaximumPrice = this.maximumSinceBuying * (1.0 - this.sellTriggerMinDistanceFromMaximumSinceBuyingPercentage);
+        double trailingStopLossMaximumPrice = this.maxPriceSinceBuying * (1.0 - this.sellTriggerTrailingStopLossMinDeclineSinceMaximumAfterBuyingPercentage);
         return lastClosingPrice <= trailingStopLossMaximumPrice;
     }
 

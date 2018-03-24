@@ -4,10 +4,12 @@ import trading.DayCount;
 import trading.ISIN;
 
 public class LocalMaximumTradingStrategyParameters {
-    private ISIN isin;
-    private DayCount buyTriggerLocalMaximumLookBehindPeriod;
-    private double buyTriggerMinDistanceFromLocalMaximumPercentage;
-    private double sellTriggerMinDistanceFromMaximumSinceBuyingPercentage;
+    private final ISIN isin;
+    private final DayCount buyTriggerLocalMaximumLookBehindPeriod;
+    private final double buyTriggerMinDeclineFromLocalMaximumPercentage;
+    private final double sellTriggerTrailingStopLossMinDeclineFromMaximumAfterBuyingPercentage;
+    private final double activateTrailingStopLossMinRaiseSinceBuyingPercentage;
+    private final double sellTriggerStopLossMinimumDeclineSinceBuyingPercentage;
 
     public ISIN getIsin() {
         return this.isin;
@@ -17,18 +19,28 @@ public class LocalMaximumTradingStrategyParameters {
         return this.buyTriggerLocalMaximumLookBehindPeriod;
     }
 
-    public double getBuyTriggerMinDistanceFromLocalMaximumPercentage() {
-        return this.buyTriggerMinDistanceFromLocalMaximumPercentage;
+    public double getBuyTriggerMinDeclineFromMaximumPercentage() {
+        return this.buyTriggerMinDeclineFromLocalMaximumPercentage;
     }
 
-    public double getSellTriggerMinDistanceFromMaximumSinceBuyingPercentage() {
-        return this.sellTriggerMinDistanceFromMaximumSinceBuyingPercentage;
+    public double getSellTriggerTrailingStopLossMinDeclineFromMaximumAfterBuyingPercentage() {
+        return this.sellTriggerTrailingStopLossMinDeclineFromMaximumAfterBuyingPercentage;
     }
 
-    public LocalMaximumTradingStrategyParameters(ISIN isin, DayCount buyTriggerLocalMaximumLookBehindPeriod, double buyTriggerMinDistanceFromLocalMaximumPercentage, double sellTriggerMinDistanceFromMaximumSinceBuyingPercentage) {
+    public double getActivateTrailingStopLossMinRaiseSinceBuyingPercentage() {
+        return this.activateTrailingStopLossMinRaiseSinceBuyingPercentage;
+    }
+
+    public double getSellTriggerStopLossMinimumDeclineSinceBuyingPercentage() {
+        return this.sellTriggerStopLossMinimumDeclineSinceBuyingPercentage;
+    }
+
+    public LocalMaximumTradingStrategyParameters(ISIN isin, DayCount buyTriggerLocalMaximumLookBehindPeriod, double buyTriggerMinDeclineFromLocalMaximumPercentage, double sellTriggerTrailingStopLossMinDeclineFromMaximumAfterBuyingPercentage, double activateTrailingStopLossMinRaiseSinceBuyingPercentage, double sellTriggerStopLossMinimumDeclineSinceBuyingPercentage) {
         this.isin = isin;
         this.buyTriggerLocalMaximumLookBehindPeriod = buyTriggerLocalMaximumLookBehindPeriod;
-        this.buyTriggerMinDistanceFromLocalMaximumPercentage = buyTriggerMinDistanceFromLocalMaximumPercentage;
-        this.sellTriggerMinDistanceFromMaximumSinceBuyingPercentage = sellTriggerMinDistanceFromMaximumSinceBuyingPercentage;
+        this.buyTriggerMinDeclineFromLocalMaximumPercentage = buyTriggerMinDeclineFromLocalMaximumPercentage;
+        this.sellTriggerTrailingStopLossMinDeclineFromMaximumAfterBuyingPercentage = sellTriggerTrailingStopLossMinDeclineFromMaximumAfterBuyingPercentage;
+        this.activateTrailingStopLossMinRaiseSinceBuyingPercentage = activateTrailingStopLossMinRaiseSinceBuyingPercentage;
+        this.sellTriggerStopLossMinimumDeclineSinceBuyingPercentage = sellTriggerStopLossMinimumDeclineSinceBuyingPercentage;
     }
 }
