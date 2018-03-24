@@ -1,5 +1,6 @@
 package trading.strategy.localMaximum;
 
+import trading.DayCount;
 import trading.market.HistoricalStockData;
 import trading.strategy.AlwaysFiresTrigger;
 import trading.strategy.DelegateTrigger;
@@ -11,20 +12,22 @@ import trading.strategy.progressive.ProgressiveTradingStrategyParametersBuilder;
 /**
  * Trading strategy:
  *
- * Buy after distance from local maximum reached and sell after
- * maximum passed and declined under certain level below maximum since buying.
+ * Buy after negative distance from local maximum reached and sell after
+ * local maximum passed and declined under certain level below maximum since buying.
  */
 public class LocalMaximumTradingStrategy implements TradingStrategy {
     private final ProgressiveTradingStrategy progressiveTradingStrategy;
     private final HistoricalStockData historicalStockData;
-    private final LocalMaximumTradingStrategyParameters parameters;
+
+    private final DayCount buyTriggerLocalMaximumLookBehindPeriod;
+    private final double buyTriggerMinDistanceFromLocalMaximumPercentage;
+    private final double sellTriggerMinDistanceFromMaximumSinceBuyingPercentage;
 
     private double buyLocalMaximum = 0.0;
     private boolean buyLocalMaximumPassed = false;
     private double maximumSinceBuying = 0.0;
 
     public LocalMaximumTradingStrategy(LocalMaximumTradingStrategyParameters parameters, TradingStrategyContext context) {
-        this.parameters = parameters;
         this.historicalStockData = context.getHistoricalMarketData().getStockData(parameters.getIsin());
 
         ProgressiveTradingStrategyParametersBuilder parametersBuilder = new ProgressiveTradingStrategyParametersBuilder();
@@ -36,11 +39,15 @@ public class LocalMaximumTradingStrategy implements TradingStrategy {
         parametersBuilder.setResetTriggerFactory(historicalMarketData -> new AlwaysFiresTrigger());
 
         this.progressiveTradingStrategy = new ProgressiveTradingStrategy(parametersBuilder.build(), context);
+
+        this.buyTriggerLocalMaximumLookBehindPeriod = parameters.getBuyTriggerLocalMaximumLookBehindPeriod();
+        this.buyTriggerMinDistanceFromLocalMaximumPercentage = parameters.getBuyTriggerMinDistanceFromLocalMaximumPercentage();
+        this.sellTriggerMinDistanceFromMaximumSinceBuyingPercentage = parameters.getSellTriggerMinDistanceFromMaximumSinceBuyingPercentage();
     }
 
     private boolean shouldBuyStocks() {
-        double localMaximum = this.historicalStockData.getMaximumClosingMarketPrice(this.parameters.getBuyTriggerLocalMaximumLookBehindPeriod()).getValue();
-        double minDelta = localMaximum * this.parameters.getBuyTriggerMinDistanceFromLocalMaximumPercentage();
+        double localMaximum = this.historicalStockData.getMaximumClosingMarketPrice(this.buyTriggerLocalMaximumLookBehindPeriod).getValue();
+        double minDelta = localMaximum * this.buyTriggerMinDistanceFromLocalMaximumPercentage;
         double maxBuyPrice = localMaximum - minDelta;
         double lastClosingMarketPrice = this.historicalStockData.getLastClosingMarketPrice().getValue();
 
@@ -70,7 +77,7 @@ public class LocalMaximumTradingStrategy implements TradingStrategy {
             this.maximumSinceBuying = lastClosingPrice;
         }
 
-        double sellTriggerMinDeltaFromMaximumSinceBuying = this.parameters.getSellTriggerMinDistanceFromMaximumSinceBuyingPercentage() * this.maximumSinceBuying;
+        double sellTriggerMinDeltaFromMaximumSinceBuying = this.sellTriggerMinDistanceFromMaximumSinceBuyingPercentage * this.maximumSinceBuying;
         double sellTriggerMaxPrice = this.maximumSinceBuying - sellTriggerMinDeltaFromMaximumSinceBuying;
 
         return lastClosingPrice <= sellTriggerMaxPrice;
