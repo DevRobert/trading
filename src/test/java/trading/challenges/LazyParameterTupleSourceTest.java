@@ -1,4 +1,4 @@
-package trading.simulation;
+package trading.challenges;
 
 import org.junit.Assert;
 import org.junit.Test;
@@ -8,15 +8,15 @@ import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 
-public class ParameterTupleSourceTest {
+public class LazyParameterTupleSourceTest {
     @Test
     public void oneParameter() {
         List<List<Object>> parameterLists = new ArrayList<>();
         parameterLists.add(Arrays.asList(new Object[] { 1, 2, 3 }));
 
-        ParameterTupleSource parameterTupleSource = new ParameterTupleSource(parameterLists);
+        LazyParameterTupleSource lazyParameterTupleSource = new LazyParameterTupleSource(parameterLists);
 
-        Iterator<Object[]> iterator = parameterTupleSource;
+        Iterator<Object[]> iterator = lazyParameterTupleSource.getIterator();
 
         List<Object[]> expected = Arrays.asList(
                 new Object[] { 1 },
@@ -28,7 +28,7 @@ public class ParameterTupleSourceTest {
 
         assertEquals(expected, actual);
 
-        Assert.assertEquals(3, parameterTupleSource.size());
+        Assert.assertEquals(3, lazyParameterTupleSource.size());
     }
 
     @Test
@@ -37,9 +37,9 @@ public class ParameterTupleSourceTest {
         parameterLists.add(Arrays.asList(new Object[] { 1, 2, 3 }));
         parameterLists.add(Arrays.asList(new Object[] { "a", "b" }));
 
-        ParameterTupleSource parameterTupleSource = new ParameterTupleSource(parameterLists);
+        LazyParameterTupleSource lazyParameterTupleSource = new LazyParameterTupleSource(parameterLists);
 
-        Iterator<Object[]> iterator = parameterTupleSource;
+        Iterator<Object[]> iterator = lazyParameterTupleSource.getIterator();
 
         List<Object[]> expected = Arrays.asList(
                 new Object[] { 1, "a"},
@@ -54,7 +54,7 @@ public class ParameterTupleSourceTest {
 
         assertEquals(expected, actual);
 
-        Assert.assertEquals(6, parameterTupleSource.size());
+        Assert.assertEquals(6, lazyParameterTupleSource.size());
     }
 
     @Test
@@ -64,9 +64,9 @@ public class ParameterTupleSourceTest {
         parameterLists.add(Arrays.asList(new Object[] { "a", "b" }));
         parameterLists.add(Arrays.asList(new Object[] { 0.1, 0.2 }));
 
-        ParameterTupleSource parameterTupleSource = new ParameterTupleSource(parameterLists);
+        LazyParameterTupleSource lazyParameterTupleSource = new LazyParameterTupleSource(parameterLists);
 
-        Iterator<Object[]> iterator = parameterTupleSource;
+        Iterator<Object[]> iterator = lazyParameterTupleSource.getIterator();
 
         List<Object[]> expected = Arrays.asList(
                 new Object[] { 1, "a", 0.1},
@@ -87,7 +87,7 @@ public class ParameterTupleSourceTest {
 
         assertEquals(expected, actual);
 
-        Assert.assertEquals(12, parameterTupleSource.size());
+        Assert.assertEquals(12, lazyParameterTupleSource.size());
     }
 
     @Test
@@ -95,9 +95,9 @@ public class ParameterTupleSourceTest {
         List<List<Object>> parameterLists = new ArrayList<>();
         parameterLists.add(Arrays.asList(new Object[] { 1 }));
 
-        ParameterTupleSource parameterTupleSource = new ParameterTupleSource(parameterLists);
+        LazyParameterTupleSource lazyParameterTupleSource = new LazyParameterTupleSource(parameterLists);
 
-        Iterator<Object[]> iterator = parameterTupleSource;
+        Iterator<Object[]> iterator = lazyParameterTupleSource.getIterator();
 
         iterator.next();
 

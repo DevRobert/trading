@@ -52,7 +52,7 @@ public class DynamicLocalMaximumChallenge implements Challenge {
     }
 
     @Override
-    public List<Object[]> buildParametersForDifferentRuns() {
+    public ParameterTupleSource buildParametersForDifferentRuns() {
         List<Object[]> parameters = new ArrayList<>();
 
         for(ISIN isin: HistoricalTestDataProvider.getISINs()) {
@@ -67,7 +67,7 @@ public class DynamicLocalMaximumChallenge implements Challenge {
             }
         }
 
-        return parameters;
+        return new PreparedParameterTupleSource(parameters);
     }
 
     @Override

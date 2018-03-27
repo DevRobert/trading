@@ -12,16 +12,18 @@ import trading.strategy.localMaximum.LocalMaximumTradingStrategy;
 import trading.strategy.localMaximum.LocalMaximumTradingStrategyParameters;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 public class LocalMaximumChallenge implements Challenge {
-    private Set<ISIN> getISIN() {
-        return HistoricalTestDataProvider.getISINs();
+    private List<Object> getISIN() {
+        return HistoricalTestDataProvider.getISINs().stream().collect(Collectors.toList());
     }
 
-    private List<Double> getHighResolutionDoubles() {
-        List<Double> result = new  ArrayList<>();
+    private List<Object> getHighResolutionDoubles() {
+        List<Object> result = new  ArrayList<>();
 
         result.add(0.0);
 
@@ -44,8 +46,8 @@ public class LocalMaximumChallenge implements Challenge {
         return result;
     }
 
-    private List<Double> getLowResolutionDoubles() {
-        List<Double> result = new  ArrayList<>();
+    private List<Object> getLowResolutionDoubles() {
+        List<Object> result = new  ArrayList<>();
 
         result.add(0.0);
 
@@ -68,8 +70,8 @@ public class LocalMaximumChallenge implements Challenge {
         return result;
     }
 
-    private List<Double> getVeryLowResolutionDoubles() {
-        List<Double> result = new  ArrayList<>();
+    private List<Object> getVeryLowResolutionDoubles() {
+        List<Object> result = new  ArrayList<>();
 
         result.add(0.0);
 
@@ -88,8 +90,8 @@ public class LocalMaximumChallenge implements Challenge {
         return result;
     }
 
-    private List<Integer> getBuyTriggerLocalMaximumLookBehindPeriod() {
-        List<Integer> result = new ArrayList<>();
+    private List<Object> getBuyTriggerLocalMaximumLookBehindPeriod() {
+        List<Object> result = new ArrayList<>();
 
         for(int lookBehind = 1; lookBehind < 10; lookBehind += 1) {
             result.add(lookBehind);
@@ -102,48 +104,32 @@ public class LocalMaximumChallenge implements Challenge {
         return result;
     }
 
-    private List<Double> getBuyTriggerMinDeclineFromLocalMaximumPercentage() {
+    private List<Object> getBuyTriggerMinDeclineFromLocalMaximumPercentage() {
         return this.getVeryLowResolutionDoubles();
     }
 
-    private List<Double> getSellTriggerTrailingStopLossMinDeclineFromMaximumAfterBuyingPercentage() {
+    private List<Object> getSellTriggerTrailingStopLossMinDeclineFromMaximumAfterBuyingPercentage() {
         return this.getVeryLowResolutionDoubles();
     }
 
-    private List<Double> getActivateTrailingStopLossMinRaiseSinceBuyingPercentage() {
+    private List<Object> getActivateTrailingStopLossMinRaiseSinceBuyingPercentage() {
         return this.getVeryLowResolutionDoubles();
     }
 
-    private List<Double> getSellTriggerStopLossMinimumDeclineSinceBuyingPercentage() {
+    private List<Object> getSellTriggerStopLossMinimumDeclineSinceBuyingPercentage() {
         return this.getVeryLowResolutionDoubles();
     }
 
     @Override
-    public List<Object[]> buildParametersForDifferentRuns() {
-        List<Object[]> parameters = new ArrayList<>();
-
-        for(ISIN isin: this.getISIN()) {
-            for(Integer buyTriggerLocalMaximumLookBehindPeriod: this.getBuyTriggerLocalMaximumLookBehindPeriod()) {
-                for(Double buyTriggerMinDeclineFromLocalMaximumPercentage: this.getBuyTriggerMinDeclineFromLocalMaximumPercentage()) {
-                    for(Double sellTriggerTrailingStopLossMinDeclineFromMaximumAfterBuyingPercentage: this.getSellTriggerTrailingStopLossMinDeclineFromMaximumAfterBuyingPercentage()) {
-                        for(Double activateTrailingStopLossMinRaiseSinceBuyingPercentage: this.getActivateTrailingStopLossMinRaiseSinceBuyingPercentage()) {
-                            for(Double sellTriggerStopLossMinimumDeclineSinceBuyingPercentage: this.getSellTriggerStopLossMinimumDeclineSinceBuyingPercentage()) {
-                                parameters.add(new Object[] {
-                                        isin,
-                                        buyTriggerLocalMaximumLookBehindPeriod,
-                                        buyTriggerMinDeclineFromLocalMaximumPercentage,
-                                        sellTriggerTrailingStopLossMinDeclineFromMaximumAfterBuyingPercentage,
-                                        activateTrailingStopLossMinRaiseSinceBuyingPercentage,
-                                        sellTriggerStopLossMinimumDeclineSinceBuyingPercentage
-                                });
-                            }
-                        }
-                    }
-                }
-            }
-        }
-
-        return parameters;
+    public ParameterTupleSource buildParametersForDifferentRuns() {
+        return new LazyParameterTupleSource(Arrays.asList(
+                this.getISIN(),
+                this.getBuyTriggerLocalMaximumLookBehindPeriod(),
+                this.getBuyTriggerMinDeclineFromLocalMaximumPercentage(),
+                this.getSellTriggerTrailingStopLossMinDeclineFromMaximumAfterBuyingPercentage(),
+                this.getActivateTrailingStopLossMinRaiseSinceBuyingPercentage(),
+                this.getSellTriggerStopLossMinimumDeclineSinceBuyingPercentage()
+        ));
     }
 
     @Override

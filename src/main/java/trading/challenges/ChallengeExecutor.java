@@ -4,68 +4,67 @@ import trading.simulation.SimulationDriver;
 import trading.simulation.SimulationDriverParameters;
 import trading.simulation.SimulationReport;
 
-import java.io.PrintWriter;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
+import java.util.Iterator;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 public class ChallengeExecutor {
-    private Collection<String> reportLines;
+    private ParameterTupleSource runParametersSource;
+    private Iterator<Object[]> runParametersIterator;
+    private Reporter reporter;
 
     private void prepareReporting() {
-        this.reportLines = Collections.synchronizedCollection(new ArrayList<String>());
+        String fileName = "/Users/robert/GitHub/data/data.csv";
+        this.reporter = new Reporter(fileName);
     }
 
     private void endReporting() {
-        String fileName = "/Users/robert/GitHub/data/data.csv";
+       this.reporter.finish();
+       this.reporter = null;
+    }
 
-        PrintWriter writer;
+    private Object[] getNextRunParameters() {
+        Object[] result = null;
 
-        try {
-            writer = new PrintWriter(fileName, "UTF-8");
-        }
-        catch (Exception ex) {
-            throw new RuntimeException(ex);
-        }
-
-        for(String line: reportLines) {
-            writer.println(line);
+        synchronized (this.runParametersIterator) {
+            if(this.runParametersIterator.hasNext()) {
+                result = this.runParametersIterator.next();
+            }
         }
 
-        writer.close();
-
-        this.reportLines = null;
-
-        System.out.println("Report saved: " + fileName);
+        return result;
     }
 
     public void executeChallenge(Challenge challenge) {
         this.prepareReporting();
 
-        List<Object[]> runParametersList = challenge.buildParametersForDifferentRuns();
+        this.runParametersSource = challenge.buildParametersForDifferentRuns();
+        this.runParametersIterator = runParametersSource.getIterator();
 
         final int numThreads = Runtime.getRuntime().availableProcessors();
 
-        System.out.println("Running " + runParametersList.size() + " simulations in " + numThreads + " threads...");
+        System.out.println("Running " + runParametersSource.size() + " simulations in " + numThreads + " threads...");
 
         final ExecutorService threads = Executors.newFixedThreadPool(numThreads);
 
         try {
-            final CountDownLatch countDownLatch = new CountDownLatch(runParametersList.size());
+            final CountDownLatch countDownLatch = new CountDownLatch(runParametersSource.size());
 
-            for(Object[] runParameters: runParametersList) {
+            for(int threadIndex = 0; threadIndex < numThreads; threadIndex++) {
                 threads.execute(() -> {
-                    try {
-                        SimulationDriverParameters simulationDriverParameters = challenge.buildSimulationDriverParametersForRun(runParameters);
-                        SimulationDriver simulationDriver = new SimulationDriver(simulationDriverParameters);
-                        SimulationReport simulationReport = simulationDriver.runSimulation();
-                        this.trackSimulationReport(simulationReport, runParameters);
-                    } finally {
-                        countDownLatch.countDown();
+                    Object[] runParameters;
+
+                    while((runParameters = this.getNextRunParameters()) != null) {
+                        try {
+                            SimulationDriverParameters simulationDriverParameters = challenge.buildSimulationDriverParametersForRun(runParameters);
+                            SimulationDriver simulationDriver = new SimulationDriver(simulationDriverParameters);
+                            SimulationReport simulationReport = simulationDriver.runSimulation();
+                            this.trackSimulationReport(simulationReport, runParameters);
+                        }
+                        finally {
+                            countDownLatch.countDown();
+                        }
                     }
                 });
             }
@@ -95,6 +94,6 @@ public class ChallengeExecutor {
             line += ";" + runParameter.toString();
         }
 
-        reportLines.add(line);
+        this.reporter.writeLine(line);
     }
 }
