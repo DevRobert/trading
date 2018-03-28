@@ -44,7 +44,8 @@ public class ChallengeExecutor {
 
         final int numThreads = Runtime.getRuntime().availableProcessors();
 
-        System.out.println("Running " + runParametersSource.size() + " simulations in " + numThreads + " threads...");
+        int numSimulations = runParametersSource.size();
+        System.out.println("Running " + String.format("%,d", numSimulations) + " simulations in " + numThreads + " threads...");
 
         final ExecutorService threads = Executors.newFixedThreadPool(numThreads);
 
@@ -64,6 +65,13 @@ public class ChallengeExecutor {
                         }
                         finally {
                             countDownLatch.countDown();
+                        }
+
+                        long numRemainingSimulations = countDownLatch.getCount();
+
+                        if(numRemainingSimulations % 100000 == 0) {
+                            double progress = 100.0 * (numSimulations - numRemainingSimulations) / numSimulations;
+                            System.out.println("Progress: " + String.format("%.2f", progress) + " % - " + String.format("%,d", numRemainingSimulations) + " simulations remaining.");
                         }
                     }
                 });
