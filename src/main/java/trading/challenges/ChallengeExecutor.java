@@ -69,7 +69,7 @@ public class ChallengeExecutor {
 
                         long numRemainingSimulations = countDownLatch.getCount();
 
-                        if(numRemainingSimulations % 100000 == 0) {
+                        if(numRemainingSimulations % 100000 == 0 && numRemainingSimulations > 0) {
                             double progress = 100.0 * (numSimulations - numRemainingSimulations) / numSimulations;
                             System.out.println("Progress: " + String.format("%.2f", progress) + " % - " + String.format("%,d", numRemainingSimulations) + " simulations remaining.");
                         }
