@@ -19,4 +19,32 @@ public class PositionTest {
         position.confirmCreation();
         Assert.assertFalse(position.isCreationPending());
     }
+
+    @Test
+    public void initializationWithNegativeQuantityFails() {
+        try {
+            new Position(ISIN.MunichRe, new Quantity(-1), Amount.Zero);
+        }
+        catch(RuntimeException ex) {
+            Assert.assertEquals("The quantity must not be negative.", ex.getMessage());
+            return;
+        }
+
+        Assert.fail("RuntimeException expected.");
+    }
+
+    @Test
+    public void setNegativeQuantityFails() {
+        Position position = new Position(ISIN.MunichRe, Quantity.Zero, Amount.Zero);
+
+        try {
+            position.setQuantity(new Quantity(-1));
+        }
+        catch(RuntimeException ex) {
+            Assert.assertEquals("The quantity must not be negative.", ex.getMessage());
+            return;
+        }
+
+        Assert.fail("RuntimeException expected.");
+    }
 }

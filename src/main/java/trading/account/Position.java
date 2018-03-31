@@ -19,6 +19,10 @@ public class Position {
     }
 
     protected void setQuantity(Quantity quantity) {
+        if(quantity.getValue() < 0) {
+            throw new RuntimeException("The quantity must not be negative.");
+        }
+
         this.quantity = quantity;
     }
 
@@ -35,6 +39,10 @@ public class Position {
     }
 
     public Position(ISIN isin, Quantity quantity, Amount fullMarketPrice) {
+        if(quantity.getValue() < 0) {
+            throw new RuntimeException("The quantity must not be negative.");
+        }
+
         this.isin = isin;
         this.quantity = quantity;
         this.fullMarketPrice = fullMarketPrice;
