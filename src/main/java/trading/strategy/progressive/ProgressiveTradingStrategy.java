@@ -3,13 +3,11 @@ package trading.strategy.progressive;
 import trading.Amount;
 import trading.Quantity;
 import trading.account.Position;
+import trading.broker.CommissionStrategy;
 import trading.broker.OrderRequest;
 import trading.broker.OrderType;
 import trading.market.HistoricalStockData;
-import trading.strategy.StrategyInitializationException;
-import trading.strategy.TradingStrategy;
-import trading.strategy.TradingStrategyContext;
-import trading.strategy.Trigger;
+import trading.strategy.*;
 
 /**
  * Progressive Trading Strategy
@@ -124,11 +122,12 @@ public class ProgressiveTradingStrategy implements TradingStrategy {
 
     private void waitAndBuyStocks() {
         Amount availableMoney = this.context.getAccount().getAvailableMoney();
+        CommissionStrategy commissionStrategy = this.context.getBroker().getCommissionStrategy();
         Amount lastClosingMarketPrice = this.historicalStockData.getLastClosingMarketPrice();
-        boolean stockAffordable = (availableMoney.getValue() >= lastClosingMarketPrice.getValue());
+        Quantity affordableQuantity = new AffordableQuantityCalculator().calculateAffordableQuantity(availableMoney, lastClosingMarketPrice, commissionStrategy);
 
-        if (stockAffordable && this.buyTrigger.checkFires()) {
-            this.setBuyMarketOrder();
+        if (!affordableQuantity.isZero() && this.buyTrigger.checkFires()) {
+            this.setBuyMarketOrder(affordableQuantity);
 
             this.inStateWaitAndBuyStocks = false;
             this.inStateWaitAndSellStocks = true;
@@ -137,13 +136,8 @@ public class ProgressiveTradingStrategy implements TradingStrategy {
         }
     }
 
-    private void setBuyMarketOrder() {
-        Amount availableMoney = this.context.getAccount().getAvailableMoney();
-        Amount lastClosingMarketPrice = this.historicalStockData.getLastClosingMarketPrice();
-        double maxQuantity = Math.floor(availableMoney.getValue() / lastClosingMarketPrice.getValue());
-
-        Quantity quantity = new Quantity((int) maxQuantity);
-        OrderRequest orderRequest = new OrderRequest(OrderType.BuyMarket, this.parameters.getISIN(), quantity);
+    private void setBuyMarketOrder(Quantity affordableQuantity) {
+        OrderRequest orderRequest = new OrderRequest(OrderType.BuyMarket, this.parameters.getISIN(), affordableQuantity);
         this.context.getBroker().setOrder(orderRequest);
     }
 

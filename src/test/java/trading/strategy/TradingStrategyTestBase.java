@@ -19,7 +19,7 @@ public abstract class TradingStrategyTestBase {
 
     private HistoricalMarketData historicalMarketData;
     private Simulation simulation;
-    private CommissionStrategy commissionStrategy;
+    protected CommissionStrategy commissionStrategy;
 
     protected abstract TradingStrategy initializeTradingStrategy(Account account, Broker broker, HistoricalMarketData historicalMarketData);
 

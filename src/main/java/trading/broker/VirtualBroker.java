@@ -49,6 +49,11 @@ public class VirtualBroker implements Broker {
         }
     }
 
+    @Override
+    public CommissionStrategy getCommissionStrategy() {
+        return this.commissionStrategy;
+    }
+
     private void processOrderRequest(OrderRequest orderRequest) {
         switch (orderRequest.getOrderType()) {
             case BuyMarket:

@@ -77,6 +77,7 @@ public class ProgressiveTradingStrategyTest extends ProgressiveTradingStrategyTe
         beginSimulation();
         openDay();
 
+        // Account initial balance is: 50,000
         // Expected price = 1,000
         // Expected quantity = 50
         // Expected full price = 50,000
@@ -86,8 +87,24 @@ public class ProgressiveTradingStrategyTest extends ProgressiveTradingStrategyTe
     }
 
     @Test
-    public void buyOrderIsSetAboutMaximumAmount_includingCommissions() {
-        // todo
+    public void buyOrderIsSetAboutMaximumAmount_consideringCommissions() {
+        parametersBuilder.setBuyTriggerFactory(historicalMarketData -> new AlwaysFiresTrigger());
+
+        this.commissionStrategy = totalPrice -> new Amount(1500.0);
+
+        beginHistory(ISIN.MunichRe, new Amount(1000.0));
+
+        beginSimulation();
+        openDay();
+
+        // Account initial balance is: 50,000.0
+        // Expected price = 1,000
+        // Commission = 1,500
+        // Expected quantity = 48
+        // Expected full price = 48,000
+
+        Position position = account.getPosition(ISIN.MunichRe);
+        Assert.assertEquals(new Quantity(48), position.getQuantity());
     }
 
     @Test

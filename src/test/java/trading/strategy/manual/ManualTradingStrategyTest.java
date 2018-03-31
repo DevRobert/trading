@@ -5,6 +5,7 @@ import org.junit.Test;
 import trading.ISIN;
 import trading.Quantity;
 import trading.broker.Broker;
+import trading.broker.CommissionStrategy;
 import trading.broker.OrderRequest;
 import trading.broker.OrderType;
 
@@ -25,6 +26,11 @@ public class ManualTradingStrategyTest {
             @Override
             public void notifyDayOpened() {
 
+            }
+
+            @Override
+            public CommissionStrategy getCommissionStrategy() {
+                return null;
             }
         };
 

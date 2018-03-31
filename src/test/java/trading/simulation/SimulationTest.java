@@ -5,10 +5,7 @@ import org.junit.Before;
 import org.junit.Test;
 import trading.*;
 import trading.account.Account;
-import trading.broker.Broker;
-import trading.broker.OrderRequest;
-import trading.broker.VirtualBroker;
-import trading.broker.ZeroCommissionStrategy;
+import trading.broker.*;
 import trading.market.HistoricalMarketData;
 import trading.market.MarketPriceSnapshot;
 import trading.market.MarketPriceSnapshotBuilder;
@@ -190,6 +187,11 @@ public class SimulationTest {
             @Override
             public void notifyDayOpened() {
                 dayOpenedSignalReceived.set(true);
+            }
+
+            @Override
+            public CommissionStrategy getCommissionStrategy() {
+                return null;
             }
         };
 
