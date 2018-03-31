@@ -64,7 +64,7 @@ public class ProgressiveTradingStrategy implements TradingStrategy {
             throw new StrategyInitializationException("The strategy parameters must be specified.");
         }
 
-        if(context == null) {
+        if (context == null) {
             throw new StrategyInitializationException("The context must be specified.");
         }
 
@@ -123,7 +123,11 @@ public class ProgressiveTradingStrategy implements TradingStrategy {
     }
 
     private void waitAndBuyStocks() {
-        if (this.buyTrigger.checkFires()) {
+        Amount availableMoney = this.context.getAccount().getAvailableMoney();
+        Amount lastClosingMarketPrice = this.historicalStockData.getLastClosingMarketPrice();
+        boolean stockAffordable = (availableMoney.getValue() >= lastClosingMarketPrice.getValue());
+
+        if (stockAffordable && this.buyTrigger.checkFires()) {
             this.setBuyMarketOrder();
 
             this.inStateWaitAndBuyStocks = false;
@@ -135,14 +139,12 @@ public class ProgressiveTradingStrategy implements TradingStrategy {
 
     private void setBuyMarketOrder() {
         Amount availableMoney = this.context.getAccount().getAvailableMoney();
-        Amount lastClosingMarketPrice = historicalStockData.getLastClosingMarketPrice();
+        Amount lastClosingMarketPrice = this.historicalStockData.getLastClosingMarketPrice();
         double maxQuantity = Math.floor(availableMoney.getValue() / lastClosingMarketPrice.getValue());
 
-        if(maxQuantity > 0) {
-            Quantity quantity = new Quantity((int) maxQuantity);
-            OrderRequest orderRequest = new OrderRequest(OrderType.BuyMarket, this.parameters.getISIN(), quantity);
-            this.context.getBroker().setOrder(orderRequest);
-        }
+        Quantity quantity = new Quantity((int) maxQuantity);
+        OrderRequest orderRequest = new OrderRequest(OrderType.BuyMarket, this.parameters.getISIN(), quantity);
+        this.context.getBroker().setOrder(orderRequest);
     }
 
     private void waitAndSellStocks() {
