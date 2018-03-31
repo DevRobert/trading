@@ -39,4 +39,8 @@ public class SimulationReport {
     public double getRealizedRateOfReturn() {
         return this.realizedRateOfReturn;
     }
+
+    public double getAddedRateOfReturn() {
+        return this.getRealizedRateOfReturn() - this.getAverageMarketRateOfReturn();
+    }
 }

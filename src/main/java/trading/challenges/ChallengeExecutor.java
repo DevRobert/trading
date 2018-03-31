@@ -96,6 +96,7 @@ public class ChallengeExecutor {
                 ";" + simulationReport.getFinalAccountBalance().toString() +
                 ";" + simulationReport.getAverageMarketRateOfReturn() +
                 ";" + simulationReport.getRealizedRateOfReturn() +
+                ";" + simulationReport.getAddedRateOfReturn() +
                 ";" + simulationReport.getTransactions().size();
 
         for(Object runParameter: runParameters) {
