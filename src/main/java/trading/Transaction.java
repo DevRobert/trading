@@ -28,6 +28,14 @@ public class Transaction {
     }
 
     public Transaction(TransactionType transactionType, ISIN isin, Quantity quantity, Amount totalPrice, Amount commission) {
+        if(quantity.getValue() < 0) {
+            throw new RuntimeException("The transaction quantity must not be negative.");
+        }
+
+        if(quantity.getValue() == 0) {
+            throw new RuntimeException("The transaction quantity must not be zero.");
+        }
+
         this.transactionType = transactionType;
         this.isin = isin;
         this.quantity = quantity;

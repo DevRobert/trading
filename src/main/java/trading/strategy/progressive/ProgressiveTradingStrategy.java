@@ -138,9 +138,11 @@ public class ProgressiveTradingStrategy implements TradingStrategy {
         Amount lastClosingMarketPrice = historicalStockData.getLastClosingMarketPrice();
         double maxQuantity = Math.floor(availableMoney.getValue() / lastClosingMarketPrice.getValue());
 
-        Quantity quantity = new Quantity((int) maxQuantity);
-        OrderRequest orderRequest = new OrderRequest(OrderType.BuyMarket, this.parameters.getISIN(), quantity);
-        this.context.getBroker().setOrder(orderRequest);
+        if(maxQuantity > 0) {
+            Quantity quantity = new Quantity((int) maxQuantity);
+            OrderRequest orderRequest = new OrderRequest(OrderType.BuyMarket, this.parameters.getISIN(), quantity);
+            this.context.getBroker().setOrder(orderRequest);
+        }
     }
 
     private void waitAndSellStocks() {

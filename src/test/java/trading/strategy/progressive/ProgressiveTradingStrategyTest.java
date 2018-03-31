@@ -6,7 +6,9 @@ import trading.Amount;
 import trading.DayCount;
 import trading.ISIN;
 import trading.Quantity;
+import trading.account.Account;
 import trading.account.Position;
+import trading.strategy.AlwaysFiresTrigger;
 import trading.strategy.WaitFixedPeriodTrigger;
 
 public class ProgressiveTradingStrategyTest extends ProgressiveTradingStrategyTestBase {
@@ -86,6 +88,21 @@ public class ProgressiveTradingStrategyTest extends ProgressiveTradingStrategyTe
     @Test
     public void buyOrderIsSetAboutMaximumAmount_includingCommissions() {
         // todo
+    }
+
+    @Test
+    public void noBuyOrderIsSetIfNoMoneyAvailable() {
+        Amount availableMoney = new Amount(-10000.0);
+        this.account = new Account(availableMoney);
+
+        parametersBuilder.setBuyTriggerFactory(historicalMarketData -> new AlwaysFiresTrigger());
+
+        beginHistory(ISIN.MunichRe, new Amount(1000.0));
+
+        beginSimulation();
+        openDay();
+
+        assertNoneOrEmptyPosition(ISIN.MunichRe);
     }
 
     /**
