@@ -14,7 +14,6 @@ import trading.strategy.localMaximum.LocalMaximumTradingStrategyParameters;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 public class LocalMaximumChallenge implements Challenge {
@@ -63,7 +62,7 @@ public class LocalMaximumChallenge implements Challenge {
             result.add(value);
         }
 
-        for(double value= 0.1; value <= 0.2; value += 0.1) {
+        for(double value= 0.1; value <= 1; value += 0.1) {
             result.add(value);
         }
 
@@ -75,15 +74,15 @@ public class LocalMaximumChallenge implements Challenge {
 
         result.add(0.0);
 
-        for(double value = 0.001; value < 0.01; value += 0.002) {
+        for(double value = 0.001; value < 0.01; value += 0.001) {
             result.add(value);
         }
 
-        for(double value = 0.01; value < 0.1; value += 0.02) {
+        for(double value = 0.01; value < 0.1; value += 0.01) {
             result.add(value);
         }
 
-        for(double value = 0.1; value <= 0.2; value += 0.1) {
+        for(double value = 0.1; value <= 1; value += 0.1) {
             result.add(value);
         }
 
@@ -123,23 +122,23 @@ public class LocalMaximumChallenge implements Challenge {
     @Override
     public ParameterTupleSource buildParametersForDifferentRuns() {
         return new LazyParameterTupleSource(Arrays.asList(
-                this.getISIN(),
                 this.getBuyTriggerLocalMaximumLookBehindPeriod(),
                 this.getBuyTriggerMinDeclineFromLocalMaximumPercentage(),
                 this.getSellTriggerTrailingStopLossMinDeclineFromMaximumAfterBuyingPercentage(),
                 this.getActivateTrailingStopLossMinRaiseSinceBuyingPercentage(),
-                this.getSellTriggerStopLossMinimumDeclineSinceBuyingPercentage()
+                this.getSellTriggerStopLossMinimumDeclineSinceBuyingPercentage(),
+                this.getISIN()
         ));
     }
 
     @Override
     public SimulationDriverParameters buildSimulationDriverParametersForRun(Object[] runParameters) {
-        final ISIN isin = (ISIN) runParameters[0];
-        final int buyTriggerLocalMaximumLookBehindPeriod = (int) runParameters[1];
-        final double buyTriggerMinDeclineFromLocalMaximumPercentage = (double) runParameters[2];
-        final double sellTriggerTrailingStopLossMinDeclineFromMaximumAfterBuyingPercentage = (double) runParameters[3];
-        final double activateTrailingStopLossMinRaiseSinceBuyingPercentage = (double) runParameters[4];
-        final double sellTriggerStopLossMinimumDeclineSinceBuyingPercentage = (double) runParameters[5];
+        final int buyTriggerLocalMaximumLookBehindPeriod = (int) runParameters[0];
+        final double buyTriggerMinDeclineFromLocalMaximumPercentage = (double) runParameters[1];
+        final double sellTriggerTrailingStopLossMinDeclineFromMaximumAfterBuyingPercentage = (double) runParameters[2];
+        final double activateTrailingStopLossMinRaiseSinceBuyingPercentage = (double) runParameters[3];
+        final double sellTriggerStopLossMinimumDeclineSinceBuyingPercentage = (double) runParameters[4];
+        final ISIN isin = (ISIN) runParameters[5];
 
         SimulationDriverParametersBuilder simulationDriverParametersBuilder = new SimulationDriverParametersBuilder();
 
@@ -149,7 +148,7 @@ public class LocalMaximumChallenge implements Challenge {
 
         simulationDriverParametersBuilder.setHistoryDuration(new DayCount(120));
         simulationDriverParametersBuilder.setSimulationDuration(new DayCount(1370));
-        simulationDriverParametersBuilder.setSeedCapital(new Amount(100000.0));
+        simulationDriverParametersBuilder.setSeedCapital(new Amount(10000.0));
 
         simulationDriverParametersBuilder.setTradingStrategyFactory(context -> {
             LocalMaximumTradingStrategyParameters parameters = new LocalMaximumTradingStrategyParameters(
@@ -164,7 +163,8 @@ public class LocalMaximumChallenge implements Challenge {
             return new LocalMaximumTradingStrategy(parameters, context);
         });
 
-        simulationDriverParametersBuilder.setCommissionStrategy(CommissionStrategies.getDegiroXetraCommissionStrategy());
+        // simulationDriverParametersBuilder.setCommissionStrategy(CommissionStrategies.getDegiroXetraCommissionStrategy());
+        simulationDriverParametersBuilder.setCommissionStrategy(CommissionStrategies.getConsorsXetraCommissionStrategy());
 
         return simulationDriverParametersBuilder.build();
     }
