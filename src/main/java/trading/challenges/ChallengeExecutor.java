@@ -63,6 +63,9 @@ public class ChallengeExecutor {
                             SimulationReport simulationReport = simulationDriver.runSimulation();
                             this.trackSimulationReport(simulationReport, runParameters);
                         }
+                        catch(RuntimeException ex) {
+                            this.reportException(runParameters, ex);
+                        }
                         finally {
                             countDownLatch.countDown();
                         }
@@ -104,5 +107,18 @@ public class ChallengeExecutor {
         }
 
         this.reporter.writeLine(line);
+    }
+
+    private void reportException(Object[] runParameters, Exception ex) {
+        String message = "Exception occurred";
+
+        for(int parameterIndex = 0; parameterIndex < runParameters.length; parameterIndex++) {
+            message += ";";
+            message += runParameters[parameterIndex].toString();
+        }
+
+        message += ";" + ex.getMessage();
+
+        System.out.println(message);
     }
 }
