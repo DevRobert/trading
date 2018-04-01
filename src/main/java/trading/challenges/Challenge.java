@@ -3,6 +3,7 @@ package trading.challenges;
 import trading.simulation.SimulationDriverParameters;
 
 public interface Challenge {
-    ParameterTupleSource buildParametersForDifferentRuns();
+    ParameterTupleSource getParametersSource();
     SimulationDriverParameters buildSimulationDriverParametersForRun(Object[] runParameters);
+    String[] getParameterNames();
 }

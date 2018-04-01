@@ -52,7 +52,7 @@ public class DynamicLocalMaximumChallenge implements Challenge {
     }
 
     @Override
-    public ParameterTupleSource buildParametersForDifferentRuns() {
+    public ParameterTupleSource getParametersSource() {
         List<Object[]> parameters = new ArrayList<>();
 
         for(ISIN isin: HistoricalTestDataProvider.getISINs()) {
@@ -110,5 +110,19 @@ public class DynamicLocalMaximumChallenge implements Challenge {
         simulationDriverParametersBuilder.setCommissionStrategy(CommissionStrategies.getDegiroXetraCommissionStrategy());
 
         return simulationDriverParametersBuilder.build();
+    }
+
+    @Override
+    public String[] getParameterNames() {
+        return new String[] {
+                "isin",
+                "risingIndicatorLookBehindPeriod",
+                "risingIndicatorMinRisingPercentage",
+                "risingBuyTriggerLocalMaximumLookBehindPeriod",
+                "risingBuyTriggerMinDistanceFromLocalMaximumPercentage",
+                "decliningBuyTriggerLocalMaximumLookBehindPeriod",
+                "decliningBuyTriggerMinDistanceFromLocalMaximumPercentage",
+                "sellTriggerMinDistanceFromMaximumSinceBuyingPercentage"
+        };
     }
 }

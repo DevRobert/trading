@@ -120,7 +120,7 @@ public class LocalMaximumChallenge implements Challenge {
     }
 
     @Override
-    public ParameterTupleSource buildParametersForDifferentRuns() {
+    public ParameterTupleSource getParametersSource() {
         return new LazyParameterTupleSource(Arrays.asList(
                 this.getBuyTriggerLocalMaximumLookBehindPeriod(),
                 this.getBuyTriggerMinDeclineFromLocalMaximumPercentage(),
@@ -163,9 +163,21 @@ public class LocalMaximumChallenge implements Challenge {
             return new LocalMaximumTradingStrategy(parameters, context);
         });
 
-        // simulationDriverParametersBuilder.setCommissionStrategy(CommissionStrategies.getDegiroXetraCommissionStrategy());
-        simulationDriverParametersBuilder.setCommissionStrategy(CommissionStrategies.getConsorsXetraCommissionStrategy());
+        simulationDriverParametersBuilder.setCommissionStrategy(CommissionStrategies.getDegiroXetraCommissionStrategy());
+        // simulationDriverParametersBuilder.setCommissionStrategy(CommissionStrategies.getConsorsXetraCommissionStrategy());
 
         return simulationDriverParametersBuilder.build();
+    }
+
+    @Override
+    public String[] getParameterNames() {
+        return new String[] {
+                "isin",
+                "maximum_look_behind",
+                "maximum_min_decline",
+                "stop_loss_min_decline",
+                "trailing_stop_loss_activation_min_raise",
+                "trailing_stop_loss_min_decline"
+        };
     }
 }
