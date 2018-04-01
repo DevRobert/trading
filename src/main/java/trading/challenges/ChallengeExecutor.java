@@ -34,7 +34,7 @@ public class ChallengeExecutor {
             fieldNames.add(parameterName);
         }
 
-        this.reporter.writeLine(0, String.join(";", fieldNames));
+        this.reporter.writeLine(-1, String.join(";", fieldNames));
     }
 
     private void endReporting() {

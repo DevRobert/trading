@@ -21,74 +21,6 @@ public class LocalMaximumChallenge implements Challenge {
         return HistoricalTestDataProvider.getISINs().stream().collect(Collectors.toList());
     }
 
-    private List<Object> getHighResolutionDoubles() {
-        List<Object> result = new  ArrayList<>();
-
-        result.add(0.0);
-
-        for(double value = 0.0001; value < 0.001; value += 0.00002) {
-            result.add(value);
-        }
-
-        for(double value = 0.001; value < 0.01; value += 0.0002) {
-            result.add(value);
-        }
-
-        for(double value = 0.01; value < 0.1; value += 0.002) {
-            result.add(value);
-        }
-
-        for(double value= 0.1; value <= 0.2; value += 0.02) {
-            result.add(value);
-        }
-
-        return result;
-    }
-
-    private List<Object> getLowResolutionDoubles() {
-        List<Object> result = new  ArrayList<>();
-
-        result.add(0.0);
-
-        for(double value = 0.0001; value < 0.001; value += 0.0001) {
-            result.add(value);
-        }
-
-        for(double value = 0.001; value < 0.01; value += 0.001) {
-            result.add(value);
-        }
-
-        for(double value = 0.01; value < 0.1; value += 0.01) {
-            result.add(value);
-        }
-
-        for(double value= 0.1; value <= 1; value += 0.1) {
-            result.add(value);
-        }
-
-        return result;
-    }
-
-    private List<Object> getVeryLowResolutionDoubles() {
-        List<Object> result = new  ArrayList<>();
-
-        result.add(0.0);
-
-        for(double value = 0.001; value < 0.01; value += 0.001) {
-            result.add(value);
-        }
-
-        for(double value = 0.01; value < 0.1; value += 0.01) {
-            result.add(value);
-        }
-
-        for(double value = 0.1; value <= 1; value += 0.1) {
-            result.add(value);
-        }
-
-        return result;
-    }
-
     private List<Object> getBuyTriggerLocalMaximumLookBehindPeriod() {
         List<Object> result = new ArrayList<>();
 
@@ -96,7 +28,7 @@ public class LocalMaximumChallenge implements Challenge {
             result.add(lookBehind);
         }
 
-        for(int lookBehind = 10; lookBehind <= 120; lookBehind += 10) {
+        for(int lookBehind = 10; lookBehind <= 90; lookBehind += 10) {
             result.add(lookBehind);
         }
 
@@ -104,19 +36,19 @@ public class LocalMaximumChallenge implements Challenge {
     }
 
     private List<Object> getBuyTriggerMinDeclineFromLocalMaximumPercentage() {
-        return this.getVeryLowResolutionDoubles();
+        return ParameterGenerators.getVeryLowResolutionDoubles(0.0, 0.1);
     }
 
     private List<Object> getSellTriggerTrailingStopLossMinDeclineFromMaximumAfterBuyingPercentage() {
-        return this.getVeryLowResolutionDoubles();
+        return ParameterGenerators.getVeryLowResolutionDoubles(0.0, 0.3);
     }
 
     private List<Object> getActivateTrailingStopLossMinRaiseSinceBuyingPercentage() {
-        return this.getVeryLowResolutionDoubles();
+        return ParameterGenerators.getVeryLowResolutionDoubles(0.008, 1.0);
     }
 
     private List<Object> getSellTriggerStopLossMinimumDeclineSinceBuyingPercentage() {
-        return this.getVeryLowResolutionDoubles();
+        return ParameterGenerators.getVeryLowResolutionDoubles(0.0, 0.4);
     }
 
     @Override
@@ -172,12 +104,12 @@ public class LocalMaximumChallenge implements Challenge {
     @Override
     public String[] getParameterNames() {
         return new String[] {
-                "isin",
                 "maximum_look_behind",
                 "maximum_min_decline",
                 "stop_loss_min_decline",
                 "trailing_stop_loss_activation_min_raise",
-                "trailing_stop_loss_min_decline"
+                "trailing_stop_loss_min_decline",
+                "isin"
         };
     }
 }
