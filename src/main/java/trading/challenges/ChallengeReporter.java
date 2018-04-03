@@ -1,11 +1,15 @@
 package trading.challenges;
 
 import trading.simulation.RunParameters;
+import trading.simulation.SimulationDayReport;
 import trading.simulation.SimulationReport;
 
 import java.io.BufferedWriter;
+import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -47,6 +51,60 @@ public class ChallengeReporter {
         }
 
         this.writeLine(runParameters.getRunIndex(), line);
+
+        this.generateDailyReport(runParameters, simulationReport);
+    }
+
+    private void generateDailyReport(RunParameters runParameters, SimulationReport simulationReport) {
+        if(simulationReport.getDayReports() == null) {
+            return;
+        }
+
+        Path mainReportPath = Paths.get(this.fileName);
+        Path reportDirectory = mainReportPath.getParent();
+        String dailyPath = reportDirectory.toString() + File.separator + "data_detailed_" + runParameters.getRunIndex() + ".csv";
+
+        BufferedWriter bufferedWriter = null;
+
+        try {
+            bufferedWriter = new BufferedWriter(new FileWriter(dailyPath));
+
+            bufferedWriter.write("day;account_balance;available_money;average_market_rate_of_return;realized_rate_of_return");
+            bufferedWriter.newLine();
+
+            for(int dayIndex = 0; dayIndex < simulationReport.getDayReports().size(); dayIndex++) {
+                SimulationDayReport simulationDayReport = simulationReport.getDayReports().get(dayIndex);
+
+                bufferedWriter.write(((Integer) dayIndex).toString());
+                bufferedWriter.write(";");
+
+                bufferedWriter.write(simulationDayReport.getAccountBalance().toString());
+                bufferedWriter.write(";");
+
+                bufferedWriter.write(simulationDayReport.getAvailableMoney(). toString());
+                bufferedWriter.write(";");
+
+                bufferedWriter.write(((Double) simulationDayReport.getAverageMarketRateOfReturn()).toString());
+                bufferedWriter.write(";");
+
+                bufferedWriter.write(((Double) simulationDayReport.getRealizedRateOfReturn()).toString());
+                bufferedWriter.newLine();
+            }
+
+            bufferedWriter.close();
+        }
+        catch (IOException exception) {
+            if(bufferedWriter != null) {
+                try {
+                    bufferedWriter.close();
+                }
+                catch (IOException closeException) {
+                    closeException.printStackTrace();
+                }
+            }
+
+            throw new RuntimeException(exception);
+        }
     }
 
     public void trackFailedSimulation(RunParameters runParameters, Exception ex) {

@@ -10,13 +10,20 @@ import trading.market.MarketPriceSnapshot;
 import trading.strategy.TradingStrategy;
 import trading.strategy.TradingStrategyContext;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Set;
 
 public class SimulationDriver {
     private final SimulationDriverParameters parameters;
+    private boolean dailyReporting = false;
 
     public SimulationDriver(SimulationDriverParameters parameters) {
         this.parameters = parameters;
+    }
+
+    public void setDailyReporting(boolean dailyReporting) {
+        this.dailyReporting = dailyReporting;
     }
 
     public SimulationReport runSimulation() {
@@ -34,9 +41,29 @@ public class SimulationDriver {
 
         int numSimulationDays = this.parameters.getSimulationDuration().getValue();
 
+        List<SimulationDayReport> simulationDayReports = null;
+
+        if(this.dailyReporting) {
+            simulationDayReports = new ArrayList<>();
+        }
+
         for(int simulationDayIndex = 0; simulationDayIndex < numSimulationDays; simulationDayIndex++) {
             simulation.openDay();
-            simulation.closeDay(simulationMarketDataSource.getNextClosingMarketPrices());
+
+            MarketPriceSnapshot nextClosingMarketPrices = simulationMarketDataSource.getNextClosingMarketPrices();
+            simulation.closeDay(nextClosingMarketPrices);
+
+            if(this.dailyReporting) {
+                Amount availableMoney = account.getAvailableMoney();
+                Amount accountBalance = account.getBalance();
+
+                double averageMarketRateOfReturn = this.calculateAverageMarketRateOfReturn(
+                        initialClosingMarketPrices, nextClosingMarketPrices);
+
+                double realizedRateOfReturn = account.getBalance().getValue() / this.parameters.getSeedCapital().getValue() - 1;
+
+                simulationDayReports.add(new SimulationDayReport(availableMoney, accountBalance, averageMarketRateOfReturn, realizedRateOfReturn));
+            }
         }
 
         Amount finalAccountBalance = account.getBalance();
@@ -51,7 +78,8 @@ public class SimulationDriver {
                 finalAccountBalance,
                 account.getProcessedTransactions(),
                 averageMarketRateOfReturn,
-                realizedRateOfReturn);
+                realizedRateOfReturn,
+                simulationDayReports);
 
         return simulationReport;
     }
@@ -78,7 +106,7 @@ public class SimulationDriver {
         for(ISIN isin: isins) {
             double initialMarketPrice = initialClosingMarketPrices.getMarketPrice(isin).getValue();
             double finalMarketPrice = finalClosingMarketPrices.getMarketPrice(isin).getValue();
-            double marketRateOfReturn = finalMarketPrice / initialMarketPrice - 1;
+            double marketRateOfReturn = finalMarketPrice / initialMarketPrice - 1.0;
             sumMarketRateOfReturn += marketRateOfReturn;
         }
 

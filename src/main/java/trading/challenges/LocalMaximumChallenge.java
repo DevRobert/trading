@@ -53,6 +53,16 @@ public class LocalMaximumChallenge implements Challenge {
 
     @Override
     public ParameterTupleSource getParametersSource() {
+        List<Object[]> parameterTuples = new ArrayList<>();
+
+        for(ISIN isin: HistoricalTestDataProvider.getISINs()) {
+            parameterTuples.add(new Object[] { 7, 0.1, 0.3, 0.04, 0.0, isin});
+            parameterTuples.add(new Object[] { 3, 0.09, 0.3, 0.06, 0.07, isin});
+        }
+
+        return new PreparedParameterTupleSource(parameterTuples);
+
+        /*
         return new LazyParameterTupleSource(Arrays.asList(
                 this.getBuyTriggerLocalMaximumLookBehindPeriod(),
                 this.getBuyTriggerMinDeclineFromLocalMaximumPercentage(),
@@ -61,6 +71,7 @@ public class LocalMaximumChallenge implements Challenge {
                 this.getSellTriggerStopLossMinimumDeclineSinceBuyingPercentage(),
                 this.getISIN()
         ));
+        */
     }
 
     @Override
@@ -96,7 +107,6 @@ public class LocalMaximumChallenge implements Challenge {
         });
 
         simulationDriverParametersBuilder.setCommissionStrategy(CommissionStrategies.getDegiroXetraCommissionStrategy());
-        // simulationDriverParametersBuilder.setCommissionStrategy(CommissionStrategies.getConsorsXetraCommissionStrategy());
 
         return simulationDriverParametersBuilder.build();
     }

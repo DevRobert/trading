@@ -18,15 +18,83 @@ public class ChallengeExecutor {
     private CountDownLatch countDownLatch;
     private int numSimulations;
     private Challenge challenge;
+    private boolean dailyReporting = false;
 
-    private void prepareReporting(String[] parameterNames) {
-        String fileName = "/Users/robert/GitHub/data/data.csv";
-        this.reporter = new ChallengeReporter(fileName, parameterNames);
+    public ChallengeExecutor(Challenge challenge) {
+        this.challenge = challenge;
     }
 
-    private void endReporting() {
-       this.reporter.close();
-       this.reporter = null;
+    public void setDailyReporting(boolean dailyReporting) {
+        this.dailyReporting = dailyReporting;
+    }
+
+    public void executeChallenge() {
+        String fileName = "/Users/robert/GitHub/data/data.csv";
+        this.reporter = new ChallengeReporter(fileName, this.challenge.getParameterNames());
+
+        this.runParametersSource = challenge.getParametersSource();
+        this.runParametersIterator = runParametersSource.getIterator();
+
+        final int numThreads = Runtime.getRuntime().availableProcessors();
+
+        this.numSimulations = runParametersSource.size();
+
+        if(dailyReporting && this.numSimulations > 1000) {
+            throw new RuntimeException("Daily reporting is not allowed for challenges containing more than 1,000 simulations.");
+        }
+
+        System.out.println("Running " + String.format("%,d", this.numSimulations) + " simulations in " + numThreads + " threads...");
+
+        final ExecutorService threads = Executors.newFixedThreadPool(numThreads);
+
+        this.countDownLatch = new CountDownLatch(this.numSimulations);
+
+        try {
+            for(int threadIndex = 0; threadIndex < numThreads; threadIndex++) {
+                threads.execute(() -> this.runSimulationInWorkerThread());
+            }
+
+            countDownLatch.await();
+        }
+        catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        }
+        finally {
+            threads.shutdown();
+
+            this.reporter.close();
+        }
+
+        System.out.println("All simulations completed.");
+    }
+
+    private void runSimulationInWorkerThread() {
+        RunParameters runParameters;
+
+        while((runParameters = this.getNextRunParameters()) != null) {
+            try {
+                SimulationDriverParameters simulationDriverParameters = challenge.buildSimulationDriverParametersForRun(runParameters.getParameters());
+
+                SimulationDriver simulationDriver = new SimulationDriver(simulationDriverParameters);
+                simulationDriver.setDailyReporting(this.dailyReporting);
+                SimulationReport simulationReport = simulationDriver.runSimulation();
+
+                this.reporter.trackCompletedSimulation(runParameters, simulationReport);
+            }
+            catch(RuntimeException ex) {
+                this.reporter.trackFailedSimulation(runParameters, ex);
+            }
+            finally {
+                countDownLatch.countDown();
+            }
+
+            long numRemainingSimulations = countDownLatch.getCount();
+
+            if(numRemainingSimulations % 100000 == 0 && numRemainingSimulations > 0) {
+                double progress = 100.0 * (numSimulations - numRemainingSimulations) / numSimulations;
+                System.out.println("Progress: " + String.format("%.2f", progress) + " % - " + String.format("%,d", numRemainingSimulations) + " simulations remaining.");
+            }
+        }
     }
 
     private RunParameters getNextRunParameters() {
@@ -47,67 +115,5 @@ public class ChallengeExecutor {
         }
 
         return new RunParameters(runIndex, runParameters);
-    }
-
-    public void executeChallenge(Challenge challenge) {
-        this.challenge = challenge;
-        this.prepareReporting(challenge.getParameterNames());
-
-        this.runParametersSource = challenge.getParametersSource();
-        this.runParametersIterator = runParametersSource.getIterator();
-
-        final int numThreads = Runtime.getRuntime().availableProcessors();
-
-        this.numSimulations = runParametersSource.size();
-        System.out.println("Running " + String.format("%,d", this.numSimulations) + " simulations in " + numThreads + " threads...");
-
-        final ExecutorService threads = Executors.newFixedThreadPool(numThreads);
-
-        this.countDownLatch = new CountDownLatch(this.numSimulations);
-
-        try {
-            for(int threadIndex = 0; threadIndex < numThreads; threadIndex++) {
-                threads.execute(() -> this.runSimulationInWorkerThread());
-            }
-
-            countDownLatch.await();
-        }
-        catch (InterruptedException e) {
-            throw new RuntimeException(e);
-        }
-        finally {
-            threads.shutdown();
-        }
-
-        System.out.println("All simulations completed.");
-
-        this.endReporting();
-    }
-
-    private void runSimulationInWorkerThread() {
-        RunParameters runParameters;
-
-        while((runParameters = this.getNextRunParameters()) != null) {
-            try {
-                SimulationDriverParameters simulationDriverParameters = challenge.buildSimulationDriverParametersForRun(runParameters.getParameters());
-                SimulationDriver simulationDriver = new SimulationDriver(simulationDriverParameters);
-                SimulationReport simulationReport = simulationDriver.runSimulation();
-
-                this.reporter.trackCompletedSimulation(runParameters, simulationReport);
-            }
-            catch(RuntimeException ex) {
-                this.reporter.trackFailedSimulation(runParameters, ex);
-            }
-            finally {
-                countDownLatch.countDown();
-            }
-
-            long numRemainingSimulations = countDownLatch.getCount();
-
-            if(numRemainingSimulations % 100000 == 0 && numRemainingSimulations > 0) {
-                double progress = 100.0 * (numSimulations - numRemainingSimulations) / numSimulations;
-                System.out.println("Progress: " + String.format("%.2f", progress) + " % - " + String.format("%,d", numRemainingSimulations) + " simulations remaining.");
-            }
-        }
     }
 }
