@@ -55,10 +55,6 @@ public class ChallengeExecutor {
             }
         }
 
-        if(runParameters == null) {
-            return null;
-        }
-
         return new RunParameters(runIndex, runParameters);
     }
 
