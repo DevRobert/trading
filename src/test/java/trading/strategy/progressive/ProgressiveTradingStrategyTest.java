@@ -31,7 +31,7 @@ public class ProgressiveTradingStrategyTest extends ProgressiveTradingStrategyTe
 
     @Test
     public void buyOrderIsSetInitially_ifBuyTriggerFiresImmediately() {
-        parametersBuilder.setBuyTriggerFactory((historicalMarketData) -> new WaitFixedPeriodTrigger(new DayCount(0)));
+        parametersBuilder.setBuyTriggerFactory((historicalMarketData) -> new WaitFixedPeriodTrigger(historicalMarketData, new DayCount(0)));
 
         beginHistory(ISIN.MunichRe, new Amount(1000.0));
 
@@ -43,7 +43,7 @@ public class ProgressiveTradingStrategyTest extends ProgressiveTradingStrategyTe
 
     @Test
     public void buyOrderIsNotSetInitially_ifBuyTriggerFiresAfterOneDay() {
-        parametersBuilder.setBuyTriggerFactory((historicalMarketData) -> new WaitFixedPeriodTrigger(new DayCount(1)));
+        parametersBuilder.setBuyTriggerFactory((historicalMarketData) -> new WaitFixedPeriodTrigger(historicalMarketData, new DayCount(1)));
 
         beginHistory(ISIN.MunichRe, new Amount(1000.0));
 
@@ -55,7 +55,7 @@ public class ProgressiveTradingStrategyTest extends ProgressiveTradingStrategyTe
 
     @Test
     public void buyOrderIsSetAfterOneDay_ifBuyTriggerFiresAfterOneDay() {
-        parametersBuilder.setBuyTriggerFactory((historicalMarketData) -> new WaitFixedPeriodTrigger(new DayCount(1)));
+        parametersBuilder.setBuyTriggerFactory((historicalMarketData) -> new WaitFixedPeriodTrigger(historicalMarketData, new DayCount(1)));
 
         beginHistory(ISIN.MunichRe, new Amount(1000.0));
 
@@ -70,7 +70,7 @@ public class ProgressiveTradingStrategyTest extends ProgressiveTradingStrategyTe
 
     @Test
     public void buyOrderMaximumQuantityIsOrdered_ifNoCommissions() {
-        parametersBuilder.setBuyTriggerFactory((historicalMarketData) -> new WaitFixedPeriodTrigger(new DayCount(0)));
+        parametersBuilder.setBuyTriggerFactory((historicalMarketData) -> new WaitFixedPeriodTrigger(historicalMarketData, new DayCount(0)));
 
         beginHistory(ISIN.MunichRe, new Amount(1000.0));
 
@@ -131,9 +131,9 @@ public class ProgressiveTradingStrategyTest extends ProgressiveTradingStrategyTe
 
     @Test
     public void sellOrderIsSetOneDayAfterBuying_ifSellTriggerFiresImmediately() {
-        parametersBuilder.setBuyTriggerFactory((historicalMarketData) -> new WaitFixedPeriodTrigger(new DayCount(0)));
-        parametersBuilder.setSellTriggerFactory((historicalMarketData) -> new WaitFixedPeriodTrigger(new DayCount(0)));
-        parametersBuilder.setResetTriggerFactory((historicalMarketData) -> new WaitFixedPeriodTrigger(new DayCount(10)));
+        parametersBuilder.setBuyTriggerFactory((historicalMarketData) -> new WaitFixedPeriodTrigger(historicalMarketData, new DayCount(0)));
+        parametersBuilder.setSellTriggerFactory((historicalMarketData) -> new WaitFixedPeriodTrigger(historicalMarketData, new DayCount(0)));
+        parametersBuilder.setResetTriggerFactory((historicalMarketData) -> new WaitFixedPeriodTrigger(historicalMarketData, new DayCount(10)));
 
         beginHistory(ISIN.MunichRe, new Amount(1000.0));
         beginSimulation();
@@ -148,9 +148,9 @@ public class ProgressiveTradingStrategyTest extends ProgressiveTradingStrategyTe
 
     @Test
     public void sellOrderIsSetTwoDaysAfterBuying_ifSellTriggerFiresAfterOneDay() {
-        parametersBuilder.setBuyTriggerFactory((historicalMarketData) -> new WaitFixedPeriodTrigger(new DayCount(0)));
-        parametersBuilder.setSellTriggerFactory((historicalMarketData) -> new WaitFixedPeriodTrigger(new DayCount(1)));
-        parametersBuilder.setResetTriggerFactory((historicalMarketData) -> new WaitFixedPeriodTrigger(new DayCount(10)));
+        parametersBuilder.setBuyTriggerFactory((historicalMarketData) -> new WaitFixedPeriodTrigger(historicalMarketData, new DayCount(0)));
+        parametersBuilder.setSellTriggerFactory((historicalMarketData) -> new WaitFixedPeriodTrigger(historicalMarketData, new DayCount(1)));
+        parametersBuilder.setResetTriggerFactory((historicalMarketData) -> new WaitFixedPeriodTrigger(historicalMarketData, new DayCount(10)));
 
         beginHistory(ISIN.MunichRe, new Amount(1000.0));
         beginSimulation();
@@ -174,9 +174,9 @@ public class ProgressiveTradingStrategyTest extends ProgressiveTradingStrategyTe
      */
     @Test
     public void sellOrderIsSetAgainOneDayAfterSelling_ifResetTriggerFiresImmediately_andBuyTriggerFiresImmediately() {
-        parametersBuilder.setBuyTriggerFactory((historicalMarketData) -> new WaitFixedPeriodTrigger(new DayCount(0)));
-        parametersBuilder.setSellTriggerFactory((historicalMarketData) -> new WaitFixedPeriodTrigger(new DayCount(0)));
-        parametersBuilder.setResetTriggerFactory((historicalMarketData) -> new WaitFixedPeriodTrigger(new DayCount(0)));
+        parametersBuilder.setBuyTriggerFactory((historicalMarketData) -> new WaitFixedPeriodTrigger(historicalMarketData, new DayCount(0)));
+        parametersBuilder.setSellTriggerFactory((historicalMarketData) -> new WaitFixedPeriodTrigger(historicalMarketData, new DayCount(0)));
+        parametersBuilder.setResetTriggerFactory((historicalMarketData) -> new WaitFixedPeriodTrigger(historicalMarketData, new DayCount(0)));
 
         beginHistory(ISIN.MunichRe, new Amount(1000.0));
 
@@ -203,9 +203,9 @@ public class ProgressiveTradingStrategyTest extends ProgressiveTradingStrategyTe
 
     @Test
     public void sellOrderIsSetAgainTwoDaysAfterSelling_ifResetTriggerFiresAfterOneDay_andBuyTriggerFiresImmediately() {
-        parametersBuilder.setBuyTriggerFactory((historicalMarketData) -> new WaitFixedPeriodTrigger(new DayCount(0)));
-        parametersBuilder.setSellTriggerFactory((historicalMarketData) -> new WaitFixedPeriodTrigger(new DayCount(0)));
-        parametersBuilder.setResetTriggerFactory((historicalMarketData) -> new WaitFixedPeriodTrigger(new DayCount(1)));
+        parametersBuilder.setBuyTriggerFactory((historicalMarketData) -> new WaitFixedPeriodTrigger(historicalMarketData, new DayCount(0)));
+        parametersBuilder.setSellTriggerFactory((historicalMarketData) -> new WaitFixedPeriodTrigger(historicalMarketData, new DayCount(0)));
+        parametersBuilder.setResetTriggerFactory((historicalMarketData) -> new WaitFixedPeriodTrigger(historicalMarketData, new DayCount(1)));
 
         beginHistory(ISIN.MunichRe, new Amount(1000.0));
 

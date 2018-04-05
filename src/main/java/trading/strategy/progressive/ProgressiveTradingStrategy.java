@@ -81,22 +81,6 @@ public class ProgressiveTradingStrategy implements TradingStrategy {
 
     @Override
     public void prepareOrdersForNextTradingDay() {
-        if (initialization) {
-            initialization = false;
-        } else {
-            if (this.buyTrigger != null) {
-                this.buyTrigger.notifyDayPassed();
-            }
-
-            if (this.sellTrigger != null) {
-                this.sellTrigger.notifyDayPassed();
-            }
-
-            if (this.resetTrigger != null) {
-                this.resetTrigger.notifyDayPassed();
-            }
-        }
-
         if (activateSellTriggerAfterDayPassed) {
             activateSellTriggerAfterDayPassed = false;
             this.sellTrigger = this.parameters.getSellTriggerFactory().createTrigger(this.context.getHistoricalMarketData());

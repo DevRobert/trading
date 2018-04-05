@@ -12,11 +12,6 @@ public class DelegateTrigger implements Trigger {
     }
 
     @Override
-    public void notifyDayPassed() {
-
-    }
-
-    @Override
     public boolean checkFires() {
         return this.condition.checkFires();
     }

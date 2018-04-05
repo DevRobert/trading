@@ -28,9 +28,9 @@ public class ProgressiveTradingStrategyInitializationTest {
     public void before() {
         this.parametersBuilder = new ProgressiveTradingStrategyParametersBuilder();
         this.parametersBuilder.setISIN(ISIN.MunichRe);
-        this.parametersBuilder.setBuyTriggerFactory((historicalMarketData) -> new WaitFixedPeriodTrigger(new DayCount(1)));
-        this.parametersBuilder.setSellTriggerFactory((historicalMarketData) -> new WaitFixedPeriodTrigger(new DayCount(1)));
-        this.parametersBuilder.setResetTriggerFactory((historicalMarketData) -> new WaitFixedPeriodTrigger(new DayCount(1)));
+        this.parametersBuilder.setBuyTriggerFactory((historicalMarketData) -> new WaitFixedPeriodTrigger(historicalMarketData, new DayCount(1)));
+        this.parametersBuilder.setSellTriggerFactory((historicalMarketData) -> new WaitFixedPeriodTrigger(historicalMarketData, new DayCount(1)));
+        this.parametersBuilder.setResetTriggerFactory((historicalMarketData) -> new WaitFixedPeriodTrigger(historicalMarketData, new DayCount(1)));
 
         Amount availableMoney = new Amount(50000.0);
         this.account = new Account(availableMoney);

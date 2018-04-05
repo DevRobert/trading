@@ -8,11 +8,6 @@ public class NotImplementedTrigger implements Trigger {
     }
 
     @Override
-    public void notifyDayPassed() {
-
-    }
-
-    @Override
     public boolean checkFires() {
         throw new NotImplementedException();
     }

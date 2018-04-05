@@ -1,22 +1,22 @@
 package trading.strategy;
 
 import trading.DayCount;
+import trading.market.HistoricalMarketData;
 
 public class WaitFixedPeriodTrigger implements Trigger {
+    private final HistoricalMarketData historicalMarketData;
     private final int waitDaysBeforeFire;
-    private int daysPassed = 0;
+    private DayCount initialHistoryDuration;
 
-    public WaitFixedPeriodTrigger(DayCount waitDaysBeforeFire) {
+    public WaitFixedPeriodTrigger(HistoricalMarketData historicalMarketData, DayCount waitDaysBeforeFire) {
+        this.historicalMarketData = historicalMarketData;
         this.waitDaysBeforeFire = waitDaysBeforeFire.getValue();
-    }
-
-    @Override
-    public void notifyDayPassed() {
-        daysPassed++;
+        this.initialHistoryDuration = historicalMarketData.getDuration();
     }
 
     @Override
     public boolean checkFires() {
-        return this.daysPassed == waitDaysBeforeFire;
+        int daysPassed = this.historicalMarketData.getDuration().getValue() - this.initialHistoryDuration.getValue();
+        return daysPassed == waitDaysBeforeFire;
     }
 }
