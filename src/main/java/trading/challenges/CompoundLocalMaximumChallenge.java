@@ -59,7 +59,7 @@ public class CompoundLocalMaximumChallenge implements Challenge {
 
         result.add(0.05);
 
-        for(double maximumPercentage = 0.1; maximumPercentage <= 1.0; maximumPercentage += 0.01) {
+        for(double maximumPercentage = 0.1; maximumPercentage <= 1.0; maximumPercentage += 0.1) {
             result.add(maximumPercentage);
         }
 
