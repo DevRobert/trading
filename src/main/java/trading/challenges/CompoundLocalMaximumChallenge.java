@@ -18,6 +18,7 @@ public class CompoundLocalMaximumChallenge implements Challenge {
     private List<Object> getBuyTriggerLocalMaximumLookBehindPeriod() {
         List<Object> result = new ArrayList<>();
 
+        /*
         for(int lookBehind = 1; lookBehind < 10; lookBehind += 1) {
             result.add(lookBehind);
         }
@@ -25,32 +26,38 @@ public class CompoundLocalMaximumChallenge implements Challenge {
         for(int lookBehind = 10; lookBehind <= 90; lookBehind += 10) {
             result.add(lookBehind);
         }
+        */
+
+        result.add(1);
+        result.add(5);
+        result.add(10);
+        result.add(20);
+        result.add(30);
+        result.add(90);
 
         return result;
     }
 
     private List<Object> getBuyTriggerMinDeclineFromLocalMaximumPercentage() {
-        return ParameterGenerators.getVeryLowResolutionDoubles(0.0, 0.1);
+        return ParameterGenerators.getLowestResolutionDoubles(0.0, 0.1);
     }
 
     private List<Object> getSellTriggerTrailingStopLossMinDeclineFromMaximumAfterBuyingPercentage() {
-        return ParameterGenerators.getVeryLowResolutionDoubles(0.0, 0.3);
+        return ParameterGenerators.getLowestResolutionDoubles(0.0, 0.3);
     }
 
     private List<Object> getActivateTrailingStopLossMinRaiseSinceBuyingPercentage() {
-        return ParameterGenerators.getVeryLowResolutionDoubles(0.008, 1.0);
+        return ParameterGenerators.getLowestResolutionDoubles(0.008, 1.0);
     }
 
     private List<Object> getSellTriggerStopLossMinimumDeclineSinceBuyingPercentage() {
-        return ParameterGenerators.getVeryLowResolutionDoubles(0.0, 0.4);
+        return ParameterGenerators.getLowestResolutionDoubles(0.0, 0.4);
     }
 
     private List<Object> getMaximumPercentage() {
         List<Object> result = new ArrayList<>();
 
-        for(int lookBehind = 1; lookBehind < 10; lookBehind += 1) {
-            result.add((double) lookBehind);
-        }
+        result.add(5.0);
 
         for(int lookBehind = 10; lookBehind <= 90; lookBehind += 10) {
             result.add((double) lookBehind);

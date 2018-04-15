@@ -72,6 +72,22 @@ public class ParameterGenerators {
         return result;
     }
 
+    public static List<Object> getLowestResolutionDoubles(double inclusiveMin, double inclusiveMax) {
+        List<Object> result = new  ArrayList<>();
+
+        addValue(result, 0.0, inclusiveMin, inclusiveMax);
+
+        for(double value = 0.01; value < 0.1; value += 0.02) {
+            addValue(result, value, inclusiveMin, inclusiveMax);
+        }
+
+        for(double value = 0.1; value <= 1; value += 0.2) {
+            addValue(result, value, inclusiveMin, inclusiveMax);
+        }
+
+        return result;
+    }
+
     private static void addValue(List<Object> result, double value, double inclusiveMin, double inclusiveMax) {
         if(value >= inclusiveMin && value <= inclusiveMax) {
             result.add(value);
