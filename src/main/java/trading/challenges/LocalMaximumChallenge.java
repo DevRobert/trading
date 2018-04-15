@@ -18,7 +18,15 @@ import java.util.stream.Collectors;
 
 public class LocalMaximumChallenge implements Challenge {
     private List<Object> getISIN() {
-        return HistoricalTestDataProvider.getISINs().stream().collect(Collectors.toList());
+        // return HistoricalTestDataProvider.getISINs().stream().collect(Collectors.toList());
+
+        HistoricalTestDataProvider.getISINs();
+
+        List<Object> result = new ArrayList<>();
+
+        result.add(ISIN.MunichRe);
+
+        return result;
     }
 
     private List<Object> getBuyTriggerLocalMaximumLookBehindPeriod() {
@@ -53,6 +61,7 @@ public class LocalMaximumChallenge implements Challenge {
 
     @Override
     public ParameterTupleSource getParametersSource() {
+        /*
         List<Object[]> parameterTuples = new ArrayList<>();
 
         for(ISIN isin: HistoricalTestDataProvider.getISINs()) {
@@ -61,8 +70,8 @@ public class LocalMaximumChallenge implements Challenge {
         }
 
         return new PreparedParameterTupleSource(parameterTuples);
+        */
 
-        /*
         return new LazyParameterTupleSource(Arrays.asList(
                 this.getBuyTriggerLocalMaximumLookBehindPeriod(),
                 this.getBuyTriggerMinDeclineFromLocalMaximumPercentage(),
@@ -71,7 +80,7 @@ public class LocalMaximumChallenge implements Challenge {
                 this.getSellTriggerStopLossMinimumDeclineSinceBuyingPercentage(),
                 this.getISIN()
         ));
-        */
+
     }
 
     @Override

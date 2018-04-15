@@ -21,9 +21,9 @@ public abstract class TradingStrategyTestBase {
     private Simulation simulation;
     protected CommissionStrategy commissionStrategy;
 
-    protected abstract TradingStrategy initializeTradingStrategy(Account account, Broker broker, HistoricalMarketData historicalMarketData);
+    protected abstract TradingStrategy initializeTradingStrategy(TradingStrategyContext context);
 
-    @Before()
+    @Before
     public void tradingStrategyTestBaseBefore() {
         this.account = new Account(new Amount(50000.0));
         this.commissionStrategy = new ZeroCommissionStrategy();
@@ -75,7 +75,7 @@ public abstract class TradingStrategyTestBase {
         }
 
         this.broker = new VirtualBroker(this.account, this.historicalMarketData, this.commissionStrategy);
-        this.tradingStrategy = this.initializeTradingStrategy(this.account, this.broker, historicalMarketData);
+        this.tradingStrategy = this.initializeTradingStrategy(new TradingStrategyContext(this.account, this.broker, this.historicalMarketData));
 
         SimulationBuilder simulationBuilder = new SimulationBuilder();
         simulationBuilder.setTradingStrategy(this.tradingStrategy);

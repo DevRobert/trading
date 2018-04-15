@@ -6,6 +6,7 @@ import trading.market.MarketPriceSnapshot;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class Account {
     private Amount availableMoney;
@@ -180,5 +181,15 @@ public class Account {
             position.setFullMarketPrice(newFullMarketPrice);
             this.balance = this.balance.add(delta);
         }
+    }
+
+    public Map<ISIN,Quantity> getCurrentStocks() {
+        Map<ISIN, Quantity> currentStocks = new HashMap<>();
+
+        for(ISIN isin: this.positions.keySet()) {
+            currentStocks.put(isin, this.positions.get(isin).getQuantity());
+        }
+
+        return currentStocks;
     }
 }

@@ -2,9 +2,6 @@ package trading.strategy.progressive;
 
 import org.junit.Before;
 import trading.ISIN;
-import trading.account.Account;
-import trading.broker.Broker;
-import trading.market.HistoricalMarketData;
 import trading.strategy.NotImplementedTrigger;
 import trading.strategy.TradingStrategy;
 import trading.strategy.TradingStrategyContext;
@@ -22,9 +19,8 @@ public abstract class ProgressiveTradingStrategyTestBase extends TradingStrategy
     }
 
     @Override
-    protected TradingStrategy initializeTradingStrategy(Account account, Broker broker, HistoricalMarketData historicalMarketData) {
+    protected TradingStrategy initializeTradingStrategy(TradingStrategyContext tradingStrategyContext) {
         ProgressiveTradingStrategyParameters parameters = parametersBuilder.build();
-        TradingStrategyContext tradingStrategyContext = new TradingStrategyContext(account, broker, historicalMarketData);
         return new ProgressiveTradingStrategy(parameters, tradingStrategyContext);
     }
 }

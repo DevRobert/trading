@@ -5,6 +5,7 @@ import org.junit.Test;
 import trading.*;
 
 import java.util.List;
+import java.util.Map;
 
 public class AccountTest extends AccountTestBase {
     @Test
@@ -229,5 +230,22 @@ public class AccountTest extends AccountTestBase {
         Assert.assertEquals(2, account.getProcessedTransactions().size());
         Assert.assertTrue(account.getProcessedTransactions().contains(firstTransaction));
         Assert.assertTrue(account.getProcessedTransactions().contains(secondTransaction));
+    }
+
+    @Test
+    public void returnsCurrentStocks() {
+        Account account = new Account(new Amount(50000.0));
+
+        Transaction firstTransaction = new Transaction(TransactionType.Buy, ISIN.MunichRe, new Quantity(1), new Amount(1000.0), Amount.Zero);
+        Transaction secondTransaction = new Transaction(TransactionType.Buy, ISIN.Allianz, new Quantity(2), new Amount(500.0), Amount.Zero);
+
+        account.registerTransaction(firstTransaction);
+        account.registerTransaction(secondTransaction);
+
+        Map<ISIN, Quantity> stocks = account.getCurrentStocks();
+
+        Assert.assertEquals(2, stocks.size());
+        Assert.assertEquals(new Quantity(1), stocks.get(ISIN.MunichRe));
+        Assert.assertEquals(new Quantity(2), stocks.get(ISIN.Allianz));
     }
 }

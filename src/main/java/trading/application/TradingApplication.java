@@ -15,7 +15,7 @@ public class TradingApplication {
         Date start = new Date();
 
         ChallengeExecutor challengeExecutor = new ChallengeExecutor(challenge);
-        challengeExecutor.setDailyReporting(true);
+        // challengeExecutor.setDailyReporting(true);
         challengeExecutor.executeChallenge();
 
         Date end = new Date();
