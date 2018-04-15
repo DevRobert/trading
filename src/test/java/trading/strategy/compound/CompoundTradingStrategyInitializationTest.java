@@ -10,12 +10,16 @@ import trading.broker.Broker;
 import trading.broker.CommissionStrategies;
 import trading.broker.VirtualBroker;
 import trading.market.HistoricalMarketData;
+import trading.strategy.NotImplementedTrigger;
 import trading.strategy.TradingStrategyContext;
+import trading.strategy.Trigger;
+import trading.strategy.TriggerFactory;
 
 public class CompoundTradingStrategyInitializationTest {
     private TradingStrategyContext tradingStrategyContext;
     private ScoringStrategy scoringStrategy;
     private StockSelector stockSelector;
+    private TriggerFactory sellTriggerFactory;
 
     @Before
     public void before() {
@@ -26,10 +30,23 @@ public class CompoundTradingStrategyInitializationTest {
         this.tradingStrategyContext = new TradingStrategyContext(account, broker, historicalMarketData);
         this.scoringStrategy = new FixedScoringStrategy();
         this.stockSelector = new StockSelector(new Score(0.0), 1.0);
+
+        this.sellTriggerFactory = new TriggerFactory() {
+            @Override
+            public Trigger createTrigger(HistoricalMarketData historicalMarketData) {
+                return new NotImplementedTrigger();
+            }
+        };
     }
 
     protected CompoundTradingStrategy createCompoundTradingStrategy() {
-        return new CompoundTradingStrategy(this.tradingStrategyContext, this.scoringStrategy, this.stockSelector);
+        CompoundTradingStrategyParameters compoundTradingStrategyParameters = new CompoundTradingStrategyParametersBuilder()
+                .setScoringStrategy(this.scoringStrategy)
+                .setStockSelector(this.stockSelector)
+                .setSellTriggerFactory(this.sellTriggerFactory)
+                .build();
+
+        return new CompoundTradingStrategy(compoundTradingStrategyParameters, this.tradingStrategyContext);
     }
 
     @Test
@@ -41,6 +58,19 @@ public class CompoundTradingStrategyInitializationTest {
         }
         catch(RuntimeException ex) {
             Assert.assertEquals("The trading strategy context was not specified.", ex.getMessage());
+            return;
+        }
+
+        Assert.fail("RuntimeException expected.");
+    }
+
+    @Test
+    public void initializationFails_ifParametersNotSpecified() {
+        try {
+            new CompoundTradingStrategy(null, this.tradingStrategyContext);
+        }
+        catch(RuntimeException ex) {
+            Assert.assertEquals("The trading strategy parameters were not specified.", ex.getMessage());
             return;
         }
 
@@ -71,6 +101,21 @@ public class CompoundTradingStrategyInitializationTest {
         }
         catch(RuntimeException ex) {
             Assert.assertEquals("The stock selector was not specified.", ex.getMessage());
+            return;
+        }
+
+        Assert.fail("RuntimeException expected.");
+    }
+
+    @Test
+    public void initializationFails_ifSellTriggerNotSpecified() {
+        this.sellTriggerFactory = null;
+
+        try {
+            createCompoundTradingStrategy();
+        }
+        catch(RuntimeException ex) {
+            Assert.assertEquals("The sell trigger factory was not specified.", ex.getMessage());
             return;
         }
 

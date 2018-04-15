@@ -3,20 +3,26 @@ package trading.strategy.compound;
 import org.junit.Assert;
 import org.junit.Test;
 import trading.Amount;
+import trading.DayCount;
 import trading.ISIN;
 import trading.account.Position;
 import trading.market.MarketPriceSnapshotBuilder;
-import trading.strategy.TradingStrategy;
-import trading.strategy.TradingStrategyContext;
-import trading.strategy.TradingStrategyTestBase;
+import trading.strategy.*;
 
 public class CompoundTradingStrategyTest extends TradingStrategyTestBase {
     private ScoringStrategy scoringStrategy;
     private StockSelector stockSelector;
+    private TriggerFactory sellTriggerFactory;
 
     @Override
     protected TradingStrategy initializeTradingStrategy(TradingStrategyContext tradingStrategyContext) {
-        return new CompoundTradingStrategy(tradingStrategyContext, this.scoringStrategy, this.stockSelector);
+        CompoundTradingStrategyParameters compoundTradingStrategyParameters = new CompoundTradingStrategyParametersBuilder()
+                .setScoringStrategy(this.scoringStrategy)
+                .setStockSelector(this.stockSelector)
+                .setSellTriggerFactory(this.sellTriggerFactory)
+                .build();
+
+        return new CompoundTradingStrategy(compoundTradingStrategyParameters, tradingStrategyContext);
     }
 
     @Test
@@ -26,6 +32,8 @@ public class CompoundTradingStrategyTest extends TradingStrategyTestBase {
                 .setScore(ISIN.Allianz, new Score(1.0));
 
         this.stockSelector = new StockSelector(new Score(0.0), 1.0);
+
+        this.sellTriggerFactory = (historicalMarketData) -> new NeverFiresTrigger();
 
         MarketPriceSnapshotBuilder marketPriceSnapshotBuilder = new MarketPriceSnapshotBuilder();
         marketPriceSnapshotBuilder.setMarketPrice(ISIN.MunichRe, new Amount(1000.0));
@@ -57,6 +65,8 @@ public class CompoundTradingStrategyTest extends TradingStrategyTestBase {
 
         this.stockSelector = new StockSelector(new Score(0.3), 1.0);
 
+        this.sellTriggerFactory = (historicalMarketData) -> new NeverFiresTrigger();
+
         MarketPriceSnapshotBuilder marketPriceSnapshotBuilder = new MarketPriceSnapshotBuilder()
                 .setMarketPrice(ISIN.MunichRe, new Amount(1000.0))
                 .setMarketPrice(ISIN.Allianz, new Amount(500.0));
@@ -75,5 +85,43 @@ public class CompoundTradingStrategyTest extends TradingStrategyTestBase {
         Assert.assertEquals(50, munichRePosition.getQuantity().getValue());
 
         Assert.assertFalse(this.account.hasPosition(ISIN.Allianz));
+    }
+    
+    @Test
+    public void stockIsSoldAfterTriggerFires() {
+        this.scoringStrategy = new FixedScoringStrategy()
+                .setScore(ISIN.MunichRe, new Score(1.0));
+
+        this.stockSelector = new StockSelector(new Score(0.2), 1.0);
+
+        this.sellTriggerFactory = historicalMarketData -> new WaitFixedPeriodTrigger(historicalMarketData, new DayCount(1));
+
+        this.beginHistory(ISIN.MunichRe, new Amount(1000.0));
+
+        this.beginSimulation();
+        this.openDay();
+
+        // Seed capital: 50,000
+        // Zero commissions
+        // => 50 * 1,000 = 50,000
+
+        Position munichRePosition = this.account.getPosition(ISIN.MunichRe);
+        Assert.assertEquals(50, munichRePosition.getQuantity().getValue());
+
+        this.closeDay(new Amount(1000.0));
+        this.openDay();
+
+        // First day passed
+        // Stocks should not have been sold yet
+
+        Assert.assertEquals(50, munichRePosition.getQuantity().getValue());
+
+        this.closeDay(new Amount(1000.0));
+        this.openDay();
+
+        // Second day passed
+        // Stocks should have been sold
+
+        Assert.assertEquals(0, munichRePosition.getQuantity().getValue());
     }
 }
