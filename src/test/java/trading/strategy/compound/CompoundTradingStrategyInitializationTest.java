@@ -12,7 +12,6 @@ import trading.broker.VirtualBroker;
 import trading.market.HistoricalMarketData;
 import trading.strategy.NotImplementedTrigger;
 import trading.strategy.TradingStrategyContext;
-import trading.strategy.Trigger;
 import trading.strategy.TriggerFactory;
 
 public class CompoundTradingStrategyInitializationTest {
@@ -30,13 +29,7 @@ public class CompoundTradingStrategyInitializationTest {
         this.tradingStrategyContext = new TradingStrategyContext(account, broker, historicalMarketData);
         this.scoringStrategy = new FixedScoringStrategy();
         this.stockSelector = new StockSelector(new Score(0.0), 1.0);
-
-        this.sellTriggerFactory = new TriggerFactory() {
-            @Override
-            public Trigger createTrigger(HistoricalMarketData historicalMarketData) {
-                return new NotImplementedTrigger();
-            }
-        };
+        this.sellTriggerFactory = isin -> new NotImplementedTrigger();
     }
 
     protected CompoundTradingStrategy createCompoundTradingStrategy() {

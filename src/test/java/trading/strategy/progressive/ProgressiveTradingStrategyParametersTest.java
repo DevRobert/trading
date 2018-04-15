@@ -3,8 +3,10 @@ package trading.strategy.progressive;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
+import trading.Amount;
 import trading.DayCount;
 import trading.ISIN;
+import trading.market.HistoricalMarketData;
 import trading.strategy.StrategyInitializationException;
 import trading.strategy.WaitFixedPeriodTrigger;
 
@@ -13,11 +15,13 @@ public class ProgressiveTradingStrategyParametersTest {
 
     @Before
     public void before() {
+        HistoricalMarketData historicalMarketData = new HistoricalMarketData(ISIN.MunichRe, new Amount(1000.0));
+
         this.builder = new ProgressiveTradingStrategyParametersBuilder();
         this.builder.setISIN(ISIN.MunichRe);
-        this.builder.setBuyTriggerFactory((historicalMarketData) -> new WaitFixedPeriodTrigger(historicalMarketData, new DayCount(1)));
-        this.builder.setSellTriggerFactory((historicalMarketData) -> new WaitFixedPeriodTrigger(historicalMarketData, new DayCount(1)));
-        this.builder.setResetTriggerFactory((historicalMarketData) -> new WaitFixedPeriodTrigger(historicalMarketData, new DayCount(1)));
+        this.builder.setBuyTriggerFactory(isin -> new WaitFixedPeriodTrigger(historicalMarketData, new DayCount(1)));
+        this.builder.setSellTriggerFactory(isin -> new WaitFixedPeriodTrigger(historicalMarketData, new DayCount(1)));
+        this.builder.setResetTriggerFactory(isin -> new WaitFixedPeriodTrigger(historicalMarketData, new DayCount(1)));
     }
 
     @Test

@@ -74,7 +74,7 @@ public class CompoundTradingStrategy implements TradingStrategy {
 
     private void createSellTriggers() {
         for(ISIN isin: this.createSellTriggersAfterStocksBought) {
-            Trigger sellTrigger = this.sellTriggerFactory.createTrigger(this.context.getHistoricalMarketData());
+            Trigger sellTrigger = this.sellTriggerFactory.createTrigger(isin);
             this.sellTriggers.put(isin, sellTrigger);
         }
 

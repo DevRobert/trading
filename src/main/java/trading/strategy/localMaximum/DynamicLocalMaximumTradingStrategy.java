@@ -32,8 +32,8 @@ public class DynamicLocalMaximumTradingStrategy implements TradingStrategy {
         AtomicReference<Boolean> buyLocalMaximumPassed = new AtomicReference<>(false);
         AtomicReference<Double> maximumSinceBuying = new AtomicReference<>(0.0);
 
-        parametersBuilder.setBuyTriggerFactory(historicalMarketData -> {
-            HistoricalStockData historicalStockData = historicalMarketData.getStockData(parameters.getIsin());
+        parametersBuilder.setBuyTriggerFactory(isin -> {
+            HistoricalStockData historicalStockData = context.getHistoricalMarketData().getStockData(isin);
 
             return new DelegateTrigger(() -> {
                 double lookBackMarketPrice = historicalStockData.getClosingMarketPrice(parameters.getRisingIndicatorLookBehindPeriod()).getValue();
@@ -69,8 +69,8 @@ public class DynamicLocalMaximumTradingStrategy implements TradingStrategy {
             });
         });
 
-        parametersBuilder.setSellTriggerFactory(historicalMarketData -> {
-            HistoricalStockData historicalStockData = historicalMarketData.getStockData(parameters.getIsin());
+        parametersBuilder.setSellTriggerFactory(isin -> {
+            HistoricalStockData historicalStockData = context.getHistoricalMarketData().getStockData(isin);
 
             return new DelegateTrigger(() -> {
                 double lastClosingPrice = historicalStockData.getLastClosingMarketPrice().getValue();

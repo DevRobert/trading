@@ -94,7 +94,7 @@ public class CompoundTradingStrategyTest extends TradingStrategyTestBase {
 
         this.stockSelector = new StockSelector(new Score(0.2), 1.0);
 
-        this.sellTriggerFactory = historicalMarketData -> new WaitFixedPeriodTrigger(historicalMarketData, new DayCount(1));
+        this.sellTriggerFactory = isin -> new WaitFixedPeriodTrigger(historicalMarketData, new DayCount(1));
 
         this.beginHistory(ISIN.MunichRe, new Amount(1000.0));
 

@@ -2,7 +2,7 @@ package trading.application;
 
 import trading.challenges.Challenge;
 import trading.challenges.ChallengeExecutor;
-import trading.challenges.LocalMaximumChallenge;
+import trading.challenges.CompoundLocalMaximumChallenge;
 
 import java.util.Date;
 
@@ -10,7 +10,7 @@ public class TradingApplication {
     public static void main(String[] args) {
         System.out.println("Trading application started.");
 
-        Challenge challenge = new LocalMaximumChallenge();
+        Challenge challenge = new CompoundLocalMaximumChallenge();
 
         Date start = new Date();
 

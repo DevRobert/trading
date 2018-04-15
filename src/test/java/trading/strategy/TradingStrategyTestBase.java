@@ -17,7 +17,7 @@ public abstract class TradingStrategyTestBase {
     private VirtualBroker broker;
     private TradingStrategy tradingStrategy;
 
-    private HistoricalMarketData historicalMarketData;
+    protected HistoricalMarketData historicalMarketData;
     private Simulation simulation;
     protected CommissionStrategy commissionStrategy;
 

@@ -19,13 +19,13 @@ public class RisingAndDecliningDaysTradingStrategy implements TradingStrategy {
 
         parametersBuilder.setISIN(parameters.getISIN());
 
-        parametersBuilder.setBuyTriggerFactory(historicalMarketData -> {
-            HistoricalStockData historicalStockData = historicalMarketData.getStockData(parameters.getISIN());
+        parametersBuilder.setBuyTriggerFactory(isin -> {
+            HistoricalStockData historicalStockData = context.getHistoricalMarketData().getStockData(isin);
             return new DelegateTrigger(() -> historicalStockData.getRisingDaysInSequence() >= risingDaysInSequence);
         });
 
-        parametersBuilder.setSellTriggerFactory(historicalMarketData -> {
-            HistoricalStockData historicalStockData = historicalMarketData.getStockData(parameters.getISIN());
+        parametersBuilder.setSellTriggerFactory(isin -> {
+            HistoricalStockData historicalStockData = context.getHistoricalMarketData().getStockData(isin);
             return new DelegateTrigger(() -> historicalStockData.getDecliningDaysInSequence() >= decliningDaysInSequence);
         });
 

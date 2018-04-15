@@ -74,7 +74,7 @@ public class ProgressiveTradingStrategy implements TradingStrategy {
         this.context = context;
         this.historicalStockData = context.getHistoricalMarketData().getStockData(parameters.getISIN());
 
-        this.buyTrigger = this.parameters.getBuyTriggerFactory().createTrigger(context.getHistoricalMarketData());
+        this.buyTrigger = this.parameters.getBuyTriggerFactory().createTrigger(parameters.getISIN());
         this.sellTrigger = null;
         this.resetTrigger = null;
     }
@@ -83,12 +83,12 @@ public class ProgressiveTradingStrategy implements TradingStrategy {
     public void prepareOrdersForNextTradingDay() {
         if (activateSellTriggerAfterDayPassed) {
             activateSellTriggerAfterDayPassed = false;
-            this.sellTrigger = this.parameters.getSellTriggerFactory().createTrigger(this.context.getHistoricalMarketData());
+            this.sellTrigger = this.parameters.getSellTriggerFactory().createTrigger(parameters.getISIN());
         }
 
         if (activateResetTriggerAfterDayPassed) {
             activateResetTriggerAfterDayPassed = false;
-            this.resetTrigger = this.parameters.getResetTriggerFactory().createTrigger(this.context.getHistoricalMarketData());
+            this.resetTrigger = this.parameters.getResetTriggerFactory().createTrigger(parameters.getISIN());
         }
 
         if (this.inStateWaitAndReset) {
@@ -147,7 +147,7 @@ public class ProgressiveTradingStrategy implements TradingStrategy {
             this.inStateWaitAndReset = false;
             this.inStateWaitAndBuyStocks = true;
 
-            this.buyTrigger = this.parameters.getBuyTriggerFactory().createTrigger(this.context.getHistoricalMarketData());
+            this.buyTrigger = this.parameters.getBuyTriggerFactory().createTrigger(this.parameters.getISIN());
             this.resetTrigger = null;
         }
     }

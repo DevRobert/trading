@@ -1,7 +1,7 @@
 package trading.strategy;
 
-import trading.market.HistoricalMarketData;
+import trading.ISIN;
 
 public interface TriggerFactory {
-    Trigger createTrigger(HistoricalMarketData historicalMarketData);
+    Trigger createTrigger(ISIN isin);
 }
