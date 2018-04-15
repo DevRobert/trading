@@ -57,10 +57,10 @@ public class CompoundLocalMaximumChallenge implements Challenge {
     private List<Object> getMaximumPercentage() {
         List<Object> result = new ArrayList<>();
 
-        result.add(5.0);
+        result.add(0.05);
 
-        for(int lookBehind = 10; lookBehind <= 90; lookBehind += 10) {
-            result.add((double) lookBehind);
+        for(double maximumPercentage = 0.1; maximumPercentage <= 1.0; maximumPercentage += 0.01) {
+            result.add(maximumPercentage);
         }
 
         return result;
