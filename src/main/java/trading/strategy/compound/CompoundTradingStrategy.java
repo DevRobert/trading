@@ -54,6 +54,8 @@ public class CompoundTradingStrategy implements TradingStrategy {
     private void prepareSellOrders() {
         this.createSellTriggers();
 
+        Set<ISIN> deleteSellTriggers = new HashSet<>();
+
         for(ISIN isin: this.sellTriggers.keySet()) {
             Trigger sellTrigger = this.sellTriggers.get(isin);
 
@@ -61,7 +63,12 @@ public class CompoundTradingStrategy implements TradingStrategy {
                 Position position = this.context.getAccount().getPosition(isin);
                 OrderRequest orderRequest = new OrderRequest(OrderType.SellMarket, isin, position.getQuantity());
                 this.context.getBroker().setOrder(orderRequest);
+                deleteSellTriggers.add(isin);
             }
+        }
+
+        for(ISIN isin: deleteSellTriggers) {
+            this.sellTriggers.remove(isin);
         }
     }
 
