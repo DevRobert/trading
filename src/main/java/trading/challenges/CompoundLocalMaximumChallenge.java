@@ -67,6 +67,32 @@ public class CompoundLocalMaximumChallenge implements Challenge {
 
     @Override
     public ParameterTupleSource getParametersSource() {
+        List<Object[]> parameterTuples = new ArrayList<>();
+
+        parameterTuples.add(new Object[] {
+                10, // buyTriggerLocalMaximumLookBehindPeriod = maximum_look_behind
+                0.1, // buyTriggerMinDeclineFromLocalMaximumPercentage = maximum_min_decline
+                0.07, // sellTriggerTrailingStopLossMinDeclineFromMaximumAfterBuyingPercentage = trailing_stop_los_min_decline
+                0.03, // activateTrailingStopLossMinRaiseSinceBuyingPercentage = trailing_stop_loss_activation_min_raise
+                0.1, // sellTriggerStopLossMinimumDeclineSinceBuyingPercentage = stop_loss_min_decline
+                0.2 // getMaximumPercentage = maximum_percentage
+        });
+
+        parameterTuples.add(new Object[] {
+                10, // buyTriggerLocalMaximumLookBehindPeriod = maximum_look_behind
+                0.05, // buyTriggerMinDeclineFromLocalMaximumPercentage = maximum_min_decline
+                0.07, // sellTriggerTrailingStopLossMinDeclineFromMaximumAfterBuyingPercentage = trailing_stop_los_min_decline
+                0.03, // activateTrailingStopLossMinRaiseSinceBuyingPercentage = trailing_stop_loss_activation_min_raise
+                0.1, // sellTriggerStopLossMinimumDeclineSinceBuyingPercentage = stop_loss_min_decline
+                0.2 // getMaximumPercentage = maximum_percentage
+        });
+
+        return new PreparedParameterTupleSource(parameterTuples);
+    }
+
+    /*
+    @Override
+    public ParameterTupleSource getParametersSource() {
         return new LazyParameterTupleSource(Arrays.asList(
                 this.getBuyTriggerLocalMaximumLookBehindPeriod(),
                 this.getBuyTriggerMinDeclineFromLocalMaximumPercentage(),
@@ -76,6 +102,7 @@ public class CompoundLocalMaximumChallenge implements Challenge {
                 this.getMaximumPercentage()
         ));
     }
+    */
 
     @Override
     public SimulationDriverParameters buildSimulationDriverParametersForRun(Object[] runParameters) {
@@ -119,9 +146,9 @@ public class CompoundLocalMaximumChallenge implements Challenge {
         return new String[] {
                 "maximum_look_behind",
                 "maximum_min_decline",
-                "stop_loss_min_decline",
-                "trailing_stop_loss_activation_min_raise",
                 "trailing_stop_loss_min_decline",
+                "trailing_stop_loss_activation_min_raise",
+                "stop_loss_min_decline",
                 "maximum_percentage"
         };
     }
