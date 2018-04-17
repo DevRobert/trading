@@ -2,6 +2,16 @@
 <project version="4">
   <component name="CompilerConfiguration">
     <bytecodeTargetLevel>
+      <module name="trading-api_main" target="1.8" />
+      <module name="trading-api_test" target="1.8" />
+      <module name="trading-application_main" target="1.8" />
+      <module name="trading-application_test" target="1.8" />
+      <module name="trading-cli_main" target="1.8" />
+      <module name="trading-cli_test" target="1.8" />
+      <module name="trading-domain_main" target="1.8" />
+      <module name="trading-domain_test" target="1.8" />
+      <module name="trading-persistence_main" target="1.8" />
+      <module name="trading-persistence_test" target="1.8" />
       <module name="trading_main" target="1.8" />
       <module name="trading_test" target="1.8" />
     </bytecodeTargetLevel>

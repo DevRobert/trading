@@ -1,1 +1,7 @@
 rootProject.name = 'trading'
+include 'trading-domain'
+include 'trading-application'
+include 'trading-api'
+include 'trading-cli'
+include 'trading-persistence'
+
