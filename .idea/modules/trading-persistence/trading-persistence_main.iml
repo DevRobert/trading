@@ -9,5 +9,9 @@
     </content>
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
+    <orderEntry type="module" module-name="trading-domain_main" />
+    <orderEntry type="library" name="Gradle: org.mongodb:mongodb-driver:3.6.2" level="project" />
+    <orderEntry type="library" name="Gradle: org.mongodb:mongodb-driver-core:3.6.2" level="project" />
+    <orderEntry type="library" name="Gradle: org.mongodb:bson:3.6.2" level="project" />
   </component>
 </module>

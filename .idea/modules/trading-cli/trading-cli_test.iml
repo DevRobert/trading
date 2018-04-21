@@ -10,8 +10,14 @@
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
     <orderEntry type="module" module-name="trading-cli_main" />
+    <orderEntry type="module" module-name="trading-persistence_main" />
+    <orderEntry type="module" module-name="trading-domain_main" />
+    <orderEntry type="module" module-name="trading-application_main" />
     <orderEntry type="library" name="Gradle: junit:junit:4.12" level="project" />
+    <orderEntry type="library" name="Gradle: org.mongodb:mongodb-driver:3.6.2" level="project" />
     <orderEntry type="library" name="Gradle: org.hamcrest:hamcrest-core:1.3" level="project" />
+    <orderEntry type="library" name="Gradle: org.mongodb:mongodb-driver-core:3.6.2" level="project" />
+    <orderEntry type="library" name="Gradle: org.mongodb:bson:3.6.2" level="project" />
   </component>
   <component name="TestModuleProperties" production-module="trading-cli_main" />
 </module>

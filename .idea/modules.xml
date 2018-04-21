@@ -18,8 +18,6 @@
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/trading-persistence.iml" filepath="$PROJECT_DIR$/.idea/modules/trading-persistence.iml" group="trading-persistence" />
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/trading-persistence/trading-persistence_main.iml" filepath="$PROJECT_DIR$/.idea/modules/trading-persistence/trading-persistence_main.iml" group="trading-persistence" />
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/trading-persistence/trading-persistence_test.iml" filepath="$PROJECT_DIR$/.idea/modules/trading-persistence/trading-persistence_test.iml" group="trading-persistence" />
-      <module fileurl="file://$PROJECT_DIR$/.idea/modules/trading_main.iml" filepath="$PROJECT_DIR$/.idea/modules/trading_main.iml" group="trading" />
-      <module fileurl="file://$PROJECT_DIR$/.idea/modules/trading_test.iml" filepath="$PROJECT_DIR$/.idea/modules/trading_test.iml" group="trading" />
     </modules>
   </component>
 </project>
