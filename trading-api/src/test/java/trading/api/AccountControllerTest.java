@@ -1,4 +1,4 @@
-package trading.api.account;
+package trading.api;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -22,28 +22,28 @@ public class AccountControllerTest {
 
     @Test
     public void getTransactions() throws Exception {
-        mvc.perform(MockMvcRequestBuilders.get("/api/accounts/2/transactions/").accept(MediaType.APPLICATION_JSON))
+        this.mvc.perform(MockMvcRequestBuilders.get("/api/accounts/2/transactions/").accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(content().json("Test"));
     }
 
     @Test
     public void getTransaction() throws Exception {
-        mvc.perform(MockMvcRequestBuilders.get("/api/accounts/2/transactions/1").accept(MediaType.APPLICATION_JSON))
+        this.mvc.perform(MockMvcRequestBuilders.get("/api/accounts/2/transactions/1").accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(content().json("Test"));
     }
 
     @Test
     public void getPositions() throws Exception {
-        mvc.perform(MockMvcRequestBuilders.get("/api/accounts/2/positions/").accept(MediaType.APPLICATION_JSON))
+        this.mvc.perform(MockMvcRequestBuilders.get("/api/accounts/2/positions/").accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(content().json("Test"));
     }
 
     @Test
     public void getPosition() throws Exception {
-        mvc.perform(MockMvcRequestBuilders.get("/api/accounts/2/positions/DE0008430026").accept(MediaType.APPLICATION_JSON))
+        this.mvc.perform(MockMvcRequestBuilders.get("/api/accounts/2/positions/DE0008430026").accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(content().json("Test"));
     }
