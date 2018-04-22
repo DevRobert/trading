@@ -1,4 +1,4 @@
-package trading.persistence;
+package trading.persistence.market;
 
 import com.mongodb.BasicDBObject;
 import com.mongodb.MongoClient;

@@ -1,9 +1,9 @@
 package trading.cli;
 
 import trading.domain.simulation.MultiStockMarketDataStore;
-import trading.persistence.MongoMultiStockMarketDataStore;
-import trading.persistence.MongoMultiStockMarketDataStoreParameters;
-import trading.persistence.MongoMultiStockMarketDataStoreParametersBuilder;
+import trading.persistence.market.MongoMultiStockMarketDataStore;
+import trading.persistence.market.MongoMultiStockMarketDataStoreParameters;
+import trading.persistence.market.MongoMultiStockMarketDataStoreParametersBuilder;
 
 public class Dependencies {
     protected static MultiStockMarketDataStore getMultiStockMarketDataStore() {

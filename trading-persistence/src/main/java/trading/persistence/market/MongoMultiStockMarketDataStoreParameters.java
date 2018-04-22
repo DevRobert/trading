@@ -1,4 +1,4 @@
-package trading.persistence;
+package trading.persistence.market;
 
 public class MongoMultiStockMarketDataStoreParameters {
     private String database;

@@ -1,3 +1,13 @@
+buildscript {
+    repositories {
+        mavenCentral()
+    }
+
+    dependencies {
+        // classpath("org.springframework.boot:")
+    }
+}
+
 group 'trading'
 version '1.0-SNAPSHOT'
 
@@ -10,5 +20,10 @@ repositories {
 }
 
 dependencies {
+    compile 'org.springframework.boot:spring-boot-starter-web:2.0.1.RELEASE'
+    compile project(":trading-domain")
+    compile project(":trading-application")
+    compile project(":trading-persistence")
     testCompile group: 'junit', name: 'junit', version: '4.12'
+    testCompile 'org.springframework.boot:spring-boot-starter-test:2.0.1.RELEASE'
 }

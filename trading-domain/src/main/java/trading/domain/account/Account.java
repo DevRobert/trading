@@ -9,11 +9,19 @@ import java.util.List;
 import java.util.Map;
 
 public class Account {
+    private AccountId id;
     private Amount availableMoney;
     private HashMap<ISIN, Position> positions = new HashMap<>();
     private Amount commissions;
     private Amount balance;
     private final List<Transaction> processedTransactions;
+
+    public Account(Amount availableMoney) {
+        this.commissions = Amount.Zero;
+        this.availableMoney = availableMoney;
+        this.balance = availableMoney;
+        this.processedTransactions = new ArrayList<>();
+    }
 
     public Amount getCommissions() {
         return commissions;
@@ -45,11 +53,14 @@ public class Account {
         return processedTransactions;
     }
 
-    public Account(Amount availableMoney) {
-        this.commissions = Amount.Zero;
-        this.availableMoney = availableMoney;
-        this.balance = availableMoney;
-        this.processedTransactions = new ArrayList<>();
+    public AccountId getId() {
+        return this.id;
+    }
+
+    public void setId(AccountId accountId) {
+        // todo test must not be updated if set
+
+        this.id = accountId;
     }
 
     public void registerTransaction(Transaction transaction) throws AccountStateException {

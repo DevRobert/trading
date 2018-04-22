@@ -1,11 +1,20 @@
 package trading.domain;
 
 public class Transaction {
+    private TransactionId id;
     private TransactionType transactionType;
     private ISIN isin;
     private Quantity quantity;
     private Amount totalPrice;
     private Amount commission;
+
+    public TransactionId getId() {
+        return id;
+    }
+
+    public void setId(TransactionId id) {
+        this.id = id;
+    }
 
     public TransactionType getTransactionType() {
         return transactionType;
