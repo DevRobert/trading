@@ -1,10 +1,11 @@
 package trading.api.scoring;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import trading.api.Dependencies;
 import trading.application.ScoringService;
 import trading.domain.ISIN;
+import trading.domain.simulation.MultiStockMarketDataStore;
 import trading.domain.strategy.compound.Score;
 import trading.domain.strategy.compound.Scores;
 
@@ -13,11 +14,14 @@ import java.util.List;
 
 @RestController
 public class ScoringController {
+    @Autowired
+    private MultiStockMarketDataStore multiStockMarketDataStore;
+
     @RequestMapping("/api/scoring")
     public GetScoringResponse getScoring() {
         GetScoringResponse response = new GetScoringResponse();
 
-        ScoringService scoringService = new ScoringService(Dependencies.getMultiStockMarketDataStore());
+        ScoringService scoringService = new ScoringService(this.multiStockMarketDataStore);
         Scores scores = scoringService.getCurrentScoring();
 
         List<ScoreDto> scoreDtos = new ArrayList<>();

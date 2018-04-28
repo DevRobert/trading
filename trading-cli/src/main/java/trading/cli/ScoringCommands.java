@@ -1,13 +1,22 @@
 package trading.cli;
 
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.shell.standard.ShellComponent;
+import org.springframework.shell.standard.ShellMethod;
 import trading.application.ScoringService;
 import trading.domain.ISIN;
+import trading.domain.simulation.MultiStockMarketDataStore;
 import trading.domain.strategy.compound.Score;
 import trading.domain.strategy.compound.Scores;
 
-public class CurrentScoringApplication {
-    public static void main(String[] args) {
-        ScoringService scoringService = new ScoringService(Dependencies.getMultiStockMarketDataStore());
+@ShellComponent
+public class ScoringCommands {
+    @Autowired
+    private MultiStockMarketDataStore multiStockMarketDataStore;
+
+    @ShellMethod(value = "Calculates the current scoring.", key = "scoring")
+    public void getCurrentScoring() {
+        ScoringService scoringService = new ScoringService(this.multiStockMarketDataStore);
         Scores scores = scoringService.getCurrentScoring();
 
         System.out.println("Scores");

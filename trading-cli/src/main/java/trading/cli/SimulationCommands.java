@@ -1,17 +1,24 @@
 package trading.cli;
 
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.shell.standard.ShellComponent;
+import org.springframework.shell.standard.ShellMethod;
 import trading.domain.challenges.Challenge;
 import trading.domain.challenges.ChallengeExecutor;
 import trading.domain.challenges.CompoundLocalMaximumChallenge;
 import trading.domain.challenges.HistoricalTestDataProvider;
+import trading.domain.simulation.MultiStockMarketDataStore;
 
 import java.util.Date;
 
-public class TradingApplication {
-    public static void main(String[] args) {
-        System.out.println("Trading application started.");
+@ShellComponent
+public class SimulationCommands {
+    @Autowired
+    private MultiStockMarketDataStore multiStockMarketDataStore;
 
-        HistoricalTestDataProvider historicalTestDataProvider = new HistoricalTestDataProvider(Dependencies.getMultiStockMarketDataStore());
+    @ShellMethod(value = "Runs the simulations.", key = "simulation")
+    public void runSimulations() {
+        HistoricalTestDataProvider historicalTestDataProvider = new HistoricalTestDataProvider(this.multiStockMarketDataStore);
         Challenge challenge = new CompoundLocalMaximumChallenge(historicalTestDataProvider);
 
         Date start = new Date();

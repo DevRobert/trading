@@ -10,6 +10,7 @@ repositories {
 }
 
 dependencies {
+    compile group: "org.springframework.shell", name: "spring-shell-starter", version: "2.0.0.RELEASE"
     compile project(":trading-domain")
     compile project(":trading-application")
     compile project(":trading-persistence")
