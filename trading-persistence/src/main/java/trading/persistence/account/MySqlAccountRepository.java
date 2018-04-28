@@ -5,6 +5,7 @@ import trading.domain.account.Account;
 import trading.domain.account.AccountId;
 import trading.domain.account.AccountNotFoundException;
 import trading.domain.account.AccountRepository;
+import trading.persistence.MySqlRepository;
 
 import java.sql.*;
 import java.util.ArrayList;
@@ -12,24 +13,7 @@ import java.util.List;
 
 // todo transactions?
 
-public class MySqlAccountRepository implements AccountRepository {
-    private Connection openNewConnection() {
-        try {
-            return DriverManager.getConnection("jdbc:mysql://localhost/trading?user=root&password=testtest&useUnicode=true&useJDBCCompliantTimezoneShift=true&useLegacyDatetimeCode=false&serverTimezone=UTC");
-        }
-        catch (SQLException e) {
-            throw new RuntimeException(e);
-        }
-    }
-
-    private void closeConnection(Connection connection) {
-        try {
-            connection.close();
-        }
-        catch (SQLException e) {
-            e.printStackTrace();
-        }
-    }
+public class MySqlAccountRepository extends MySqlRepository implements AccountRepository {
 
     @Override
     public Account createAccount(ClientId clientId, Amount seedCapital) {

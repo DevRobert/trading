@@ -6,6 +6,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import trading.application.ScoringService;
 import trading.domain.ISIN;
+import trading.domain.market.InstrumentNameProvider;
 import trading.domain.strategy.compound.Score;
 import trading.domain.strategy.compound.Scores;
 
@@ -17,6 +18,9 @@ import java.util.List;
 public class ScoringController {
     @Autowired
     private ScoringService scoringService;
+
+    @Autowired
+    private InstrumentNameProvider instrumentNameProvider;
 
     @RequestMapping("/api/scoring")
     public GetScoringResponse getScoring() {
@@ -34,6 +38,14 @@ public class ScoringController {
             scoreDto.setName("Unknown (todo)");
             scoreDto.setScore(score.getValue());
             scoreDto.setComment(score.getComment());
+
+            String instrumentName = this.instrumentNameProvider.getInstrumentName(isin);
+
+            if(instrumentName == null) {
+                instrumentName = "Unknown";
+            }
+
+            scoreDto.setName(instrumentName);
 
             scoreDtos.add(scoreDto);
         }
