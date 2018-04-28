@@ -5,19 +5,17 @@ import org.springframework.shell.standard.ShellComponent;
 import org.springframework.shell.standard.ShellMethod;
 import trading.application.ScoringService;
 import trading.domain.ISIN;
-import trading.domain.simulation.MultiStockMarketDataStore;
 import trading.domain.strategy.compound.Score;
 import trading.domain.strategy.compound.Scores;
 
 @ShellComponent
 public class ScoringCommands {
     @Autowired
-    private MultiStockMarketDataStore multiStockMarketDataStore;
+    private ScoringService scoringService;
 
     @ShellMethod(value = "Calculates the current scoring.", key = "scoring")
     public void getCurrentScoring() {
-        ScoringService scoringService = new ScoringService(this.multiStockMarketDataStore);
-        Scores scores = scoringService.getCurrentScoring();
+        Scores scores = this.scoringService.getCurrentScoring();
 
         System.out.println("Scores");
         System.out.println();

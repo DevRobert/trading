@@ -5,7 +5,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import trading.application.ScoringService;
 import trading.domain.ISIN;
-import trading.domain.simulation.MultiStockMarketDataStore;
 import trading.domain.strategy.compound.Score;
 import trading.domain.strategy.compound.Scores;
 
@@ -15,14 +14,13 @@ import java.util.List;
 @RestController
 public class ScoringController {
     @Autowired
-    private MultiStockMarketDataStore multiStockMarketDataStore;
+    private ScoringService scoringService;
 
     @RequestMapping("/api/scoring")
     public GetScoringResponse getScoring() {
         GetScoringResponse response = new GetScoringResponse();
 
-        ScoringService scoringService = new ScoringService(this.multiStockMarketDataStore);
-        Scores scores = scoringService.getCurrentScoring();
+        Scores scores = this.scoringService.getCurrentScoring();
 
         List<ScoreDto> scoreDtos = new ArrayList<>();
 
@@ -33,7 +31,7 @@ public class ScoringController {
             scoreDto.setIsin(isin.getText());
             scoreDto.setName("Unknown (todo)");
             scoreDto.setScore(score.getValue());
-            scoreDto.setText(score.getComment());
+            scoreDto.setComment(score.getComment());
 
             scoreDtos.add(scoreDto);
         }

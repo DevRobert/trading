@@ -4,7 +4,7 @@ public class ScoreDto {
     private String isin;
     private String name;
     private Double score;
-    private String text;
+    private String comment;
 
     public String getIsin() {
         return isin;
@@ -30,11 +30,11 @@ public class ScoreDto {
         this.score = score;
     }
 
-    public String getText() {
-        return text;
+    public String getComment() {
+        return comment;
     }
 
-    public void setText(String text) {
-        this.text = text;
+    public void setComment(String comment) {
+        this.comment = comment;
     }
 }
