@@ -1,9 +1,6 @@
 package trading.domain.broker;
 
-import trading.domain.Amount;
-import trading.domain.ISIN;
-import trading.domain.Transaction;
-import trading.domain.TransactionType;
+import trading.domain.*;
 import trading.domain.account.Account;
 import trading.domain.market.HistoricalMarketData;
 
@@ -73,7 +70,15 @@ public class VirtualBroker implements Broker {
         Amount lastMarketPrice = this.historicalMarketData.getStockData(isin).getLastClosingMarketPrice();
         Amount totalPrice = lastMarketPrice.multiply(orderRequest.getQuantity());
         Amount commission = this.commissionStrategy.calculateCommission(totalPrice);
-        Transaction transaction = new Transaction(TransactionType.Buy, isin, orderRequest.getQuantity(), totalPrice, commission);
+
+        Transaction transaction = new TransactionBuilder()
+                .setTransactionType(TransactionType.Buy)
+                .setIsin(isin)
+                .setQuantity(orderRequest.getQuantity())
+                .setTotalPrice(totalPrice)
+                .setCommission(commission)
+                .build();
+
         account.registerTransaction(transaction);
     }
 
@@ -82,7 +87,15 @@ public class VirtualBroker implements Broker {
         Amount lastMarketPrice = this.historicalMarketData.getStockData(isin).getLastClosingMarketPrice();
         Amount totalPrice = lastMarketPrice.multiply(orderRequest.getQuantity());
         Amount commission = this.commissionStrategy.calculateCommission(totalPrice);
-        Transaction transaction = new Transaction(TransactionType.Sell, isin, orderRequest.getQuantity(), totalPrice, commission);
+
+        Transaction transaction = new TransactionBuilder()
+                .setTransactionType(TransactionType.Sell)
+                .setIsin(isin)
+                .setQuantity(orderRequest.getQuantity())
+                .setTotalPrice(totalPrice)
+                .setCommission(commission)
+                .build();
+
         account.registerTransaction(transaction);
     }
 }

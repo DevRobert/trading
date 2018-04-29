@@ -27,7 +27,14 @@ public class AccountTest extends AccountTestBase {
         Amount fullPrice = new Amount(2000.0);
         Amount commission = new Amount(20.0);
 
-        Transaction transaction = new Transaction(TransactionType.Buy, isin, quantity, fullPrice, commission);
+        Transaction transaction = new TransactionBuilder()
+                .setTransactionType(TransactionType.Buy)
+                .setIsin(isin)
+                .setQuantity(quantity)
+                .setTotalPrice(fullPrice)
+                .setCommission(commission)
+                .build();
+
         account.registerTransaction(transaction);
 
         Position position = account.getPosition(isin);
@@ -41,7 +48,14 @@ public class AccountTest extends AccountTestBase {
     public void buyTransactionLeadsToConfirmedPosition() throws AccountStateException {
         Amount fullPrice = new Amount(1000.0);
         Amount commission = new Amount(10.0);
-        Transaction transaction = new Transaction(TransactionType.Buy, ISIN.MunichRe, new Quantity(1), fullPrice, commission);
+
+        Transaction transaction = new TransactionBuilder()
+                .setTransactionType(TransactionType.Buy)
+                .setIsin(ISIN.MunichRe)
+                .setQuantity(new Quantity(1))
+                .setTotalPrice(fullPrice)
+                .setCommission(commission)
+                .build();
 
         account.registerTransaction(transaction);
 
@@ -58,8 +72,21 @@ public class AccountTest extends AccountTestBase {
         Amount buyCommission = new Amount(10.0);
         Amount sellCommission = new Amount(10.0);
 
-        Transaction buyTransaction = new Transaction(TransactionType.Buy, isin, quantity, fullBuyPrice, buyCommission);
-        Transaction sellTransaction = new Transaction(TransactionType.Sell, isin, quantity, fullSellPrice, sellCommission);
+        Transaction buyTransaction = new TransactionBuilder()
+                .setTransactionType(TransactionType.Buy)
+                .setIsin(isin)
+                .setQuantity(quantity)
+                .setTotalPrice(fullBuyPrice)
+                .setCommission(buyCommission)
+                .build();
+
+        Transaction sellTransaction = new TransactionBuilder()
+                .setTransactionType(TransactionType.Sell)
+                .setIsin(isin)
+                .setQuantity(quantity)
+                .setTotalPrice(fullSellPrice)
+                .setCommission(sellCommission)
+                .build();
 
         account.registerTransaction(buyTransaction);
         account.registerTransaction(sellTransaction);
@@ -76,7 +103,13 @@ public class AccountTest extends AccountTestBase {
         Amount totalPrice = new Amount(1000.0);
         Amount commission = new Amount(10.0);
 
-        Transaction transaction = new Transaction(TransactionType.Sell, isin, quantity, totalPrice, commission);
+        Transaction transaction = new TransactionBuilder()
+                .setTransactionType(TransactionType.Sell)
+                .setIsin(isin)
+                .setQuantity(quantity)
+                .setTotalPrice(totalPrice)
+                .setCommission(commission)
+                .build();
 
         try {
             account.registerTransaction(transaction);
@@ -97,8 +130,21 @@ public class AccountTest extends AccountTestBase {
         Amount buyCommission = new Amount(10.0);
         Amount sellCommission = new Amount(10.0);
 
-        Transaction buyTransaction = new Transaction(TransactionType.Buy, isin, new Quantity(2), fullBuyPrice, buyCommission);
-        Transaction sellTransaction = new Transaction(TransactionType.Sell, isin, new Quantity(1), fullSellPrice, sellCommission);
+        Transaction buyTransaction = new TransactionBuilder()
+                .setTransactionType(TransactionType.Buy)
+                .setIsin(isin)
+                .setQuantity(new Quantity(2))
+                .setTotalPrice(fullBuyPrice)
+                .setCommission(buyCommission)
+                .build();
+
+        Transaction sellTransaction = new TransactionBuilder()
+                .setTransactionType(TransactionType.Sell)
+                .setIsin(isin)
+                .setQuantity(new Quantity(1))
+                .setTotalPrice(fullSellPrice)
+                .setCommission(sellCommission)
+                .build();
 
         account.registerTransaction(buyTransaction);
 
@@ -121,8 +167,21 @@ public class AccountTest extends AccountTestBase {
         Amount buyCommission = new Amount(10.0);
         Amount sellCommission = new Amount(10.0);
 
-        Transaction buyTransaction = new Transaction(TransactionType.Buy, isin, new Quantity(1), fullBuyPrice, buyCommission);
-        Transaction sellTransaction = new Transaction(TransactionType.Sell, isin, new Quantity(2), fullSellPrice, sellCommission);
+        Transaction buyTransaction = new TransactionBuilder()
+                .setTransactionType(TransactionType.Buy)
+                .setIsin(isin)
+                .setQuantity(new Quantity(1))
+                .setTotalPrice(fullBuyPrice)
+                .setCommission(buyCommission)
+                .build();
+
+        Transaction sellTransaction = new TransactionBuilder()
+                .setTransactionType(TransactionType.Sell)
+                .setIsin(isin)
+                .setQuantity(new Quantity(2))
+                .setTotalPrice(fullSellPrice)
+                .setCommission(sellCommission)
+                .build();
 
         account.registerTransaction(buyTransaction);
 
@@ -143,8 +202,21 @@ public class AccountTest extends AccountTestBase {
         Amount fullBuyPrice = new Amount(1000.0);
         Amount buyCommission = new Amount(10.0);
 
-        Transaction buyTransaction = new Transaction(TransactionType.Buy, isin, new Quantity(2), fullBuyPrice, buyCommission);
-        Transaction furtherBuyTransaction = new Transaction(TransactionType.Buy, isin, new Quantity(2), fullBuyPrice, buyCommission);
+        Transaction buyTransaction = new TransactionBuilder()
+                .setTransactionType(TransactionType.Buy)
+                .setIsin(isin)
+                .setQuantity(new Quantity(2))
+                .setTotalPrice(fullBuyPrice)
+                .setCommission(buyCommission)
+                .build();
+
+        Transaction furtherBuyTransaction = new TransactionBuilder()
+                .setTransactionType(TransactionType.Buy)
+                .setIsin(isin)
+                .setQuantity(new Quantity(2))
+                .setTotalPrice(fullBuyPrice)
+                .setCommission(buyCommission)
+                .build();
 
         account.registerTransaction(buyTransaction);
 
@@ -160,7 +232,7 @@ public class AccountTest extends AccountTestBase {
     }
 
     @Test
-    public void buyTransactionForCompensatedPositionFails() throws AccountStateException {
+    public void buyTransactionForCompensatedPositionPasses() throws AccountStateException {
         ISIN isin = ISIN.MunichRe;
         Amount fullBuyPrice = new Amount(1000.0);
         Amount fullSellPrice = new Amount(2000.0);
@@ -168,9 +240,29 @@ public class AccountTest extends AccountTestBase {
         Amount buyCommission = new Amount(10.0);
         Amount sellCommission = new Amount(10.0);
 
-        Transaction buyTransaction = new Transaction(TransactionType.Buy, isin, new Quantity(2), fullBuyPrice, buyCommission);
-        Transaction sellTransaction = new Transaction(TransactionType.Sell, isin, new Quantity(2), fullSellPrice, sellCommission);
-        Transaction furtherBuyTransaction = new Transaction(TransactionType.Buy, isin, new Quantity(5), furtherBuyPrice, sellCommission);
+        Transaction buyTransaction = new TransactionBuilder()
+                .setTransactionType(TransactionType.Buy)
+                .setIsin(isin)
+                .setQuantity(new Quantity(2))
+                .setTotalPrice(fullBuyPrice)
+                .setCommission(buyCommission)
+                .build();
+
+        Transaction sellTransaction = new TransactionBuilder()
+                .setTransactionType(TransactionType.Sell)
+                .setIsin(isin)
+                .setQuantity(new Quantity(2))
+                .setTotalPrice(fullSellPrice)
+                .setCommission(sellCommission)
+                .build();
+
+        Transaction furtherBuyTransaction = new TransactionBuilder()
+                .setTransactionType(TransactionType.Buy)
+                .setIsin(isin)
+                .setQuantity(new Quantity(5))
+                .setTotalPrice(furtherBuyPrice)
+                .setCommission(buyCommission)
+                .build();
 
         account.registerTransaction(buyTransaction);
         account.registerTransaction(sellTransaction);
@@ -185,7 +277,14 @@ public class AccountTest extends AccountTestBase {
     public void noEmptyPositionIsCreatedForFailedTransaction() {
         Amount fullPrice = new Amount(20000.0);
         Amount commission = new Amount(10.0);
-        Transaction transaction = new Transaction(TransactionType.Sell, ISIN.MunichRe, new Quantity(1), fullPrice, commission);
+
+        Transaction transaction = new TransactionBuilder()
+                .setTransactionType(TransactionType.Sell)
+                .setIsin(ISIN.MunichRe)
+                .setQuantity(new Quantity(1))
+                .setTotalPrice(fullPrice)
+                .setCommission(commission)
+                .build();
 
         boolean registrationFailed = false;
 
@@ -221,8 +320,21 @@ public class AccountTest extends AccountTestBase {
     public void returnsRegisteredTransactions() {
         Account account = new Account(new Amount(50000.0));
 
-        Transaction firstTransaction = new Transaction(TransactionType.Buy, ISIN.MunichRe, new Quantity(1), new Amount(100.0), new Amount(0.0));
-        Transaction secondTransaction = new Transaction(TransactionType.Sell, ISIN.MunichRe, new Quantity(1), new Amount(110.0), new Amount(0.0));
+        Transaction firstTransaction = new TransactionBuilder()
+                .setTransactionType(TransactionType.Buy)
+                .setIsin(ISIN.MunichRe)
+                .setQuantity(new Quantity(1))
+                .setTotalPrice(new Amount(100.0))
+                .setCommission(Amount.Zero)
+                .build();
+
+        Transaction secondTransaction = new TransactionBuilder()
+                .setTransactionType(TransactionType.Sell)
+                .setIsin(ISIN.MunichRe)
+                .setQuantity(new Quantity(1))
+                .setTotalPrice(new Amount(110.0))
+                .setCommission(Amount.Zero)
+                .build();
 
         account.registerTransaction(firstTransaction);
         account.registerTransaction(secondTransaction);
@@ -236,8 +348,21 @@ public class AccountTest extends AccountTestBase {
     public void returnsCurrentStocks() {
         Account account = new Account(new Amount(50000.0));
 
-        Transaction firstTransaction = new Transaction(TransactionType.Buy, ISIN.MunichRe, new Quantity(1), new Amount(1000.0), Amount.Zero);
-        Transaction secondTransaction = new Transaction(TransactionType.Buy, ISIN.Allianz, new Quantity(2), new Amount(500.0), Amount.Zero);
+        Transaction firstTransaction = new TransactionBuilder()
+                .setTransactionType(TransactionType.Buy)
+                .setIsin(ISIN.MunichRe)
+                .setQuantity(new Quantity(1))
+                .setTotalPrice(new Amount(1000.0))
+                .setCommission(Amount.Zero)
+                .build();
+
+        Transaction secondTransaction = new TransactionBuilder()
+                .setTransactionType(TransactionType.Buy)
+                .setIsin(ISIN.Allianz)
+                .setQuantity(new Quantity(2))
+                .setTotalPrice(new Amount(500.0))
+                .setCommission(Amount.Zero)
+                .build();
 
         account.registerTransaction(firstTransaction);
         account.registerTransaction(secondTransaction);
@@ -253,8 +378,21 @@ public class AccountTest extends AccountTestBase {
     public void returnsTotalMarketPrice() {
         Account account = new Account(new Amount(50000.0));
 
-        Transaction firstTransaction = new Transaction(TransactionType.Buy, ISIN.MunichRe, new Quantity(1), new Amount(1000.0), Amount.Zero);
-        Transaction secondTransaction = new Transaction(TransactionType.Buy, ISIN.Allianz, new Quantity(2), new Amount(500.0), Amount.Zero);
+        Transaction firstTransaction = new TransactionBuilder()
+                .setTransactionType(TransactionType.Buy)
+                .setIsin(ISIN.MunichRe)
+                .setQuantity(new Quantity(1))
+                .setTotalPrice(new Amount(1000.0))
+                .setCommission(Amount.Zero)
+                .build();
+
+        Transaction secondTransaction = new TransactionBuilder()
+                .setTransactionType(TransactionType.Buy)
+                .setIsin(ISIN.Allianz)
+                .setQuantity(new Quantity(2))
+                .setTotalPrice(new Amount(500.0))
+                .setCommission(Amount.Zero)
+                .build();
 
         account.registerTransaction(firstTransaction);
         account.registerTransaction(secondTransaction);
@@ -266,9 +404,29 @@ public class AccountTest extends AccountTestBase {
     public void returnsTotalStockQuantity() {
         Account account = new Account(new Amount(50000.0));
 
-        Transaction firstTransaction = new Transaction(TransactionType.Buy, ISIN.MunichRe, new Quantity(1), new Amount(1000.0), Amount.Zero);
-        Transaction secondTransaction = new Transaction(TransactionType.Buy, ISIN.Allianz, new Quantity(2), new Amount(500.0), Amount.Zero);
-        Transaction thirdTransaction = new Transaction(TransactionType.Buy, ISIN.DeutscheBank, new Quantity(3), new Amount(500.0), Amount.Zero);
+        Transaction firstTransaction = new TransactionBuilder()
+                .setTransactionType(TransactionType.Buy)
+                .setIsin(ISIN.MunichRe)
+                .setQuantity(new Quantity(1))
+                .setTotalPrice(new Amount(1000.0))
+                .setCommission(Amount.Zero)
+                .build();
+
+        Transaction secondTransaction = new TransactionBuilder()
+                .setTransactionType(TransactionType.Buy)
+                .setIsin(ISIN.Allianz)
+                .setQuantity(new Quantity(2))
+                .setTotalPrice(new Amount(500.0))
+                .setCommission(Amount.Zero)
+                .build();
+
+        Transaction thirdTransaction = new TransactionBuilder()
+                .setTransactionType(TransactionType.Buy)
+                .setIsin(ISIN.DeutscheBank)
+                .setQuantity(new Quantity(3))
+                .setTotalPrice(new Amount(500.0))
+                .setCommission(Amount.Zero)
+                .build();
 
         account.registerTransaction(firstTransaction);
         account.registerTransaction(secondTransaction);

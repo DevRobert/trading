@@ -17,7 +17,13 @@ public class AvailableMoneyTest extends AccountTestBase {
         Amount totalPrice = new Amount(1000.0);
         Amount commission = new Amount(10.0);
 
-        Transaction transaction = new Transaction(TransactionType.Buy, ISIN.MunichRe, new Quantity(1), totalPrice, commission);
+        Transaction transaction = new TransactionBuilder()
+                .setTransactionType(TransactionType.Buy)
+                .setIsin(ISIN.MunichRe)
+                .setQuantity(new Quantity(1))
+                .setTotalPrice(totalPrice)
+                .setCommission(commission)
+                .build();
 
         account.registerTransaction(transaction);
 
@@ -33,7 +39,13 @@ public class AvailableMoneyTest extends AccountTestBase {
         Amount totalBuyPrice = new Amount(1000.0);
         Amount buyCommission = new Amount(10.0);
 
-        Transaction buyTransaction = new Transaction(TransactionType.Buy, ISIN.MunichRe, new Quantity(1), totalBuyPrice, buyCommission);
+        Transaction buyTransaction = new TransactionBuilder()
+                .setTransactionType(TransactionType.Buy)
+                .setIsin(ISIN.MunichRe)
+                .setQuantity(new Quantity(1))
+                .setTotalPrice(totalBuyPrice)
+                .setCommission(buyCommission)
+                .build();
 
         account.registerTransaction(buyTransaction);
 
@@ -42,7 +54,13 @@ public class AvailableMoneyTest extends AccountTestBase {
         Amount totalSellPrice = new Amount(2000.0);
         Amount sellCommission = new Amount(20.0);
 
-        Transaction sellTransaction = new Transaction(TransactionType.Sell, ISIN.MunichRe, new Quantity(1), totalSellPrice, sellCommission);
+        Transaction sellTransaction = new TransactionBuilder()
+                .setTransactionType(TransactionType.Sell)
+                .setIsin(ISIN.MunichRe)
+                .setQuantity(new Quantity(1))
+                .setTotalPrice(totalSellPrice)
+                .setCommission(sellCommission)
+                .build();
 
         account.registerTransaction(sellTransaction);
 
@@ -56,7 +74,13 @@ public class AvailableMoneyTest extends AccountTestBase {
         Amount buyTotalPrice = new Amount(11000.0);
         Amount buyCommission = new Amount(1000.0);
 
-        Transaction transaction = new Transaction(TransactionType.Buy, ISIN.MunichRe, new Quantity(1), buyTotalPrice, buyCommission);
+        Transaction transaction = new TransactionBuilder()
+                .setTransactionType(TransactionType.Buy)
+                .setIsin(ISIN.MunichRe)
+                .setQuantity(new Quantity(1))
+                .setTotalPrice(buyTotalPrice)
+                .setCommission(buyCommission)
+                .build();
 
         try {
             account.registerTransaction(transaction);
@@ -73,7 +97,14 @@ public class AvailableMoneyTest extends AccountTestBase {
         Amount buyTotalPrice = new Amount(10000.0);
         Amount buyCommission = new Amount(1000.0);
 
-        Transaction transaction = new Transaction(TransactionType.Buy, ISIN.MunichRe, new Quantity(1), buyTotalPrice, buyCommission);
+        Transaction transaction = new TransactionBuilder()
+                .setTransactionType(TransactionType.Buy)
+                .setIsin(ISIN.MunichRe)
+                .setQuantity(new Quantity(1))
+                .setTotalPrice(buyTotalPrice)
+                .setCommission(buyCommission)
+                .build();
+
         account.registerTransaction(transaction);
 
         Assert.assertEquals(new Amount(-1000.0), account.getAvailableMoney());
@@ -86,7 +117,14 @@ public class AvailableMoneyTest extends AccountTestBase {
         Amount buyTotalPrice = new Amount(9000.0);
         Amount buyCommission = new Amount(1000.0);
 
-        Transaction transaction = new Transaction(TransactionType.Buy, ISIN.MunichRe, new Quantity(1), buyTotalPrice, buyCommission);
+        Transaction transaction = new TransactionBuilder()
+                .setTransactionType(TransactionType.Buy)
+                .setIsin(ISIN.MunichRe)
+                .setQuantity(new Quantity(1))
+                .setTotalPrice(buyTotalPrice)
+                .setCommission(buyCommission)
+                .build();
+
         account.registerTransaction(transaction);
 
         Assert.assertEquals(new Amount(0.0), account.getAvailableMoney());
@@ -97,7 +135,14 @@ public class AvailableMoneyTest extends AccountTestBase {
         Amount buyTotalPrice = new Amount(8000.0);
         Amount buyCommission = new Amount(1000.0);
 
-        Transaction transaction = new Transaction(TransactionType.Buy, ISIN.MunichRe, new Quantity(1), buyTotalPrice, buyCommission);
+        Transaction transaction = new TransactionBuilder()
+                .setTransactionType(TransactionType.Buy)
+                .setIsin(ISIN.MunichRe)
+                .setQuantity(new Quantity(1))
+                .setTotalPrice(buyTotalPrice)
+                .setCommission(buyCommission)
+                .build();
+
         account.registerTransaction(transaction);
 
         Assert.assertEquals(new Amount(1000.0), account.getAvailableMoney());
@@ -108,14 +153,29 @@ public class AvailableMoneyTest extends AccountTestBase {
         Amount buyTotalPrice = new Amount(9000.0);
         Amount buyCommission = new Amount(1000.0);
 
-        Transaction buyTransaction = new Transaction(TransactionType.Buy, ISIN.MunichRe, new Quantity(1), buyTotalPrice, buyCommission);
+        Transaction buyTransaction = new TransactionBuilder()
+                .setTransactionType(TransactionType.Buy)
+                .setIsin(ISIN.MunichRe)
+                .setQuantity(new Quantity(1))
+                .setTotalPrice(buyTotalPrice)
+                .setCommission(buyCommission)
+                .build();
+
         account.registerTransaction(buyTransaction);
 
         // Interim available money: 10,000 - 9,000 - 1,000 = 0
 
         Amount sellTotalPrice = new Amount(5.0);
         Amount sellCommission = new Amount(10.0);
-        Transaction sellTransaction = new Transaction(TransactionType.Sell, ISIN.MunichRe, new Quantity(1), sellTotalPrice, sellCommission);
+
+        Transaction sellTransaction = new TransactionBuilder()
+                .setTransactionType(TransactionType.Sell)
+                .setIsin(ISIN.MunichRe)
+                .setQuantity(new Quantity(1))
+                .setTotalPrice(sellTotalPrice)
+                .setCommission(sellCommission)
+                .build();
+
         account.registerTransaction(sellTransaction);
 
         // Available money: 0 + 5 - 10 = -5
@@ -128,7 +188,14 @@ public class AvailableMoneyTest extends AccountTestBase {
         Amount buyTotalPrice1 = new Amount(8000.0);
         Amount buyCommission1 = new Amount(0.0);
 
-        Transaction buyTransaction1 = new Transaction(TransactionType.Buy, ISIN.MunichRe, new Quantity(1), buyTotalPrice1, buyCommission1);
+        Transaction buyTransaction1 = new TransactionBuilder()
+                .setTransactionType(TransactionType.Buy)
+                .setIsin(ISIN.MunichRe)
+                .setQuantity(new Quantity(1))
+                .setTotalPrice(buyTotalPrice1)
+                .setCommission(buyCommission1)
+                .build();
+
         account.registerTransaction(buyTransaction1);
 
         // Interim available money: 10,000 - 8,000 = 2,000
@@ -136,21 +203,44 @@ public class AvailableMoneyTest extends AccountTestBase {
         Amount buyTotalPrice2 = new Amount(2000.0);
         Amount buyCommission2 = new Amount(0.0);
 
-        Transaction buyTransaction2 = new Transaction(TransactionType.Buy, ISIN.Allianz, new Quantity(1), buyTotalPrice2, buyCommission2);
+        Transaction buyTransaction2 = new TransactionBuilder()
+                .setTransactionType(TransactionType.Buy)
+                .setIsin(ISIN.Allianz)
+                .setQuantity(new Quantity(1))
+                .setTotalPrice(buyTotalPrice2)
+                .setCommission(buyCommission2)
+                .build();
+
         account.registerTransaction(buyTransaction2);
 
         // Interim available money: 2,000 - 2,000 = 0
 
         Amount sellTotalPrice1 = new Amount(5.0);
         Amount sellCommission1 = new Amount(10.0);
-        Transaction sellTransaction1 = new Transaction(TransactionType.Sell, ISIN.MunichRe, new Quantity(1), sellTotalPrice1, sellCommission1);
+
+        Transaction sellTransaction1 = new TransactionBuilder()
+                .setTransactionType(TransactionType.Sell)
+                .setIsin(ISIN.MunichRe)
+                .setQuantity(new Quantity(1))
+                .setTotalPrice(sellTotalPrice1)
+                .setCommission(sellCommission1)
+                .build();
+
         account.registerTransaction(sellTransaction1);
 
         // Interim available money: 0 + 5 - 10 = -5
 
         Amount sellTotalPrice2 = new Amount(5.0);
         Amount sellCommission2 = new Amount(10.0);
-        Transaction sellTransaction2 = new Transaction(TransactionType.Sell, ISIN.Allianz, new Quantity(1), sellTotalPrice2, sellCommission2);
+
+        Transaction sellTransaction2 = new TransactionBuilder()
+                .setTransactionType(TransactionType.Sell)
+                .setIsin(ISIN.Allianz)
+                .setQuantity(new Quantity(1))
+                .setTotalPrice(sellTotalPrice2)
+                .setCommission(sellCommission2)
+                .build();
+
         account.registerTransaction(sellTransaction2);
 
         // Available money: -5 + 5 - 10 = -10

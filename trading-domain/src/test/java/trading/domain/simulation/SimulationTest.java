@@ -267,9 +267,16 @@ public class SimulationTest {
 
     @Test
     public void accountIsUpdatedWithLatestMarketPriceWhenDayClosed() {
-        Amount buyStocksTotalAmount = new Amount(200.0);
+        Amount buyStocksTotalPrice = new Amount(200.0);
         Amount buyStocksComission = new Amount(0.0);
-        account.registerTransaction(new Transaction(TransactionType.Buy, ISIN.MunichRe, new Quantity(2), buyStocksTotalAmount, buyStocksComission));
+
+        account.registerTransaction(new TransactionBuilder()
+                .setTransactionType(TransactionType.Buy)
+                .setIsin(ISIN.MunichRe)
+                .setQuantity(new Quantity(2))
+                .setTotalPrice(buyStocksTotalPrice)
+                .setCommission(buyStocksComission)
+                .build());
 
         startSimulation();
         simulation.openDay();

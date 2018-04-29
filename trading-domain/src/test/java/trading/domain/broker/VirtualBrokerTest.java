@@ -114,7 +114,14 @@ public class VirtualBrokerTest {
         Quantity quantity = new Quantity(10);
         Amount buyTotalPrice = new Amount(10000.0);
         Amount buyCommission = new Amount(0.0);
-        account.registerTransaction(new Transaction(TransactionType.Buy, ISIN.MunichRe, quantity, buyTotalPrice, buyCommission));
+
+        account.registerTransaction(new TransactionBuilder()
+                .setTransactionType(TransactionType.Buy)
+                .setIsin(ISIN.MunichRe)
+                .setQuantity(quantity)
+                .setTotalPrice(buyTotalPrice)
+                .setCommission(buyCommission)
+                .build());
 
         OrderRequest orderRequest = new OrderRequest(OrderType.SellMarket, ISIN.MunichRe, quantity);
         virtualBroker.setOrder(orderRequest);
@@ -148,7 +155,14 @@ public class VirtualBrokerTest {
         Quantity quantity = new Quantity(10);
         Amount buyTotalPrice = new Amount(10000.0);
         Amount buyCommission = new Amount(0.0);
-        account.registerTransaction(new Transaction(TransactionType.Buy, ISIN.MunichRe, quantity, buyTotalPrice, buyCommission));
+
+        account.registerTransaction(new TransactionBuilder()
+                .setTransactionType(TransactionType.Buy)
+                .setIsin(ISIN.MunichRe)
+                .setQuantity(quantity)
+                .setTotalPrice(buyTotalPrice)
+                .setCommission(buyCommission)
+                .build());
 
         // Available money after buying: 50,000 - 10,000 = 40,000
 
@@ -211,7 +225,14 @@ public class VirtualBrokerTest {
         Quantity quantity = new Quantity(10);
         Amount buyTotalPrice = new Amount(10000.0);
         Amount buyCommission = new Amount(0.0);
-        account.registerTransaction(new Transaction(TransactionType.Buy, ISIN.MunichRe, quantity, buyTotalPrice, buyCommission));
+
+        account.registerTransaction(new TransactionBuilder()
+                .setTransactionType(TransactionType.Buy)
+                .setIsin(ISIN.MunichRe)
+                .setQuantity(quantity)
+                .setTotalPrice(buyTotalPrice)
+                .setCommission(buyCommission)
+                .build());
 
         // Available money after buying: 50,000 - 10,000 = 40,000
 

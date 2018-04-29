@@ -19,7 +19,14 @@ public abstract class AccountTestBase {
         Amount fullPrice = new Amount(5000.0);
         Amount commission = new Amount(10.0);
 
-        Transaction transaction = new Transaction(TransactionType.Buy, ISIN.MunichRe, new Quantity(10), fullPrice, commission);
+        Transaction transaction = new TransactionBuilder()
+                .setTransactionType(TransactionType.Buy)
+                .setIsin(ISIN.MunichRe)
+                .setQuantity(new Quantity(10))
+                .setTotalPrice(fullPrice)
+                .setCommission(commission)
+                .build();
+
         account.registerTransaction(transaction);
 
         // New available money = 10,000 - 5,000 - 10 = 4,990

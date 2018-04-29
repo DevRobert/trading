@@ -14,7 +14,15 @@ public class CommissionTest extends AccountTestBase {
     public void commissionOfBuyTransactionIsRegistered() throws AccountStateException {
         Amount fullPrice = new Amount(100.0);
         Amount commission = new Amount(20.0);
-        Transaction transaction = new Transaction(TransactionType.Buy, ISIN.MunichRe, new Quantity(1), fullPrice, commission);
+
+        Transaction transaction = new TransactionBuilder()
+                .setTransactionType(TransactionType.Buy)
+                .setIsin(ISIN.MunichRe)
+                .setQuantity(new Quantity(1))
+                .setTotalPrice(fullPrice)
+                .setCommission(commission)
+                .build();
+
         account.registerTransaction(transaction);
 
         Assert.assertEquals(commission, account.getCommissions());
@@ -29,8 +37,21 @@ public class CommissionTest extends AccountTestBase {
         Amount buyCommission = new Amount(10.0);
         Amount sellCommission = new Amount(10.0);
 
-        Transaction buyTransaction = new Transaction(TransactionType.Buy, isin, quantity, fullBuyPrice, buyCommission);
-        Transaction sellTransaction = new Transaction(TransactionType.Sell, isin, quantity, fullSellPrice, sellCommission);
+        Transaction buyTransaction = new TransactionBuilder()
+                .setTransactionType(TransactionType.Buy)
+                .setIsin(isin)
+                .setQuantity(quantity)
+                .setTotalPrice(fullBuyPrice)
+                .setCommission(buyCommission)
+                .build();
+
+        Transaction sellTransaction = new TransactionBuilder()
+                .setTransactionType(TransactionType.Sell)
+                .setIsin(isin)
+                .setQuantity(quantity)
+                .setTotalPrice(fullSellPrice)
+                .setCommission(sellCommission)
+                .build();
 
         account.registerTransaction(buyTransaction);
         account.registerTransaction(sellTransaction);

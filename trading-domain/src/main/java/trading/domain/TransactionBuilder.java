@@ -1,11 +1,14 @@
 package trading.domain;
 
+import java.time.LocalDate;
+
 public class TransactionBuilder {
     private TransactionType transactionType;
     private ISIN isin;
     private Quantity quantity;
     private Amount totalPrice;
     private Amount commission;
+    private LocalDate date;
 
     public TransactionBuilder setTransactionType(TransactionType transactionType) {
         this.transactionType = transactionType;
@@ -32,7 +35,12 @@ public class TransactionBuilder {
         return this;
     }
 
+    public TransactionBuilder setDate(LocalDate date) {
+        this.date = date;
+        return this;
+    }
+
     public Transaction build() {
-        return new Transaction(this.transactionType, this.isin, this.quantity, this.totalPrice, this.commission);
+        return new Transaction(this.transactionType, this.isin, this.quantity, this.totalPrice, this.commission, this.date);
     }
 }

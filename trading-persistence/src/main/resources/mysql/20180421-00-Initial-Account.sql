@@ -65,6 +65,7 @@ CREATE TABLE IF NOT EXISTS `transaction` (
   `TotalPrice` DOUBLE NOT NULL,
   `Commission` DOUBLE NOT NULL,
   `Isin` VARCHAR(12) NOT NULL,
+  `Date` DATE NOT NULL,
   `Created` DATETIME NOT NULL,
   PRIMARY KEY (`Id`),
   INDEX `fk_transaction_transaction_type1_idx` (`TransactionTypeId` ASC),
@@ -133,5 +134,5 @@ INSERT INTO `client` (`Id`, `Name`) VALUES (2, 'Demo-Client 2');
 INSERT INTO `account` (`Id`, `ClientId`, `SeedCapital`) VALUES (1, 2, 10000);
 INSERT INTO `account` (`Id`, `ClientId`, `SeedCapital`) VALUES (2, 2, 10000);
 
-INSERT INTO `transaction` (`Id`, `AccountId`, `TransactionTypeId`, `Quantity`, `TotalPrice`, `Commission`, `Isin`, `Created`) VALUES (1, 2, 0, 10, 5000, 10, 'DE0008430026', '2018-04-16 09:00:00');
-INSERT INTO `transaction` (`Id`, `AccountId`, `TransactionTypeId`, `Quantity`, `TotalPrice`, `Commission`, `Isin`, `Created`) VALUES (2, 2, 1, 10, 5500, 10, 'DE0008430026', '2018-04-17 09:00:00');
+INSERT INTO `transaction` (`Id`, `AccountId`, `TransactionTypeId`, `Quantity`, `TotalPrice`, `Commission`, `Isin`, `Date`, `Created`) VALUES (1, 2, 0, 10, 5000, 10, 'DE0008430026', '2018-04-16', '2018-04-16 09:00:00');
+INSERT INTO `transaction` (`Id`, `AccountId`, `TransactionTypeId`, `Quantity`, `TotalPrice`, `Commission`, `Isin`, `Date`, `Created`) VALUES (2, 2, 1, 10, 5500, 10, 'DE0008430026', '2018-04-17', '2018-04-17 09:00:00');

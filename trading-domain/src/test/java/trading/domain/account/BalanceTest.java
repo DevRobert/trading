@@ -26,7 +26,14 @@ public class BalanceTest extends AccountTestBase {
         Amount fullPrice = new Amount(5000.0);
         Amount commission = new Amount(10.0);
 
-        Transaction transaction = new Transaction(TransactionType.Sell, ISIN.MunichRe, new Quantity(10), fullPrice, commission);
+        Transaction transaction = new TransactionBuilder()
+                .setTransactionType(TransactionType.Sell)
+                .setIsin(ISIN.MunichRe)
+                .setQuantity(new Quantity(10))
+                .setTotalPrice(fullPrice)
+                .setCommission(commission)
+                .build();
+
         account.registerTransaction(transaction);
 
         // New balance = 9,990 - 10 = 9,980
@@ -43,7 +50,14 @@ public class BalanceTest extends AccountTestBase {
         Amount fullPrice = new Amount(6000.0);
         Amount commission = Amount.Zero;
 
-        Transaction transaction = new Transaction(TransactionType.Sell, ISIN.MunichRe, new Quantity(10), fullPrice, commission);
+        Transaction transaction = new TransactionBuilder()
+                .setTransactionType(TransactionType.Sell)
+                .setIsin(ISIN.MunichRe)
+                .setQuantity(new Quantity(10))
+                .setTotalPrice(fullPrice)
+                .setCommission(commission)
+                .build();
+
         account.registerTransaction(transaction);
 
         // New balance = 9,990 + 1,000 = 10,990
@@ -60,7 +74,14 @@ public class BalanceTest extends AccountTestBase {
         Amount fullPrice = new Amount(4000.0);
         Amount commission = Amount.Zero;
 
-        Transaction transaction = new Transaction(TransactionType.Sell, ISIN.MunichRe, new Quantity(10), fullPrice, commission);
+        Transaction transaction = new TransactionBuilder()
+                .setTransactionType(TransactionType.Sell)
+                .setIsin(ISIN.MunichRe)
+                .setQuantity(new Quantity(10))
+                .setTotalPrice(fullPrice)
+                .setCommission(commission)
+                .build();
+
         account.registerTransaction(transaction);
 
         // New balance = 9,990 - 1,000 = 8,990

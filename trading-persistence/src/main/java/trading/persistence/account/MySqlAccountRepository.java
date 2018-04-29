@@ -8,6 +8,7 @@ import trading.domain.account.AccountRepository;
 import trading.persistence.MySqlRepository;
 
 import java.sql.*;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -62,9 +63,13 @@ public class MySqlAccountRepository extends MySqlRepository implements AccountRe
     }
 
     private void saveTransaction(Connection connection, AccountId accountId, Transaction transaction) throws SQLException {
+        if(transaction.getDate() == null) {
+            throw new RuntimeException("The transaction date has to be set so that it can be persisted.");
+        }
+
         PreparedStatement preparedStatement = connection.prepareStatement(
-                "insert into transaction (Id, AccountId, TransactionTypeId, Quantity, TotalPrice, Commission, Isin, Created) " +
-                        "values (default, ?, ?, ?, ?, ?, ?, now())", Statement.RETURN_GENERATED_KEYS);
+                "insert into transaction (Id, AccountId, TransactionTypeId, Quantity, TotalPrice, Commission, Isin, `Date`, Created) " +
+                        "values (default, ?, ?, ?, ?, ?, ?, ?, now())", Statement.RETURN_GENERATED_KEYS);
 
         preparedStatement.setInt(1, accountId.getValue());
         preparedStatement.setInt(2, transaction.getTransactionType().ordinal());
@@ -72,6 +77,7 @@ public class MySqlAccountRepository extends MySqlRepository implements AccountRe
         preparedStatement.setDouble(4, transaction.getTotalPrice().getValue());
         preparedStatement.setDouble(5, transaction.getCommission().getValue());
         preparedStatement.setString(6, transaction.getIsin().getText());
+        preparedStatement.setString(7, transaction.getDate().toString());
 
         preparedStatement.executeUpdate();
 
@@ -117,7 +123,7 @@ public class MySqlAccountRepository extends MySqlRepository implements AccountRe
     }
 
     private List<Transaction> getAccountTransactions(Connection connection, AccountId accountId) throws SQLException {
-        PreparedStatement preparedStatement = connection.prepareStatement("select Id, AccountId, TransactionTypeId, Quantity, TotalPrice, Commission, Isin, Created from transaction where AccountId = ?");
+        PreparedStatement preparedStatement = connection.prepareStatement("select Id, AccountId, TransactionTypeId, Quantity, TotalPrice, Commission, Isin, Date, Created from transaction where AccountId = ?");
         preparedStatement.setInt(1, accountId.getValue());
 
         ResultSet resultSet = preparedStatement.executeQuery();
@@ -129,8 +135,17 @@ public class MySqlAccountRepository extends MySqlRepository implements AccountRe
             double totalPrice = resultSet.getDouble(5);
             double commission = resultSet.getDouble(6);
             String isin = resultSet.getString(7);
+            LocalDate date = LocalDate.parse(resultSet.getString(8));
 
-            Transaction transaction = new Transaction(TransactionType.values()[transactionType], new ISIN(isin), new Quantity(quantity), new Amount(totalPrice), new Amount(commission));
+            Transaction transaction = new TransactionBuilder()
+                    .setTransactionType(TransactionType.values()[transactionType])
+                    .setIsin(new ISIN(isin))
+                    .setQuantity(new Quantity(quantity))
+                    .setTotalPrice(new Amount(totalPrice))
+                    .setCommission(new Amount(commission))
+                    .setDate(date)
+                    .build();
+
             transactions.add(transaction);
         }
 

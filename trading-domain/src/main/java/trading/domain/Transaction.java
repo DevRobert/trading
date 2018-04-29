@@ -1,5 +1,7 @@
 package trading.domain;
 
+import java.time.LocalDate;
+
 public class Transaction {
     private TransactionId id;
     private TransactionType transactionType;
@@ -7,36 +9,9 @@ public class Transaction {
     private Quantity quantity;
     private Amount totalPrice;
     private Amount commission;
+    private LocalDate date;
 
-    public TransactionId getId() {
-        return id;
-    }
-
-    public void setId(TransactionId id) {
-        this.id = id;
-    }
-
-    public TransactionType getTransactionType() {
-        return transactionType;
-    }
-
-    public ISIN getIsin() {
-        return isin;
-    }
-
-    public Quantity getQuantity() {
-        return quantity;
-    }
-
-    public Amount getTotalPrice() {
-        return totalPrice;
-    }
-
-    public Amount getCommission() {
-        return commission;
-    }
-
-    public Transaction(TransactionType transactionType, ISIN isin, Quantity quantity, Amount totalPrice, Amount commission) {
+    public Transaction(TransactionType transactionType, ISIN isin, Quantity quantity, Amount totalPrice, Amount commission, LocalDate date) {
         if(transactionType == null) {
             throw new RuntimeException("The transaction type must be specified.");
         }
@@ -66,6 +41,39 @@ public class Transaction {
         this.quantity = quantity;
         this.totalPrice = totalPrice;
         this.commission = commission;
+        this.date = date;
+    }
+
+    public TransactionId getId() {
+        return id;
+    }
+
+    public void setId(TransactionId id) {
+        this.id = id;
+    }
+
+    public TransactionType getTransactionType() {
+        return transactionType;
+    }
+
+    public ISIN getIsin() {
+        return isin;
+    }
+
+    public Quantity getQuantity() {
+        return quantity;
+    }
+
+    public Amount getTotalPrice() {
+        return totalPrice;
+    }
+
+    public Amount getCommission() {
+        return commission;
+    }
+
+    public LocalDate getDate() {
+        return this.date;
     }
 
     @Override

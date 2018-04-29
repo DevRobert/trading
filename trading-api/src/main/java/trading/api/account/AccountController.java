@@ -7,6 +7,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import trading.application.AccountService;
 import trading.domain.ISIN;
+import trading.domain.Transaction;
 import trading.domain.account.Account;
 import trading.domain.account.AccountId;
 import trading.domain.account.Position;
@@ -32,11 +33,15 @@ public class AccountController {
     // TODO get account id from JWT
     private AccountId accountId = new AccountId(2);
 
+    private Account getAccount() {
+        return this.accountService.getAccount(this.accountId);
+    }
+
     @RequestMapping("/api/account/positions/")
     public GetAccountPositionsResponse getAccountPositions() {
         GetAccountPositionsResponse response = new GetAccountPositionsResponse();
 
-        Account account = this.accountService.getAccount(this.accountId);
+        Account account = this.getAccount();
         List<AccountPositionDto> accountPositionDtos = new ArrayList<>();
 
         MarketPriceSnapshot lastClosingPrices = this.multiStockMarketDataStore.getLastClosingPrices();
@@ -84,7 +89,35 @@ public class AccountController {
     public GetAccountTransactionsResponse getAccountTransactions() {
         GetAccountTransactionsResponse response = new GetAccountTransactionsResponse();
 
-        response.setTransactions(new ArrayList<>());
+        Account account = this.getAccount();
+
+        List<AccountTransactionDto> accountTransactionDtos = new ArrayList<>();
+
+        for(Transaction transaction: account.getProcessedTransactions()) {
+            AccountTransactionDto accountTransactionDto = new AccountTransactionDto();
+            accountTransactionDto.setDate(transaction.getDate());
+            accountTransactionDto.setTransactionType(transaction.getTransactionType().toString());
+            accountTransactionDto.setIsin(transaction.getIsin().getText());
+            accountTransactionDto.setQuantity(transaction.getQuantity().getValue());
+
+            double marketPrice = transaction.getTotalPrice().getValue() / transaction.getQuantity().getValue();
+            accountTransactionDto.setMarketPrice(marketPrice);
+
+            accountTransactionDto.setTotalPrice(transaction.getTotalPrice().getValue());
+            accountTransactionDto.setCommission(transaction.getCommission().getValue());
+
+            String instrumentName = this.instrumentNameProvider.getInstrumentName(transaction.getIsin());
+
+            if(instrumentName == null) {
+                instrumentName = "Unknown";
+            }
+
+            accountTransactionDto.setName(instrumentName);
+
+            accountTransactionDtos.add(accountTransactionDto);
+        }
+
+        response.setTransactions(accountTransactionDtos);
 
         return response;
     }

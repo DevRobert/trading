@@ -20,6 +20,8 @@ import trading.domain.market.MarketPriceSnapshot;
 import trading.domain.market.MarketPriceSnapshotBuilder;
 import trading.domain.simulation.MultiStockMarketDataStore;
 
+import java.time.LocalDate;
+
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.Matchers.hasSize;
 import static org.mockito.BDDMockito.given;
@@ -52,6 +54,7 @@ public class AccountControllerTest {
                 .setQuantity(new Quantity(10))
                 .setTotalPrice(new Amount(1000.0))
                 .setCommission(new Amount(20.0))
+                .setDate(LocalDate.of(2018, 4, 12))
                 .build());
 
         account.registerTransaction(new TransactionBuilder()
@@ -60,6 +63,7 @@ public class AccountControllerTest {
                 .setQuantity(new Quantity(10))
                 .setTotalPrice(new Amount(1000.0))
                 .setCommission(new Amount(20.0))
+                .setDate(LocalDate.of(2018, 4, 13))
                 .build());
 
         given(this.accountService.getAccount(new AccountId(2))).willReturn(account);
@@ -117,7 +121,23 @@ public class AccountControllerTest {
                 .get("/api/account/transactions/")
                 .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
-                .andExpect(content().json("Test"));
+                .andExpect(jsonPath("transactions", hasSize(2)))
+                .andExpect(jsonPath("transactions[0].date", is("2018-04-12")))
+                .andExpect(jsonPath("transactions[0].transactionType", is("Buy")))
+                .andExpect(jsonPath("transactions[0].isin", is("A")))
+                .andExpect(jsonPath("transactions[0].name", is("Company A")))
+                .andExpect(jsonPath("transactions[0].quantity", is(10)))
+                .andExpect(jsonPath("transactions[0].marketPrice", is(100.0)))
+                .andExpect(jsonPath("transactions[0].totalPrice", is(1000.0)))
+                .andExpect(jsonPath("transactions[0].commission", is(20.0)))
+                .andExpect(jsonPath("transactions[1].date", is("2018-04-13")))
+                .andExpect(jsonPath("transactions[1].transactionType", is("Buy")))
+                .andExpect(jsonPath("transactions[1].isin", is("B")))
+                .andExpect(jsonPath("transactions[1].name", is("Unknown")))
+                .andExpect(jsonPath("transactions[1].quantity", is(10)))
+                .andExpect(jsonPath("transactions[1].marketPrice", is(100.0)))
+                .andExpect(jsonPath("transactions[1].totalPrice", is(1000.0)))
+                .andExpect(jsonPath("transactions[1].commission", is(20.0)));
     }
 
     @Test

@@ -9,6 +9,7 @@ import trading.domain.account.AccountId;
 import trading.domain.account.AccountNotFoundException;
 import trading.domain.account.AccountRepository;
 
+import java.time.LocalDate;
 import java.util.List;
 
 public class MySqlAccountRepositoryTest {
@@ -92,8 +93,23 @@ public class MySqlAccountRepositoryTest {
         ISIN isin = new ISIN("DE0008430026");
         Quantity quantity = new Quantity(10);
 
-        Transaction buyTransaction = new Transaction(TransactionType.Buy, isin, quantity, new Amount(10000.0), new Amount(10.0));
-        Transaction sellTransaction = new Transaction(TransactionType.Sell, isin, quantity, new Amount(11000.0), new Amount(10.0));
+        Transaction buyTransaction = new TransactionBuilder()
+                .setTransactionType(TransactionType.Buy)
+                .setIsin(isin)
+                .setQuantity(quantity)
+                .setTotalPrice(new Amount(10000.0))
+                .setCommission(new Amount(10.0))
+                .setDate(LocalDate.of(2018, 4, 27))
+                .build();
+
+        Transaction sellTransaction = new TransactionBuilder()
+                .setTransactionType(TransactionType.Sell)
+                .setIsin(isin)
+                .setQuantity(quantity)
+                .setTotalPrice(new Amount(11000.0))
+                .setCommission(new Amount(10.0))
+                .setDate(LocalDate.of(2018, 4, 30))
+                .build();
 
         account.registerTransaction(buyTransaction);
         account.registerTransaction(sellTransaction);
@@ -114,6 +130,7 @@ public class MySqlAccountRepositoryTest {
         Assert.assertEquals(buyTransaction.getQuantity(), buyTransactionFromDatabase.getQuantity());
         Assert.assertEquals(buyTransaction.getTotalPrice(), buyTransactionFromDatabase.getTotalPrice());
         Assert.assertEquals(buyTransaction.getCommission(), buyTransactionFromDatabase.getCommission());
+        Assert.assertEquals(buyTransaction.getDate(), buyTransactionFromDatabase.getDate());
 
         Transaction sellTransactionFromDatabase = transactionsFromDatabase.get(1);
         Assert.assertEquals(sellTransaction.getTransactionType(), sellTransactionFromDatabase.getTransactionType());
@@ -121,6 +138,7 @@ public class MySqlAccountRepositoryTest {
         Assert.assertEquals(sellTransaction.getQuantity(), sellTransactionFromDatabase.getQuantity());
         Assert.assertEquals(sellTransaction.getTotalPrice(), sellTransactionFromDatabase.getTotalPrice());
         Assert.assertEquals(sellTransaction.getCommission(), sellTransactionFromDatabase.getCommission());
+        Assert.assertEquals(sellTransaction.getDate(), sellTransaction.getDate());
     }
 
     @Test
@@ -128,12 +146,29 @@ public class MySqlAccountRepositoryTest {
         // Create account with first transaction
 
         Account account = this.accountRepository.createAccount(new ClientId(1), new Amount(10000.0));
-        account.registerTransaction(new Transaction(TransactionType.Buy, ISIN.MunichRe, new Quantity(1), new Amount(100.0), new Amount(10.0)));
+
+        account.registerTransaction(new TransactionBuilder()
+                .setTransactionType(TransactionType.Buy)
+                .setIsin(ISIN.MunichRe)
+                .setQuantity(new Quantity(1))
+                .setTotalPrice(new Amount(100.0))
+                .setCommission(new Amount(10.0))
+                .setDate(LocalDate.of(2018, 4, 27))
+                .build());
+
         this.accountRepository.saveAccount(account);
 
         // Register second transaction
 
-        account.registerTransaction(new Transaction(TransactionType.Sell, ISIN.MunichRe, new Quantity(1), new Amount(110.0), new Amount(10.0)));
+        account.registerTransaction(new TransactionBuilder()
+                .setTransactionType(TransactionType.Sell)
+                .setIsin(ISIN.MunichRe)
+                .setQuantity(new Quantity(1))
+                .setTotalPrice(new Amount(110.0))
+                .setCommission(new Amount(10.0))
+                .setDate(LocalDate.of(2018, 4, 30))
+                .build());
+
         this.accountRepository.saveAccount(account);
 
         // Get account from database
