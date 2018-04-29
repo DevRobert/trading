@@ -11,10 +11,7 @@ import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 
-// todo transactions?
-
 public class MySqlAccountRepository extends MySqlRepository implements AccountRepository {
-
     @Override
     public Account createAccount(ClientId clientId, Amount seedCapital) {
         Connection connection = this.openNewConnection();

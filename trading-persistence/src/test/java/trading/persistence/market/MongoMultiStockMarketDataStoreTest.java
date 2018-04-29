@@ -157,4 +157,15 @@ public class MongoMultiStockMarketDataStoreTest {
         Assert.assertEquals(new Amount(102.5), thirdDayMarketPriceSnapshot.getMarketPrice(ISIN.MunichRe));
         Assert.assertEquals(new Amount(49.5), thirdDayMarketPriceSnapshot.getMarketPrice(ISIN.Allianz));
     }
+
+    @Test
+    public void testReturnsLastClosingPrices() {
+        MongoMultiStockMarketDataStore mongoMultiStockMarketDataStore = this.createMongoMultiStockMarketDataStore();
+
+        MarketPriceSnapshot lastClosingPrices = mongoMultiStockMarketDataStore.getLastClosingPrices();
+
+        Assert.assertNotNull(lastClosingPrices);
+        Assert.assertEquals(new Amount(102.5), lastClosingPrices.getMarketPrice(ISIN.MunichRe));
+        Assert.assertEquals(new Amount(49.5), lastClosingPrices.getMarketPrice(ISIN.Allianz));
+    }
 }

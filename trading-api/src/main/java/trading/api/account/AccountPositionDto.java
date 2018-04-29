@@ -3,9 +3,11 @@ package trading.api.account;
 import trading.domain.account.Position;
 
 public class AccountPositionDto {
-    public String isin;
-    public int quantity;
-    public double fullMarketPrice;
+    private String isin;
+    private String name;
+    private int quantity;
+    private double marketPrice;
+    private double totalMarketPrice;
 
     public AccountPositionDto() {
 
@@ -14,7 +16,7 @@ public class AccountPositionDto {
     public AccountPositionDto(Position position) {
         this.isin = position.getISIN().getText();
         this.quantity = position.getQuantity().getValue();
-        this.fullMarketPrice = position.getFullMarketPrice().getValue();
+        this.totalMarketPrice = position.getFullMarketPrice().getValue();
     }
 
     public String getIsin() {
@@ -25,6 +27,14 @@ public class AccountPositionDto {
         this.isin = isin;
     }
 
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
     public int getQuantity() {
         return quantity;
     }
@@ -33,11 +43,19 @@ public class AccountPositionDto {
         this.quantity = quantity;
     }
 
-    public double getFullMarketPrice() {
-        return fullMarketPrice;
+    public double getMarketPrice() {
+        return this.marketPrice;
     }
 
-    public void setFullMarketPrice(double fullMarketPrice) {
-        this.fullMarketPrice = fullMarketPrice;
+    public void setMarketPrice(double marketPrice) {
+        this.marketPrice = marketPrice;
+    }
+
+    public double getTotalMarketPrice() {
+        return totalMarketPrice;
+    }
+
+    public void setTotalMarketPrice(double totalMarketPrice) {
+        this.totalMarketPrice = totalMarketPrice;
     }
 }

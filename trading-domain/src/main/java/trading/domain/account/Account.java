@@ -194,7 +194,7 @@ public class Account {
         }
     }
 
-    public Map<ISIN,Quantity> getCurrentStocks() {
+    public Map<ISIN, Quantity> getCurrentStocks() {
         Map<ISIN, Quantity> currentStocks = new HashMap<>();
 
         for(ISIN isin: this.positions.keySet()) {
@@ -202,5 +202,25 @@ public class Account {
         }
 
         return currentStocks;
+    }
+
+    public Amount getTotalStocksMarketPrice() {
+        Amount totalStocksMarketPrice = Amount.Zero;
+
+        for(Position position: this.positions.values()) {
+            totalStocksMarketPrice = totalStocksMarketPrice.add(position.getFullMarketPrice());
+        }
+
+        return totalStocksMarketPrice;
+    }
+
+    public Quantity getTotalStocksQuantity() {
+        Quantity totalStocksQuantity = Quantity.Zero;
+
+        for(Position position: this.positions.values()) {
+            totalStocksQuantity = new Quantity(totalStocksQuantity.getValue() + position.getQuantity().getValue());
+        }
+
+        return totalStocksQuantity;
     }
 }

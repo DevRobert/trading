@@ -37,12 +37,28 @@ public class Transaction {
     }
 
     public Transaction(TransactionType transactionType, ISIN isin, Quantity quantity, Amount totalPrice, Amount commission) {
+        if(transactionType == null) {
+            throw new RuntimeException("The transaction type must be specified.");
+        }
+
+        if(isin == null) {
+            throw new RuntimeException("The transaction ISIN must be specified.");
+        }
+
         if(quantity.getValue() < 0) {
             throw new RuntimeException("The transaction quantity must not be negative.");
         }
 
         if(quantity.getValue() == 0) {
             throw new RuntimeException("The transaction quantity must not be zero.");
+        }
+
+        if(totalPrice == null) {
+            throw new RuntimeException("The transaction total price must be specified.");
+        }
+
+        if(commission == null) {
+            throw new RuntimeException("The transaction commission must be specified.");
         }
 
         this.transactionType = transactionType;

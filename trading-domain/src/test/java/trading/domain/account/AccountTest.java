@@ -248,4 +248,32 @@ public class AccountTest extends AccountTestBase {
         Assert.assertEquals(new Quantity(1), stocks.get(ISIN.MunichRe));
         Assert.assertEquals(new Quantity(2), stocks.get(ISIN.Allianz));
     }
+
+    @Test
+    public void returnsTotalMarketPrice() {
+        Account account = new Account(new Amount(50000.0));
+
+        Transaction firstTransaction = new Transaction(TransactionType.Buy, ISIN.MunichRe, new Quantity(1), new Amount(1000.0), Amount.Zero);
+        Transaction secondTransaction = new Transaction(TransactionType.Buy, ISIN.Allianz, new Quantity(2), new Amount(500.0), Amount.Zero);
+
+        account.registerTransaction(firstTransaction);
+        account.registerTransaction(secondTransaction);
+
+        Assert.assertEquals(new Amount(1500.0), account.getTotalStocksMarketPrice());
+    }
+
+    @Test
+    public void returnsTotalStockQuantity() {
+        Account account = new Account(new Amount(50000.0));
+
+        Transaction firstTransaction = new Transaction(TransactionType.Buy, ISIN.MunichRe, new Quantity(1), new Amount(1000.0), Amount.Zero);
+        Transaction secondTransaction = new Transaction(TransactionType.Buy, ISIN.Allianz, new Quantity(2), new Amount(500.0), Amount.Zero);
+        Transaction thirdTransaction = new Transaction(TransactionType.Buy, ISIN.DeutscheBank, new Quantity(3), new Amount(500.0), Amount.Zero);
+
+        account.registerTransaction(firstTransaction);
+        account.registerTransaction(secondTransaction);
+        account.registerTransaction(thirdTransaction);
+
+        Assert.assertEquals(new Quantity(6), account.getTotalStocksQuantity());
+    }
 }
