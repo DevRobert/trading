@@ -119,6 +119,7 @@ INSERT INTO `instrument` (`Isin`, `Name`) VALUES ('DE000A2E4L75', 'Linde');
 INSERT INTO `instrument` (`Isin`, `Name`) VALUES ('DE0008232125', 'Lufthansa');
 INSERT INTO `instrument` (`Isin`, `Name`) VALUES ('DE0006599905', 'Merck');
 INSERT INTO `instrument` (`Isin`, `Name`) VALUES ('DE0008430026', 'Münchener Rückversicherungs-Gesellschaft');
+INSERT INTO `instrument` (`Isin`, `Name`) VALUES ('DE000PSM7770', 'ProSiebenSat.1 Media');
 INSERT INTO `instrument` (`Isin`, `Name`) VALUES ('DE0007037129', 'RWE');
 INSERT INTO `instrument` (`Isin`, `Name`) VALUES ('DE0007164600', 'SAP');
 INSERT INTO `instrument` (`Isin`, `Name`) VALUES ('DE0007236101', 'Siemens');
