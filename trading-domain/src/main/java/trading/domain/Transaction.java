@@ -13,27 +13,31 @@ public class Transaction {
 
     public Transaction(TransactionType transactionType, ISIN isin, Quantity quantity, Amount totalPrice, Amount commission, LocalDate date) {
         if(transactionType == null) {
-            throw new RuntimeException("The transaction type must be specified.");
+            throw new DomainException("The transaction type must be specified.");
         }
 
         if(isin == null) {
-            throw new RuntimeException("The transaction ISIN must be specified.");
+            throw new DomainException("The ISIN must be specified.");
+        }
+
+        if(quantity == null) {
+            throw new DomainException("The quantity must be specified.");
         }
 
         if(quantity.getValue() < 0) {
-            throw new RuntimeException("The transaction quantity must not be negative.");
+            throw new DomainException("The quantity must not be negative.");
         }
 
         if(quantity.getValue() == 0) {
-            throw new RuntimeException("The transaction quantity must not be zero.");
+            throw new DomainException("The quantity must not be zero.");
         }
 
         if(totalPrice == null) {
-            throw new RuntimeException("The transaction total price must be specified.");
+            throw new DomainException("The total price must be specified.");
         }
 
         if(commission == null) {
-            throw new RuntimeException("The transaction commission must be specified.");
+            throw new DomainException("The commission must be specified.");
         }
 
         this.transactionType = transactionType;
@@ -74,6 +78,14 @@ public class Transaction {
 
     public LocalDate getDate() {
         return this.date;
+    }
+
+    public void setDate(LocalDate date) {
+        if(this.date != null) {
+            throw new DomainException("The transaction date must not be changed.");
+        }
+
+        this.date = date;
     }
 
     @Override

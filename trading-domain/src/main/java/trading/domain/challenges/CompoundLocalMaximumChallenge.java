@@ -77,7 +77,7 @@ public class CompoundLocalMaximumChallenge implements Challenge {
         parameterTuples.add(new Object[] {
                 10, // buyTriggerLocalMaximumLookBehindPeriod = maximum_look_behind
                 0.1, // buyTriggerMinDeclineFromLocalMaximumPercentage = maximum_min_decline
-                0.07, // sellTriggerTrailingStopLossMinDeclineFromMaximumAfterBuyingPercentage = trailing_stop_los_min_decline
+                0.07, // sellTriggerTrailingStopLossMinDeclineFromMaximumAfterBuyingPercentage = trailing_stop_loss_min_decline
                 0.03, // activateTrailingStopLossMinRaiseSinceBuyingPercentage = trailing_stop_loss_activation_min_raise
                 0.1, // sellTriggerStopLossMinimumDeclineSinceBuyingPercentage = stop_loss_min_decline
                 0.2 // getMaximumPercentage = maximum_percentage
@@ -86,7 +86,7 @@ public class CompoundLocalMaximumChallenge implements Challenge {
         parameterTuples.add(new Object[] {
                 10, // buyTriggerLocalMaximumLookBehindPeriod = maximum_look_behind
                 0.05, // buyTriggerMinDeclineFromLocalMaximumPercentage = maximum_min_decline
-                0.07, // sellTriggerTrailingStopLossMinDeclineFromMaximumAfterBuyingPercentage = trailing_stop_los_min_decline
+                0.07, // sellTriggerTrailingStopLossMinDeclineFromMaximumAfterBuyingPercentage = trailing_stop_loss_min_decline
                 0.03, // activateTrailingStopLossMinRaiseSinceBuyingPercentage = trailing_stop_loss_activation_min_raise
                 0.1, // sellTriggerStopLossMinimumDeclineSinceBuyingPercentage = stop_loss_min_decline
                 0.2 // getMaximumPercentage = maximum_percentage

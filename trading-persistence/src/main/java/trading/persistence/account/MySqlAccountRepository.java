@@ -130,6 +130,7 @@ public class MySqlAccountRepository extends MySqlRepository implements AccountRe
         List<Transaction> transactions = new ArrayList<>();
 
         while(resultSet.next()) {
+            int transactionId = resultSet.getInt(1);
             int transactionType = resultSet.getInt(3);
             int quantity = resultSet.getInt(4);
             double totalPrice = resultSet.getDouble(5);
@@ -145,6 +146,8 @@ public class MySqlAccountRepository extends MySqlRepository implements AccountRe
                     .setCommission(new Amount(commission))
                     .setDate(date)
                     .build();
+
+            transaction.setId(new TransactionId(transactionId)); // todo write test for this line
 
             transactions.add(transaction);
         }

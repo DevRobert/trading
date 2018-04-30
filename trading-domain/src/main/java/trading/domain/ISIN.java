@@ -15,6 +15,14 @@ public class ISIN {
     }
 
     public ISIN(String text) {
+        if(text == null) {
+            throw new DomainException("The ISIN text must be specified.");
+        }
+
+        if(text.isEmpty()) {
+            throw new DomainException("The ISIN text must not be empty.");
+        }
+
         this.text = text;
     }
 

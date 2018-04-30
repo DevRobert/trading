@@ -1,13 +1,10 @@
 package trading.api.account;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.CrossOrigin;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+import trading.api.ClientException;
 import trading.application.AccountService;
-import trading.domain.ISIN;
-import trading.domain.Transaction;
+import trading.domain.*;
 import trading.domain.account.Account;
 import trading.domain.account.AccountId;
 import trading.domain.account.Position;
@@ -37,7 +34,7 @@ public class AccountController {
         return this.accountService.getAccount(this.accountId);
     }
 
-    @RequestMapping("/api/account/positions/")
+    @RequestMapping(value = "/api/account/positions/", method = RequestMethod.GET)
     public GetAccountPositionsResponse getAccountPositions() {
         GetAccountPositionsResponse response = new GetAccountPositionsResponse();
 
@@ -80,12 +77,12 @@ public class AccountController {
         return response;
     }
 
-    @RequestMapping("/api/account/positions/{isin}")
+    @RequestMapping(value = "/api/account/positions/{isin}", method = RequestMethod.GET)
     public GetAccountPositionResponse getAccountPosition(@PathVariable("isin") String isin) {
         return new GetAccountPositionResponse();
     }
 
-    @RequestMapping("/api/account/transactions/")
+    @RequestMapping(value = "/api/account/transactions/", method = RequestMethod.GET)
     public GetAccountTransactionsResponse getAccountTransactions() {
         GetAccountTransactionsResponse response = new GetAccountTransactionsResponse();
 
@@ -122,8 +119,62 @@ public class AccountController {
         return response;
     }
 
-    @RequestMapping("/api/account/transactions/{transactionId}")
+    @RequestMapping(value = "/api/account/transactions/{transactionId}", method = RequestMethod.GET)
     public GetAccountTransactionResponse getAccountTransaction(@PathVariable("transactionId") Integer transactionId) {
         return new GetAccountTransactionResponse();
+    }
+
+    @RequestMapping(value = "/api/account/transactions/", method = RequestMethod.POST)
+    public RegisterTransactionResponse registerTransaction(@RequestBody RegisterTransactionRequest request) {
+        try {
+            TransactionBuilder transactionBuilder = new TransactionBuilder();
+
+            if (request.getTransactionType() != null) {
+                if(request.getTransactionType().isEmpty()) {
+                    throw new ClientException("The transaction type must not be empty.");
+                }
+
+                TransactionType transactionType;
+
+                try {
+                    transactionType = TransactionType.valueOf(request.getTransactionType());
+                }
+                catch(IllegalArgumentException illegalArgumentException) {
+                    throw new ClientException(String.format("The transaction type '%s' is invalid.", request.getTransactionType()));
+                }
+
+                transactionBuilder.setTransactionType(transactionType);
+            }
+
+            if(request.getIsin() != null) {
+                ISIN isin = new ISIN(request.getIsin());
+                transactionBuilder.setIsin(isin);
+            }
+
+            if(request.getQuantity() != null) {
+                Quantity quantity = new Quantity(request.getQuantity());
+                transactionBuilder.setQuantity(quantity);
+            }
+
+            if(request.getTotalPrice() != null) {
+                Amount totalPrice = new Amount(request.getTotalPrice());
+                transactionBuilder.setTotalPrice(totalPrice);
+            }
+
+            if(request.getCommission() != null) {
+                Amount commission = new Amount(request.getCommission());
+                transactionBuilder.setCommission(commission);
+            }
+
+            Transaction transaction = transactionBuilder.build();
+            this.accountService.registerTransaction(this.accountId, transaction);
+
+            RegisterTransactionResponse response = new RegisterTransactionResponse();
+            response.setTransactionId(transaction.getId().getValue());
+            return response;
+        }
+        catch(DomainException domainException) {
+            throw new ClientException(domainException);
+        }
     }
 }
