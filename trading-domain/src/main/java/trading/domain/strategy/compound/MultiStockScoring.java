@@ -21,6 +21,6 @@ public class MultiStockScoring {
             values.put(isin, scoringStrategy.calculateScore(historicalMarketData, isin));
         }
 
-        return new Scores(values);
+        return new Scores(values, historicalMarketData.getDate());
     }
 }

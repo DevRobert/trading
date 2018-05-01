@@ -14,6 +14,8 @@ import trading.domain.strategy.NotImplementedTrigger;
 import trading.domain.strategy.TradingStrategyContext;
 import trading.domain.strategy.TriggerFactory;
 
+import java.time.LocalDate;
+
 public class CompoundTradingStrategyInitializationTest {
     private TradingStrategyContext tradingStrategyContext;
     private ScoringStrategy scoringStrategy;
@@ -23,7 +25,7 @@ public class CompoundTradingStrategyInitializationTest {
     @Before
     public void before() {
         Account account = new Account(new Amount(1000.0));
-        HistoricalMarketData historicalMarketData = new HistoricalMarketData(ISIN.MunichRe, new Amount(1000.0));
+        HistoricalMarketData historicalMarketData = new HistoricalMarketData(ISIN.MunichRe, new Amount(1000.0), LocalDate.now());
         Broker broker = new VirtualBroker(account, historicalMarketData, CommissionStrategies.getZeroCommissionStrategy());
 
         this.tradingStrategyContext = new TradingStrategyContext(account, broker, historicalMarketData);

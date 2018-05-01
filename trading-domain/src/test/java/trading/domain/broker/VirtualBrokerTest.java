@@ -7,7 +7,10 @@ import trading.domain.*;
 import trading.domain.account.Account;
 import trading.domain.account.Position;
 import trading.domain.market.HistoricalMarketData;
+import trading.domain.market.MarketPriceSnapshot;
 import trading.domain.market.MarketPriceSnapshotBuilder;
+
+import java.time.LocalDate;
 
 /**
  * The virtual broker is strongly dependent on the account entity.
@@ -24,10 +27,13 @@ public class VirtualBrokerTest {
         Amount availableMoney = new Amount(50000.0);
         this.account = new Account(availableMoney);
 
-        MarketPriceSnapshotBuilder marketPriceSnapshotBuilder = new MarketPriceSnapshotBuilder();
-        marketPriceSnapshotBuilder.setMarketPrice(ISIN.MunichRe, new Amount(1000.0));
-        marketPriceSnapshotBuilder.setMarketPrice(ISIN.Allianz, new Amount(500.0));
-        this.historicalMarketData = new HistoricalMarketData(marketPriceSnapshotBuilder.build());
+        MarketPriceSnapshot marketPriceSnapshot = new MarketPriceSnapshotBuilder()
+                .setMarketPrice(ISIN.MunichRe, new Amount(1000.0))
+                .setMarketPrice(ISIN.Allianz, new Amount(500.0))
+                .setDate(LocalDate.now())
+                .build();
+
+        this.historicalMarketData = new HistoricalMarketData(marketPriceSnapshot);
 
         this.commissionStrategy = new ZeroCommissionStrategy();
     }
@@ -156,7 +162,7 @@ public class VirtualBrokerTest {
         Amount buyTotalPrice = new Amount(10000.0);
         Amount buyCommission = new Amount(0.0);
 
-        account.registerTransaction(new TransactionBuilder()
+        this.account.registerTransaction(new TransactionBuilder()
                 .setTransactionType(TransactionType.Buy)
                 .setIsin(ISIN.MunichRe)
                 .setQuantity(quantity)
@@ -171,7 +177,8 @@ public class VirtualBrokerTest {
         MarketPriceSnapshotBuilder marketPriceSnapshotBuilder = new MarketPriceSnapshotBuilder();
         marketPriceSnapshotBuilder.setMarketPrice(ISIN.MunichRe, new Amount(2000.0));
         marketPriceSnapshotBuilder.setMarketPrice(ISIN.Allianz, new Amount(500.0));
-        historicalMarketData.registerClosedDay(marketPriceSnapshotBuilder.build());
+        marketPriceSnapshotBuilder.setDate(this.historicalMarketData.getDate().plusDays(1));
+        this.historicalMarketData.registerClosedDay(marketPriceSnapshotBuilder.build());
 
         // Expected full market price for selling: 10 * 2,000 = 20,000
 

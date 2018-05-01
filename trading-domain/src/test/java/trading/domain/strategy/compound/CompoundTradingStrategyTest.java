@@ -6,8 +6,11 @@ import trading.domain.Amount;
 import trading.domain.DayCount;
 import trading.domain.ISIN;
 import trading.domain.account.Position;
+import trading.domain.market.MarketPriceSnapshot;
 import trading.domain.market.MarketPriceSnapshotBuilder;
 import trading.domain.strategy.*;
+
+import java.time.LocalDate;
 
 public class CompoundTradingStrategyTest extends TradingStrategyTestBase {
     private ScoringStrategy scoringStrategy;
@@ -35,11 +38,13 @@ public class CompoundTradingStrategyTest extends TradingStrategyTestBase {
 
         this.sellTriggerFactory = (historicalMarketData) -> new NeverFiresTrigger();
 
-        MarketPriceSnapshotBuilder marketPriceSnapshotBuilder = new MarketPriceSnapshotBuilder();
-        marketPriceSnapshotBuilder.setMarketPrice(ISIN.MunichRe, new Amount(1000.0));
-        marketPriceSnapshotBuilder.setMarketPrice(ISIN.Allianz, new Amount(500.0));
+        MarketPriceSnapshot marketPriceSnapshot = new MarketPriceSnapshotBuilder()
+                .setMarketPrice(ISIN.MunichRe, new Amount(1000.0))
+                .setMarketPrice(ISIN.Allianz, new Amount(500.0))
+                .setDate(LocalDate.now())
+                .build();
 
-        this.beginHistory(marketPriceSnapshotBuilder.build());
+        this.beginHistory(marketPriceSnapshot);
 
         this.beginSimulation();
         this.openDay();
@@ -67,11 +72,13 @@ public class CompoundTradingStrategyTest extends TradingStrategyTestBase {
 
         this.sellTriggerFactory = (historicalMarketData) -> new NeverFiresTrigger();
 
-        MarketPriceSnapshotBuilder marketPriceSnapshotBuilder = new MarketPriceSnapshotBuilder()
+        MarketPriceSnapshot marketPriceSnapshot = new MarketPriceSnapshotBuilder()
                 .setMarketPrice(ISIN.MunichRe, new Amount(1000.0))
-                .setMarketPrice(ISIN.Allianz, new Amount(500.0));
+                .setMarketPrice(ISIN.Allianz, new Amount(500.0))
+                .setDate(LocalDate.now())
+                .build();
 
-        this.beginHistory(marketPriceSnapshotBuilder.build());
+        this.beginHistory(marketPriceSnapshot);
 
         this.beginSimulation();
         this.openDay();
@@ -96,7 +103,7 @@ public class CompoundTradingStrategyTest extends TradingStrategyTestBase {
 
         this.sellTriggerFactory = isin -> new WaitFixedPeriodTrigger(historicalMarketData, new DayCount(1));
 
-        this.beginHistory(ISIN.MunichRe, new Amount(1000.0));
+        this.beginHistory(ISIN.MunichRe, new Amount(1000.0), LocalDate.now());
 
         this.beginSimulation();
         this.openDay();
@@ -108,7 +115,7 @@ public class CompoundTradingStrategyTest extends TradingStrategyTestBase {
         Position munichRePosition = this.account.getPosition(ISIN.MunichRe);
         Assert.assertEquals(50, munichRePosition.getQuantity().getValue());
 
-        this.closeDay(new Amount(1000.0));
+        this.closeDay(new Amount(1000.0), historicalMarketData.getDate().plusDays(1));
         this.openDay();
 
         // First day passed
@@ -116,7 +123,7 @@ public class CompoundTradingStrategyTest extends TradingStrategyTestBase {
 
         Assert.assertEquals(50, munichRePosition.getQuantity().getValue());
 
-        this.closeDay(new Amount(1000.0));
+        this.closeDay(new Amount(1000.0), historicalMarketData.getDate().plusDays(1));
         this.openDay();
 
         // Second day passed

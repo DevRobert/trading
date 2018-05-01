@@ -7,7 +7,9 @@ import trading.domain.ISIN;
 import trading.domain.market.MarketPriceSnapshot;
 import trading.domain.market.MarketPriceSnapshotBuilder;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 public class MultiStockListDataSourceTest {
@@ -43,27 +45,23 @@ public class MultiStockListDataSourceTest {
 
     @Test
     public void getNextClosingMarketPrices_initially_returnsCorrectSnapshot() {
-        List<MarketPriceSnapshot> marketPriceSnapshots = new ArrayList<>();
+        MarketPriceSnapshot marketPriceSnapshot = new MarketPriceSnapshotBuilder()
+                .setMarketPrice(ISIN.MunichRe, new Amount(100.0))
+                .setDate(LocalDate.now())
+                .build();
 
-        MarketPriceSnapshotBuilder marketPriceSnapshotBuilder = new MarketPriceSnapshotBuilder();
-        marketPriceSnapshotBuilder.setMarketPrice(ISIN.MunichRe, new Amount(100.0));
-        MarketPriceSnapshot marketPriceSnapshot = marketPriceSnapshotBuilder.build();
-        marketPriceSnapshots.add(marketPriceSnapshot);
-
-        MultiStockListDataSource multiStockListDataSource = new MultiStockListDataSource(marketPriceSnapshots);
+        MultiStockListDataSource multiStockListDataSource = new MultiStockListDataSource(Arrays.asList(marketPriceSnapshot));
         Assert.assertSame(marketPriceSnapshot, multiStockListDataSource.getNextClosingMarketPrices());
     }
 
     @Test
     public void getNextClosingMarketPrices_afterOneDay_fails_ofOneItemList() {
-        List<MarketPriceSnapshot> marketPriceSnapshots = new ArrayList<>();
+        MarketPriceSnapshot marketPriceSnapshot = new MarketPriceSnapshotBuilder()
+                .setMarketPrice(ISIN.MunichRe, new Amount(100.0))
+                .setDate(LocalDate.now())
+                .build();
 
-        MarketPriceSnapshotBuilder marketPriceSnapshotBuilder = new MarketPriceSnapshotBuilder();
-        marketPriceSnapshotBuilder.setMarketPrice(ISIN.MunichRe, new Amount(100.0));
-        MarketPriceSnapshot marketPriceSnapshot = marketPriceSnapshotBuilder.build();
-        marketPriceSnapshots.add(marketPriceSnapshot);
-
-        SimulationMarketDataSource multiStockListDataSource = new MultiStockListDataSource(marketPriceSnapshots);
+        SimulationMarketDataSource multiStockListDataSource = new MultiStockListDataSource(Arrays.asList(marketPriceSnapshot));
 
         multiStockListDataSource.getNextClosingMarketPrices();
 
@@ -79,22 +77,22 @@ public class MultiStockListDataSourceTest {
 
     @Test
     public void getNextClosingMarketPrices_afterOneDay_returnsCorrectSnapshot_ifTwoItemsList() {
-        List<MarketPriceSnapshot> marketPriceSnapshots = new ArrayList<>();
+        MarketPriceSnapshot firstMarketPriceSnapshot = new MarketPriceSnapshotBuilder()
+                .setMarketPrice(ISIN.MunichRe, new Amount(100.0))
+                .setDate(LocalDate.of(2018, 1, 1))
+                .build();
 
-        MarketPriceSnapshotBuilder marketPriceSnapshotBuilder = new MarketPriceSnapshotBuilder();
+        MarketPriceSnapshot secondMarketPriceSnapshot = new MarketPriceSnapshotBuilder()
+                .setMarketPrice(ISIN.MunichRe, new Amount(100.0))
+                .setDate(LocalDate.of(2018, 1, 2))
+                .build();
 
-        marketPriceSnapshotBuilder.setMarketPrice(ISIN.MunichRe, new Amount(100.0));
-        MarketPriceSnapshot firstDayMarketPriceSnapshot = marketPriceSnapshotBuilder.build();
-        marketPriceSnapshots.add(firstDayMarketPriceSnapshot);
-
-        marketPriceSnapshotBuilder.setMarketPrice(ISIN.MunichRe, new Amount(100.0));
-        MarketPriceSnapshot secondDayMarketPriceSnapshot = marketPriceSnapshotBuilder.build();
-        marketPriceSnapshots.add(secondDayMarketPriceSnapshot);
+        List<MarketPriceSnapshot> marketPriceSnapshots = Arrays.asList(firstMarketPriceSnapshot, secondMarketPriceSnapshot);
 
         MultiStockListDataSource multiStockListDataSource = new MultiStockListDataSource(marketPriceSnapshots);
 
         multiStockListDataSource.getNextClosingMarketPrices();
 
-        Assert.assertSame(secondDayMarketPriceSnapshot, multiStockListDataSource.getNextClosingMarketPrices());
+        Assert.assertSame(secondMarketPriceSnapshot, multiStockListDataSource.getNextClosingMarketPrices());
     }
 }

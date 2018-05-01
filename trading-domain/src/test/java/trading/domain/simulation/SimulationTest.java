@@ -12,6 +12,7 @@ import trading.domain.market.MarketPriceSnapshotBuilder;
 import trading.domain.strategy.TradingStrategy;
 import trading.domain.strategy.manual.ManualTradingStrategy;
 
+import java.time.LocalDate;
 import java.util.HashMap;
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -24,9 +25,12 @@ public class SimulationTest {
 
     @Before
     public void before() {
-        MarketPriceSnapshotBuilder marketPriceSnapshotBuilder = new MarketPriceSnapshotBuilder();
-        marketPriceSnapshotBuilder.setMarketPrice(ISIN.MunichRe, new Amount(1000.0));
-        historicalMarketData = new HistoricalMarketData(marketPriceSnapshotBuilder.build());
+        MarketPriceSnapshot marketPriceSnapshot = new MarketPriceSnapshotBuilder()
+                .setMarketPrice(ISIN.MunichRe, new Amount(1000.0))
+                .setDate(LocalDate.now())
+                .build();
+
+        historicalMarketData = new HistoricalMarketData(marketPriceSnapshot);
 
         Amount availableMoney = new Amount(50000.0);
         account = new Account(availableMoney);
@@ -122,7 +126,7 @@ public class SimulationTest {
         startSimulation();
 
         try {
-            MarketPriceSnapshot closingMarketPrices = new MarketPriceSnapshot(new HashMap<>());
+            MarketPriceSnapshot closingMarketPrices = new MarketPriceSnapshot(new HashMap<>(), historicalMarketData.getDate().plusDays(1));
             simulation.closeDay(closingMarketPrices);
         }
         catch(SimulationStateException ex) {
@@ -137,9 +141,10 @@ public class SimulationTest {
     public void closeDayFailsIfDayWasClosedAndNoNextDayStarted() {
         startSimulation();
 
-        MarketPriceSnapshotBuilder marketPriceSnapshotBuilder = new MarketPriceSnapshotBuilder();
-        marketPriceSnapshotBuilder.setMarketPrice(ISIN.MunichRe, new Amount(1100.0));
-        MarketPriceSnapshot closingMarketPrices = marketPriceSnapshotBuilder.build();
+        MarketPriceSnapshot closingMarketPrices = new MarketPriceSnapshotBuilder()
+                .setMarketPrice(ISIN.MunichRe, new Amount(1100.0))
+                .setDate(historicalMarketData.getDate().plusDays(1))
+                .build();
 
         simulation.openDay();
         simulation.closeDay(closingMarketPrices);
@@ -208,9 +213,13 @@ public class SimulationTest {
         simulation.openDay();
 
         Amount newMarketPriceMunichRe = new Amount(1100.0);
-        MarketPriceSnapshotBuilder marketPriceSnapshotBuilder = new MarketPriceSnapshotBuilder();
-        marketPriceSnapshotBuilder.setMarketPrice(ISIN.MunichRe, newMarketPriceMunichRe);
-        simulation.closeDay(marketPriceSnapshotBuilder.build());
+
+        MarketPriceSnapshot marketPriceSnapshot = new MarketPriceSnapshotBuilder()
+                .setMarketPrice(ISIN.MunichRe, newMarketPriceMunichRe)
+                .setDate(historicalMarketData.getDate().plusDays(1))
+                .build();
+
+        simulation.closeDay(marketPriceSnapshot);
 
         Assert.assertEquals(newMarketPriceMunichRe, historicalMarketData.getStockData(ISIN.MunichRe).getLastClosingMarketPrice());
     }
@@ -221,17 +230,20 @@ public class SimulationTest {
         simulation.openDay();
 
         Amount newMarketPriceMunichRe = new Amount(1100.0);
-        simulation.closeDay(newMarketPriceMunichRe);
+        simulation.closeDay(newMarketPriceMunichRe, historicalMarketData.getDate().plusDays(1));
 
         Assert.assertEquals(newMarketPriceMunichRe, historicalMarketData.getStockData(ISIN.MunichRe).getLastClosingMarketPrice());
     }
 
     @Test
     public void closeDayFails_ifForSingleStockCalled_butMultipleStocksAvailable() {
-        MarketPriceSnapshotBuilder marketPriceSnapshotBuilder = new MarketPriceSnapshotBuilder();
-        marketPriceSnapshotBuilder.setMarketPrice(ISIN.MunichRe, new Amount(1000.0));
-        marketPriceSnapshotBuilder.setMarketPrice(ISIN.Allianz, new Amount(500.0));
-        historicalMarketData = new HistoricalMarketData(marketPriceSnapshotBuilder.build());
+        MarketPriceSnapshot marketPriceSnapshot = new MarketPriceSnapshotBuilder()
+                .setMarketPrice(ISIN.MunichRe, new Amount(1000.0))
+                .setMarketPrice(ISIN.Allianz, new Amount(500.0))
+                .setDate(LocalDate.now())
+                .build();
+
+        historicalMarketData = new HistoricalMarketData(marketPriceSnapshot);
 
         startSimulation();
         simulation.openDay();
@@ -239,7 +251,7 @@ public class SimulationTest {
         Amount newMarketPriceMunichRe = new Amount(1100.0);
 
         try {
-            simulation.closeDay(newMarketPriceMunichRe);
+            simulation.closeDay(newMarketPriceMunichRe, historicalMarketData.getDate().plusDays(1));
         }
         catch(SimulationStateException ex) {
             Assert.assertEquals("The single-stock close day function must not be used when multiple stocks registered.", ex.getMessage());
@@ -258,9 +270,12 @@ public class SimulationTest {
         startSimulation();
         simulation.openDay();
 
-        MarketPriceSnapshotBuilder marketPriceSnapshotBuilder = new MarketPriceSnapshotBuilder();
-        marketPriceSnapshotBuilder.setMarketPrice(ISIN.MunichRe, new Amount(1100.0));
-        simulation.closeDay(marketPriceSnapshotBuilder.build());
+        MarketPriceSnapshot marketPriceSnapshot = new MarketPriceSnapshotBuilder()
+                .setMarketPrice(ISIN.MunichRe, new Amount(1100.0))
+                .setDate(historicalMarketData.getDate().plusDays(1))
+                .build();
+
+        simulation.closeDay(marketPriceSnapshot);
 
         Assert.assertTrue(dayClosedSignalReceived.get());
     }
@@ -280,7 +295,7 @@ public class SimulationTest {
 
         startSimulation();
         simulation.openDay();
-        simulation.closeDay(new Amount(110.0));
+        simulation.closeDay(new Amount(110.0), historicalMarketData.getDate().plusDays(1));
 
         Assert.assertEquals(new Amount(220.0), account.getPosition(ISIN.MunichRe).getFullMarketPrice());
     }

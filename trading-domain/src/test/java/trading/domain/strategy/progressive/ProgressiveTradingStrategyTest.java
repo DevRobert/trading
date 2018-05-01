@@ -11,6 +11,8 @@ import trading.domain.account.Position;
 import trading.domain.strategy.AlwaysFiresTrigger;
 import trading.domain.strategy.WaitFixedPeriodTrigger;
 
+import java.time.LocalDate;
+
 public class ProgressiveTradingStrategyTest extends ProgressiveTradingStrategyTestBase {
     /**
      * Default Parameters
@@ -33,7 +35,7 @@ public class ProgressiveTradingStrategyTest extends ProgressiveTradingStrategyTe
     public void buyOrderIsSetInitially_ifBuyTriggerFiresImmediately() {
         parametersBuilder.setBuyTriggerFactory(isin -> new WaitFixedPeriodTrigger(this.historicalMarketData, new DayCount(0)));
 
-        beginHistory(ISIN.MunichRe, new Amount(1000.0));
+        beginHistory(ISIN.MunichRe, new Amount(1000.0), LocalDate.now());
 
         beginSimulation();
         openDay();
@@ -45,7 +47,7 @@ public class ProgressiveTradingStrategyTest extends ProgressiveTradingStrategyTe
     public void buyOrderIsNotSetInitially_ifBuyTriggerFiresAfterOneDay() {
         parametersBuilder.setBuyTriggerFactory(isin -> new WaitFixedPeriodTrigger(this.historicalMarketData, new DayCount(1)));
 
-        beginHistory(ISIN.MunichRe, new Amount(1000.0));
+        beginHistory(ISIN.MunichRe, new Amount(1000.0), LocalDate.now());
 
         beginSimulation();
         openDay();
@@ -57,12 +59,12 @@ public class ProgressiveTradingStrategyTest extends ProgressiveTradingStrategyTe
     public void buyOrderIsSetAfterOneDay_ifBuyTriggerFiresAfterOneDay() {
         parametersBuilder.setBuyTriggerFactory(isin -> new WaitFixedPeriodTrigger(this.historicalMarketData, new DayCount(1)));
 
-        beginHistory(ISIN.MunichRe, new Amount(1000.0));
+        beginHistory(ISIN.MunichRe, new Amount(1000.0), LocalDate.now());
 
         beginSimulation();
 
         openDay();
-        closeDay(new Amount(1100.0));
+        closeDay(new Amount(1100.0), historicalMarketData.getDate().plusDays(1));
 
         openDay();
         assertPositionHasPositiveQuantity(ISIN.MunichRe);
@@ -72,7 +74,7 @@ public class ProgressiveTradingStrategyTest extends ProgressiveTradingStrategyTe
     public void buyOrderMaximumQuantityIsOrdered_ifNoCommissions() {
         parametersBuilder.setBuyTriggerFactory(isin -> new WaitFixedPeriodTrigger(this.historicalMarketData, new DayCount(0)));
 
-        beginHistory(ISIN.MunichRe, new Amount(1000.0));
+        beginHistory(ISIN.MunichRe, new Amount(1000.0), LocalDate.now());
 
         beginSimulation();
         openDay();
@@ -92,7 +94,7 @@ public class ProgressiveTradingStrategyTest extends ProgressiveTradingStrategyTe
 
         this.commissionStrategy = totalPrice -> new Amount(1500.0);
 
-        beginHistory(ISIN.MunichRe, new Amount(1000.0));
+        beginHistory(ISIN.MunichRe, new Amount(1000.0), LocalDate.now());
 
         beginSimulation();
         openDay();
@@ -114,7 +116,7 @@ public class ProgressiveTradingStrategyTest extends ProgressiveTradingStrategyTe
 
         parametersBuilder.setBuyTriggerFactory(isin -> new AlwaysFiresTrigger());
 
-        beginHistory(ISIN.MunichRe, new Amount(1000.0));
+        beginHistory(ISIN.MunichRe, new Amount(1000.0), LocalDate.now());
 
         beginSimulation();
         openDay();
@@ -135,12 +137,12 @@ public class ProgressiveTradingStrategyTest extends ProgressiveTradingStrategyTe
         parametersBuilder.setSellTriggerFactory(isin -> new WaitFixedPeriodTrigger(historicalMarketData, new DayCount(0)));
         parametersBuilder.setResetTriggerFactory(isin -> new WaitFixedPeriodTrigger(historicalMarketData, new DayCount(10)));
 
-        beginHistory(ISIN.MunichRe, new Amount(1000.0));
+        beginHistory(ISIN.MunichRe, new Amount(1000.0), LocalDate.now());
         beginSimulation();
 
         openDay();
         assertPositionHasPositiveQuantity(ISIN.MunichRe);
-        closeDay(new Amount(1100.0));
+        closeDay(new Amount(1100.0), historicalMarketData.getDate().plusDays(1));
 
         openDay();
         assertNoneOrEmptyPosition(ISIN.MunichRe);
@@ -152,16 +154,16 @@ public class ProgressiveTradingStrategyTest extends ProgressiveTradingStrategyTe
         parametersBuilder.setSellTriggerFactory(isin -> new WaitFixedPeriodTrigger(historicalMarketData, new DayCount(1)));
         parametersBuilder.setResetTriggerFactory(isin -> new WaitFixedPeriodTrigger(historicalMarketData, new DayCount(10)));
 
-        beginHistory(ISIN.MunichRe, new Amount(1000.0));
+        beginHistory(ISIN.MunichRe, new Amount(1000.0), LocalDate.now());
         beginSimulation();
 
         openDay();
         assertPositionHasPositiveQuantity(ISIN.MunichRe);
-        closeDay(new Amount(1100.0));
+        closeDay(new Amount(1100.0), historicalMarketData.getDate().plusDays(1));
 
         openDay();
         assertPositionHasPositiveQuantity(ISIN.MunichRe);
-        closeDay(new Amount(1200.0));
+        closeDay(new Amount(1200.0), historicalMarketData.getDate().plusDays(1));
 
         openDay();
         assertNoneOrEmptyPosition(ISIN.MunichRe);
@@ -178,7 +180,7 @@ public class ProgressiveTradingStrategyTest extends ProgressiveTradingStrategyTe
         parametersBuilder.setSellTriggerFactory(isin -> new WaitFixedPeriodTrigger(historicalMarketData, new DayCount(0)));
         parametersBuilder.setResetTriggerFactory(isin -> new WaitFixedPeriodTrigger(historicalMarketData, new DayCount(0)));
 
-        beginHistory(ISIN.MunichRe, new Amount(1000.0));
+        beginHistory(ISIN.MunichRe, new Amount(1000.0), LocalDate.now());
 
         beginSimulation();
         assertNoneOrEmptyPosition(ISIN.MunichRe);
@@ -187,13 +189,13 @@ public class ProgressiveTradingStrategyTest extends ProgressiveTradingStrategyTe
 
         openDay();
         assertPositionHasPositiveQuantity(ISIN.MunichRe);
-        closeDay(new Amount(1100.0));
+        closeDay(new Amount(1100.0), historicalMarketData.getDate().plusDays(1));
 
         // First selling expected for next day (due to sell trigger period = 0)
 
         openDay();
         assertNoneOrEmptyPosition(ISIN.MunichRe);
-        closeDay(new Amount(900.0));
+        closeDay(new Amount(900.0), historicalMarketData.getDate().plusDays(1));
 
         // Second buying expected for next day (due to reset trigger period = 0 and buy trigger period = 0)
 
@@ -207,7 +209,7 @@ public class ProgressiveTradingStrategyTest extends ProgressiveTradingStrategyTe
         parametersBuilder.setSellTriggerFactory(isin -> new WaitFixedPeriodTrigger(historicalMarketData, new DayCount(0)));
         parametersBuilder.setResetTriggerFactory(isin -> new WaitFixedPeriodTrigger(historicalMarketData, new DayCount(1)));
 
-        beginHistory(ISIN.MunichRe, new Amount(1000.0));
+        beginHistory(ISIN.MunichRe, new Amount(1000.0), LocalDate.now());
 
         beginSimulation();
         assertNoneOrEmptyPosition(ISIN.MunichRe);
@@ -216,19 +218,19 @@ public class ProgressiveTradingStrategyTest extends ProgressiveTradingStrategyTe
 
         openDay();
         assertPositionHasPositiveQuantity(ISIN.MunichRe);
-        closeDay(new Amount(1100.0));
+        closeDay(new Amount(1100.0), historicalMarketData.getDate().plusDays(1));
 
         // First selling expected for next day (due to sell trigger period = 0)
 
         openDay();
         assertNoneOrEmptyPosition(ISIN.MunichRe);
-        closeDay(new Amount(1200.0));
+        closeDay(new Amount(1200.0), historicalMarketData.getDate().plusDays(1));
 
         // Wait expected for next day (due to reset trigger period = 1 / not fulfilled yet)
 
         openDay();
         assertNoneOrEmptyPosition(ISIN.MunichRe);
-        closeDay(new Amount(1100.0)); // declined (1 day in sequence)
+        closeDay(new Amount(1100.0), historicalMarketData.getDate().plusDays(1)); // declined (1 day in sequence)
 
         // Second buying expected for next day (due to reset trigger period = 1 / now fulfilled)
 

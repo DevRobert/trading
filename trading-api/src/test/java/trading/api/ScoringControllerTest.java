@@ -16,14 +16,15 @@ import trading.domain.market.InstrumentNameProvider;
 import trading.domain.strategy.compound.Score;
 import trading.domain.strategy.compound.Scores;
 
+import java.time.LocalDate;
 import java.util.HashMap;
 import java.util.Map;
 
 import static org.hamcrest.Matchers.hasSize;
-import static org.mockito.BDDMockito.given;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.hamcrest.Matchers.is;
+import static org.mockito.BDDMockito.given;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest
@@ -43,7 +44,7 @@ public class ScoringControllerTest {
         Map<ISIN, Score> values = new HashMap<>();
         values.put(new ISIN("A"), new Score(1.0, "My first comment"));
         values.put(new ISIN("B"), new Score(0.5, "My second comment"));
-        Scores scores = new Scores(values);
+        Scores scores = new Scores(values, LocalDate.of(2018, 4, 29));
 
         given(this.scoringService.getCurrentScoring()).willReturn(scores);
 
@@ -61,6 +62,7 @@ public class ScoringControllerTest {
                 .andExpect(jsonPath("scores[1].isin", is("B")))
                 .andExpect(jsonPath("scores[1].name", is("Unknown")))
                 .andExpect(jsonPath("scores[1].score", is(0.5)))
-                .andExpect(jsonPath("scores[1].comment", is("My second comment")));
+                .andExpect(jsonPath("scores[1].comment", is("My second comment")))
+                .andExpect(jsonPath("marketPricesDate", is("2018-04-29")));
     }
 }

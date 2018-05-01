@@ -24,7 +24,7 @@ import static org.mockito.BDDMockito.given;
 @RunWith(SpringRunner.class)
 @SpringBootTest
 @AutoConfigureMockMvc
-public class AccountControllerTestBase {
+public abstract class AccountControllerTestBase {
     @Autowired
     protected MockMvc mvc;
 
@@ -67,6 +67,7 @@ public class AccountControllerTestBase {
         MarketPriceSnapshot lastClosingPrices = new MarketPriceSnapshotBuilder()
                 .setMarketPrice(new ISIN("A"), new Amount(200.0))
                 .setMarketPrice(new ISIN("B"), new Amount(300.0))
+                .setDate(LocalDate.of(2018, 5, 9))
                 .build();
 
         given(this.multiStockMarketDataStore.getLastClosingPrices()).willReturn(lastClosingPrices);

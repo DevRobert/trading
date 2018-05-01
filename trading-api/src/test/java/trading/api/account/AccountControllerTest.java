@@ -35,7 +35,8 @@ public class AccountControllerTest extends AccountControllerTestBase {
                 .andExpect(jsonPath("summary.totalStocksQuantity", is(20)))
                 .andExpect(jsonPath("summary.totalStocksMarketPrice", is(5000.0)))
                 .andExpect(jsonPath("summary.availableMoney", is(7960.0)))
-                .andExpect(jsonPath("summary.totalBalance", is(12960.0)));
+                .andExpect(jsonPath("summary.totalBalance", is(12960.0)))
+                .andExpect(jsonPath("marketPricesDate", is("2018-05-09")));
     }
 
     @Test

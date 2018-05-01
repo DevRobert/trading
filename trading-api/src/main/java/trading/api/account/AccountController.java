@@ -74,6 +74,8 @@ public class AccountController {
 
         response.setSummary(accountSummaryDto);
 
+        response.setMarketPricesDate(lastClosingPrices.getDate());
+
         return response;
     }
 

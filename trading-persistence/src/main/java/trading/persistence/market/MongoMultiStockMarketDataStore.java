@@ -13,7 +13,10 @@ import trading.domain.market.MarketPriceSnapshot;
 import trading.domain.market.MarketPriceSnapshotBuilder;
 import trading.domain.simulation.MultiStockMarketDataStore;
 
+import java.time.LocalDate;
+import java.time.ZoneOffset;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 public class MongoMultiStockMarketDataStore implements MultiStockMarketDataStore {
@@ -75,6 +78,10 @@ public class MongoMultiStockMarketDataStore implements MultiStockMarketDataStore
 
     private MarketPriceSnapshot readMarketPriceSnapshotFromDocument(Document document) {
         MarketPriceSnapshotBuilder marketPriceSnapshotBuilder = new MarketPriceSnapshotBuilder();
+
+        Date date = document.getDate("_id");
+        LocalDate localDate = date.toInstant().atZone(ZoneOffset.systemDefault()).toLocalDate();
+        marketPriceSnapshotBuilder.setDate(localDate);
 
         Document quotesDocument = (Document) document.get("stocks");
 

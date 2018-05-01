@@ -1,24 +1,33 @@
 package trading.domain.market;
 
 import org.junit.Assert;
+import org.junit.Before;
 import org.junit.Test;
-import trading.domain.Amount;
-import trading.domain.DayCount;
-import trading.domain.ISIN;
+import trading.domain.*;
 
+import java.time.LocalDate;
 import java.util.Set;
 
 public class HistoricalMarketDataTest {
+    private DateSequenceGenerator dateSequenceGenerator;
+
+    @Before
+    public void before() {
+        this.dateSequenceGenerator = new DateSequenceGenerator(LocalDate.now());
+    }
+
     // Get initial closing market prices
 
     @Test
     public void retrieveLastMarketPriceForInitiallyRegisteredStocks() {
         Amount initialClosingMarketPrice = new Amount(1000.0);
 
-        MarketPriceSnapshotBuilder marketPriceSnapshotBuilder = new MarketPriceSnapshotBuilder();
-        marketPriceSnapshotBuilder.setMarketPrice(ISIN.MunichRe, initialClosingMarketPrice);
+        MarketPriceSnapshot marketPriceSnapshot = new MarketPriceSnapshotBuilder()
+                .setMarketPrice(ISIN.MunichRe, initialClosingMarketPrice)
+                .setDate(LocalDate.now())
+                .build();
 
-        HistoricalMarketData historicalMarketData = new HistoricalMarketData(marketPriceSnapshotBuilder.build());
+        HistoricalMarketData historicalMarketData = new HistoricalMarketData(marketPriceSnapshot);
 
         Assert.assertEquals(initialClosingMarketPrice, historicalMarketData.getStockData(ISIN.MunichRe).getLastClosingMarketPrice());
     }
@@ -26,13 +35,13 @@ public class HistoricalMarketDataTest {
     @Test
     public void retrieveLastMarketPriceForInitiallyRegisteredSingleStock() {
         Amount initialClosingMarketPrice = new Amount(1000.0);
-        HistoricalMarketData historicalMarketData = new HistoricalMarketData(ISIN.MunichRe, initialClosingMarketPrice);
+        HistoricalMarketData historicalMarketData = new HistoricalMarketData(ISIN.MunichRe, initialClosingMarketPrice, LocalDate.now());
         Assert.assertEquals(initialClosingMarketPrice, historicalMarketData.getStockData(ISIN.MunichRe).getLastClosingMarketPrice());
     }
 
     @Test
     public void retrievalOfStockDataFailsForUnknownStock() {
-        MarketPriceSnapshot marketPriceSnapshot = new MarketPriceSnapshotBuilder().build();
+        MarketPriceSnapshot marketPriceSnapshot = new MarketPriceSnapshotBuilder().setDate(LocalDate.now()).build();
         HistoricalMarketData historicalMarketData = new HistoricalMarketData(marketPriceSnapshot);
 
         try {
@@ -49,14 +58,20 @@ public class HistoricalMarketDataTest {
 
     @Test
     public void distributeMarketPriceUpdateOverTwoStocks() {
-        MarketPriceSnapshotBuilder marketPriceSnapshotBuilder = new MarketPriceSnapshotBuilder();
-        marketPriceSnapshotBuilder.setMarketPrice(ISIN.MunichRe, new Amount(1000.0));
-        marketPriceSnapshotBuilder.setMarketPrice(ISIN.Allianz, new Amount(500.0));
-        HistoricalMarketData historicalMarketData = new HistoricalMarketData(marketPriceSnapshotBuilder.build());
+        MarketPriceSnapshot firstMarketPriceSnapshot = new MarketPriceSnapshotBuilder()
+                .setMarketPrice(ISIN.MunichRe, new Amount(1000.0))
+                .setMarketPrice(ISIN.Allianz, new Amount(500.0))
+                .setDate(this.dateSequenceGenerator.nextDate())
+                .build();
 
-        marketPriceSnapshotBuilder.setMarketPrice(ISIN.MunichRe, new Amount(1100.0));
-        marketPriceSnapshotBuilder.setMarketPrice(ISIN.Allianz, new Amount(550.0));
-        historicalMarketData.registerClosedDay(marketPriceSnapshotBuilder.build());
+        MarketPriceSnapshot secondMarketPriceSnapshot = new MarketPriceSnapshotBuilder()
+                .setMarketPrice(ISIN.MunichRe, new Amount(1100.0))
+                .setMarketPrice(ISIN.Allianz, new Amount(550.0))
+                .setDate(this.dateSequenceGenerator.nextDate())
+                .build();
+
+        HistoricalMarketData historicalMarketData = new HistoricalMarketData(firstMarketPriceSnapshot);
+        historicalMarketData.registerClosedDay(secondMarketPriceSnapshot);
 
         Assert.assertEquals(new Amount(1100.0), historicalMarketData.getStockData(ISIN.MunichRe).getLastClosingMarketPrice());
         Assert.assertEquals(new Amount(550.0), historicalMarketData.getStockData(ISIN.Allianz).getLastClosingMarketPrice());
@@ -65,23 +80,26 @@ public class HistoricalMarketDataTest {
     @Test
     public void registerMarketPriceUpdateForSingleStock() {
         Amount initialClosingMarketPrice = new Amount(1000.0);
-        HistoricalMarketData historicalMarketData = new HistoricalMarketData(ISIN.MunichRe, initialClosingMarketPrice);
+        HistoricalMarketData historicalMarketData = new HistoricalMarketData(ISIN.MunichRe, initialClosingMarketPrice, this.dateSequenceGenerator.nextDate());
 
         Amount newClosingMarketPrice = new Amount(1100.0);
-        historicalMarketData.registerClosedDay(newClosingMarketPrice);
+        historicalMarketData.registerClosedDay(newClosingMarketPrice, dateSequenceGenerator.nextDate());
 
         Assert.assertEquals(newClosingMarketPrice, historicalMarketData.getStockData(ISIN.MunichRe).getLastClosingMarketPrice());
     }
 
     @Test
-    public void registerMarketPriceUpdateForSingleStockFailsSinceMultipleStocksAvailable() {
-        MarketPriceSnapshotBuilder marketPriceSnapshotBuilder = new MarketPriceSnapshotBuilder();
-        marketPriceSnapshotBuilder.setMarketPrice(ISIN.MunichRe, new Amount(1000.0));
-        marketPriceSnapshotBuilder.setMarketPrice(ISIN.Allianz, new Amount(500.0));
-        HistoricalMarketData historicalMarketData = new HistoricalMarketData(marketPriceSnapshotBuilder.build());
+    public void registerMarketPriceUpdateForSingleStockFails_ifMultipleStocksAvailable() {
+        MarketPriceSnapshot marketPriceSnapshot = new MarketPriceSnapshotBuilder()
+                .setMarketPrice(ISIN.MunichRe, new Amount(1000.0))
+                .setMarketPrice(ISIN.Allianz, new Amount(500.0))
+                .setDate(this.dateSequenceGenerator.nextDate())
+                .build();
+
+        HistoricalMarketData historicalMarketData = new HistoricalMarketData(marketPriceSnapshot);
 
         try {
-            historicalMarketData.registerClosedDay(new Amount(1100.0));
+            historicalMarketData.registerClosedDay(new Amount(1100.0), this.dateSequenceGenerator.nextDate());
         }
         catch(RuntimeException ex) {
             Assert.assertEquals("The single-stock market update function must not be used when multiple stocks registered.", ex.getMessage());
@@ -93,10 +111,13 @@ public class HistoricalMarketDataTest {
 
     @Test
     public void derivesAvailableStocksFromMarketPriceSnapshot() {
-        MarketPriceSnapshotBuilder marketPriceSnapshotBuilder = new MarketPriceSnapshotBuilder();
-        marketPriceSnapshotBuilder.setMarketPrice(ISIN.MunichRe, new Amount(1000.0));
-        marketPriceSnapshotBuilder.setMarketPrice(ISIN.Allianz, new Amount(500.0));
-        HistoricalMarketData historicalMarketData = new HistoricalMarketData(marketPriceSnapshotBuilder.build());
+        MarketPriceSnapshot marketPriceSnapshot = new MarketPriceSnapshotBuilder()
+                .setMarketPrice(ISIN.MunichRe, new Amount(1000.0))
+                .setMarketPrice(ISIN.Allianz, new Amount(500.0))
+                .setDate(LocalDate.now())
+                .build();
+
+        HistoricalMarketData historicalMarketData = new HistoricalMarketData(marketPriceSnapshot);
 
         Set<ISIN> availableStocks = historicalMarketData.getAvailableStocks();
 
@@ -107,14 +128,19 @@ public class HistoricalMarketDataTest {
 
     @Test
     public void marketPriceUpdateFailsIfAvailableStockMissing() {
-        MarketPriceSnapshotBuilder marketPriceSnapshotBuilder = new MarketPriceSnapshotBuilder();
-        marketPriceSnapshotBuilder.setMarketPrice(ISIN.MunichRe, new Amount(1000.0));
-        HistoricalMarketData historicalMarketData = new HistoricalMarketData(marketPriceSnapshotBuilder.build());
+        MarketPriceSnapshot firstMarketPriceSnapshot = new MarketPriceSnapshotBuilder()
+                .setMarketPrice(ISIN.MunichRe, new Amount(1000.0))
+                .setDate(this.dateSequenceGenerator.nextDate())
+                .build();
 
-        marketPriceSnapshotBuilder = new MarketPriceSnapshotBuilder();
+        MarketPriceSnapshot secondMarketPriceSnapshot = new MarketPriceSnapshotBuilder()
+                .setDate(this.dateSequenceGenerator.nextDate())
+                .build();
+
+        HistoricalMarketData historicalMarketData = new HistoricalMarketData(firstMarketPriceSnapshot);
 
         try {
-            historicalMarketData.registerClosedDay(marketPriceSnapshotBuilder.build());
+            historicalMarketData.registerClosedDay(secondMarketPriceSnapshot);
         }
         catch(MissingDataException ex) {
             Assert.assertEquals("The market price snapshot must contain prices for all registered stocks.", ex.getMessage());
@@ -132,7 +158,7 @@ public class HistoricalMarketDataTest {
         Amount initialClosingMarketPrice = new Amount(1000.0);
 
         try {
-            new HistoricalMarketData(isin, initialClosingMarketPrice);
+            new HistoricalMarketData(isin, initialClosingMarketPrice, LocalDate.now());
         }
         catch(RuntimeException ex) {
             Assert.assertEquals("The ISIN must be specified.", ex.getMessage());
@@ -148,10 +174,10 @@ public class HistoricalMarketDataTest {
         Amount initialClosingMarketPrice = null;
 
         try {
-            new HistoricalMarketData(isin, initialClosingMarketPrice);
+            new HistoricalMarketData(isin, initialClosingMarketPrice, LocalDate.now());
         }
         catch(RuntimeException ex) {
-            Assert.assertEquals("The initialClosingMarketPrice must be specified.", ex.getMessage());
+            Assert.assertEquals("The market price must be specified.", ex.getMessage());
             return;
         }
 
@@ -162,14 +188,14 @@ public class HistoricalMarketDataTest {
 
     @Test
     public void getDurationReturnsOneForOneDayHistory() {
-        HistoricalMarketData historicalMarketData = new HistoricalMarketData(ISIN.MunichRe, new Amount(1000.0));
+        HistoricalMarketData historicalMarketData = new HistoricalMarketData(ISIN.MunichRe, new Amount(1000.0), LocalDate.now());
         Assert.assertEquals(new DayCount(1), historicalMarketData.getDuration());
     }
 
     @Test
     public void getDurationReturnsTwoForTwoDaysHistory() {
-        HistoricalMarketData historicalMarketData = new HistoricalMarketData(ISIN.MunichRe, new Amount(1000.0));
-        historicalMarketData.registerClosedDay(new Amount(1100.0));
+        HistoricalMarketData historicalMarketData = new HistoricalMarketData(ISIN.MunichRe, new Amount(1000.0), this.dateSequenceGenerator.nextDate());
+        historicalMarketData.registerClosedDay(new Amount(1100.0), this.dateSequenceGenerator.nextDate());
         Assert.assertEquals(new DayCount(2), historicalMarketData.getDuration());
     }
 
@@ -177,12 +203,14 @@ public class HistoricalMarketDataTest {
 
     @Test
     public void singleStockPriceUpdateMethodCanBeUsedIfInitializedWithSingleStockClosingMarketPricesMap() {
-        MarketPriceSnapshotBuilder marketPriceSnapshotBuilder = new MarketPriceSnapshotBuilder();
-        marketPriceSnapshotBuilder.setMarketPrice(ISIN.MunichRe, new Amount(1000.0));
-        MarketPriceSnapshot initialClosingMarketPrices = marketPriceSnapshotBuilder.build();
+        MarketPriceSnapshot initialClosingMarketPrices = new MarketPriceSnapshotBuilder()
+                .setMarketPrice(ISIN.MunichRe, new Amount(1000.0))
+                .setDate(this.dateSequenceGenerator.nextDate())
+                .build();
 
         HistoricalMarketData historicalMarketData = new HistoricalMarketData(initialClosingMarketPrices);
-        historicalMarketData.registerClosedDay(new Amount(1100.0));
+
+        historicalMarketData.registerClosedDay(new Amount(1100.0), this.dateSequenceGenerator.nextDate());
 
         Assert.assertEquals(new Amount(1100.0), historicalMarketData.getStockData(ISIN.MunichRe).getLastClosingMarketPrice());
     }
@@ -191,7 +219,7 @@ public class HistoricalMarketDataTest {
 
     @Test
     public void returnsLastClosingMarketPrices_initially_forOneStock() {
-        HistoricalMarketData historicalMarketData = new HistoricalMarketData(ISIN.MunichRe, new Amount(1000.0));
+        HistoricalMarketData historicalMarketData = new HistoricalMarketData(ISIN.MunichRe, new Amount(1000.0), LocalDate.now());
 
         MarketPriceSnapshot lastClosingMarketPrices = historicalMarketData.getLastClosingMarketPrices();
 
@@ -200,11 +228,13 @@ public class HistoricalMarketDataTest {
 
     @Test
     public void returnsLastClosingMarketPrices_initially_forTwoStocks() {
-        MarketPriceSnapshotBuilder marketPriceSnapshotBuilder = new MarketPriceSnapshotBuilder();
-        marketPriceSnapshotBuilder.setMarketPrice(ISIN.MunichRe, new Amount(1000.0));
-        marketPriceSnapshotBuilder.setMarketPrice(ISIN.Allianz, new Amount(500.0));
+        MarketPriceSnapshot marketPriceSnapshot = new MarketPriceSnapshotBuilder()
+                .setMarketPrice(ISIN.MunichRe, new Amount(1000.0))
+                .setMarketPrice(ISIN.Allianz, new Amount(500.0))
+                .setDate(LocalDate.now())
+                .build();
 
-        HistoricalMarketData historicalMarketData = new HistoricalMarketData(marketPriceSnapshotBuilder.build());
+        HistoricalMarketData historicalMarketData = new HistoricalMarketData(marketPriceSnapshot);
 
         MarketPriceSnapshot lastClosingMarketPrices = historicalMarketData.getLastClosingMarketPrices();
 
@@ -214,8 +244,8 @@ public class HistoricalMarketDataTest {
 
     @Test
     public void returnsLastClosingMarketPrices_afterOneDay_forOneStock() {
-        HistoricalMarketData historicalMarketData = new HistoricalMarketData(ISIN.MunichRe, new Amount(1000.0));
-        historicalMarketData.registerClosedDay(new Amount(2000.0));
+        HistoricalMarketData historicalMarketData = new HistoricalMarketData(ISIN.MunichRe, new Amount(1000.0), this.dateSequenceGenerator.nextDate());
+        historicalMarketData.registerClosedDay(new Amount(2000.0), this.dateSequenceGenerator.nextDate());
 
         MarketPriceSnapshot lastClosingMarketPrices = historicalMarketData.getLastClosingMarketPrices();
 
@@ -224,19 +254,168 @@ public class HistoricalMarketDataTest {
 
     @Test
     public void returnsLastClosingMarketPrices_afterOneDay_forTwoStocks() {
-        MarketPriceSnapshotBuilder marketPriceSnapshotBuilder = new MarketPriceSnapshotBuilder();
-        marketPriceSnapshotBuilder.setMarketPrice(ISIN.MunichRe, new Amount(1000.0));
-        marketPriceSnapshotBuilder.setMarketPrice(ISIN.Allianz, new Amount(500.0));
+        MarketPriceSnapshot firstMarketPriceSnapshot = new MarketPriceSnapshotBuilder()
+                .setMarketPrice(ISIN.MunichRe, new Amount(1000.0))
+                .setMarketPrice(ISIN.Allianz, new Amount(500.0))
+                .setDate(this.dateSequenceGenerator.nextDate())
+                .build();
 
-        HistoricalMarketData historicalMarketData = new HistoricalMarketData(marketPriceSnapshotBuilder.build());
+        MarketPriceSnapshot secondMarketPriceSnapshot = new MarketPriceSnapshotBuilder()
+                .setMarketPrice(ISIN.MunichRe, new Amount(2000.0))
+                .setMarketPrice(ISIN.Allianz, new Amount(1000.0))
+                .setDate(this.dateSequenceGenerator.nextDate())
+                .build();
 
-        marketPriceSnapshotBuilder.setMarketPrice(ISIN.MunichRe, new Amount(2000.0));
-        marketPriceSnapshotBuilder.setMarketPrice(ISIN.Allianz, new Amount(1000.0));
-        historicalMarketData.registerClosedDay(marketPriceSnapshotBuilder.build());
+        HistoricalMarketData historicalMarketData = new HistoricalMarketData(firstMarketPriceSnapshot);
+        historicalMarketData.registerClosedDay(secondMarketPriceSnapshot);
 
         MarketPriceSnapshot lastClosingMarketPrices = historicalMarketData.getLastClosingMarketPrices();
 
         Assert.assertEquals(new Amount(2000.0), lastClosingMarketPrices.getMarketPrice(ISIN.MunichRe));
         Assert.assertEquals(new Amount(1000.0), lastClosingMarketPrices.getMarketPrice(ISIN.Allianz));
+    }
+
+    // Date
+
+    @Test
+    public void returnsDateOfSingleMarketPriceSnapshot_ifOnlyOneMarketPriceSnapshotPassed() {
+        LocalDate date = LocalDate.of(2018, 4, 3);
+
+        MarketPriceSnapshot marketPriceSnapshot = new MarketPriceSnapshotBuilder()
+                .setMarketPrice(ISIN.MunichRe, new Amount(100.0))
+                .setDate(date)
+                .build();
+
+        HistoricalMarketData historicalMarketData = new HistoricalMarketData(marketPriceSnapshot);
+
+        Assert.assertSame(date, historicalMarketData.getDate());
+    }
+
+    @Test
+    public void returnsDateOfLastMarketPriceSnapshot_ifThreeMarketPriceSnapshotsPassed() {
+        LocalDate firstDate = LocalDate.of(2018, 4, 3);
+        LocalDate secondDate = LocalDate.of(2018, 4, 4);
+        LocalDate thirdDate = LocalDate.of(2018, 4, 5);
+
+        MarketPriceSnapshot firstMarketPriceSnapshot = new MarketPriceSnapshotBuilder()
+                .setMarketPrice(ISIN.MunichRe, new Amount(100.0))
+                .setDate(firstDate)
+                .build();
+
+        MarketPriceSnapshot secondMarketPriceSnapshot = new MarketPriceSnapshotBuilder()
+                .setMarketPrice(ISIN.MunichRe, new Amount(100.0))
+                .setDate(secondDate)
+                .build();
+
+        MarketPriceSnapshot thirdMarketPriceSnapshot = new MarketPriceSnapshotBuilder()
+                .setMarketPrice(ISIN.MunichRe, new Amount(100.0))
+                .setDate(thirdDate)
+                .build();
+
+        HistoricalMarketData historicalMarketData = new HistoricalMarketData(firstMarketPriceSnapshot);
+        historicalMarketData.registerClosedDay(secondMarketPriceSnapshot);
+        historicalMarketData.registerClosedDay(thirdMarketPriceSnapshot);
+
+        Assert.assertSame(thirdDate, historicalMarketData.getDate());
+    }
+
+    @Test
+    public void returnsDateOfSingleClosingPrice_ifOnlyOneClosingPricePassed() {
+        LocalDate date = LocalDate.of(2018, 4, 3);
+        HistoricalMarketData historicalMarketData = new HistoricalMarketData(ISIN.MunichRe, new Amount(100.0), date);
+        Assert.assertSame(date, historicalMarketData.getDate());
+    }
+
+    @Test
+    public void returnsDateOfLastClosingPrice_ifThreeClosingPricesPassed() {
+        LocalDate firstDate = LocalDate.of(2018, 4, 3);
+        LocalDate secondDate = LocalDate.of(2018, 4, 4);
+        LocalDate thirdDate = LocalDate.of(2018, 4, 5);
+
+        HistoricalMarketData historicalMarketData = new HistoricalMarketData(ISIN.MunichRe, new Amount(100.0), firstDate);
+        historicalMarketData.registerClosedDay(new Amount(100.0), secondDate);
+        historicalMarketData.registerClosedDay(new Amount(100.0), thirdDate);
+
+        Assert.assertSame(thirdDate, historicalMarketData.getDate());
+    }
+
+    @Test
+    public void registerClosingPricesFails_ifSnapshotDate_before_lastSnapshotDate() {
+        MarketPriceSnapshot firstMarketPriceSnapshot = new MarketPriceSnapshotBuilder()
+                .setMarketPrice(ISIN.MunichRe, new Amount(100.0))
+                .setDate(LocalDate.of(2018, 5, 3))
+                .build();
+
+        MarketPriceSnapshot secondMarketPriceSnapshot = new MarketPriceSnapshotBuilder()
+                .setMarketPrice(ISIN.MunichRe, new Amount(100.0))
+                .setDate(LocalDate.of(2018, 5, 2))
+                .build();
+
+        HistoricalMarketData historicalMarketData = new HistoricalMarketData(firstMarketPriceSnapshot);
+
+        try {
+            historicalMarketData.registerClosedDay(secondMarketPriceSnapshot);
+        }
+        catch(DomainException e) {
+            Assert.assertEquals("The specified date must not lie before the date of the last registered market price snapshot.", e.getMessage());
+            return;
+        }
+
+        Assert.fail("DomainException expected.");
+    }
+
+    @Test
+    public void registerSingleClosingPriceFails_ifDate_before_lastSnapshotDate() {
+        HistoricalMarketData historicalMarketData = new HistoricalMarketData(ISIN.MunichRe, new Amount(100.0), LocalDate.of(2018, 5, 3));
+
+        try {
+            historicalMarketData.registerClosedDay(new Amount(100.0), LocalDate.of(2018, 5, 2));
+        }
+        catch(DomainException e) {
+            Assert.assertEquals("The specified date must not lie before the date of the last registered market price snapshot.", e.getMessage());
+            return;
+        }
+
+        Assert.fail("DomainException expected.");
+    }
+
+    @Test
+    public void registerClosingPricesFails_isSnapshotDate_equals_lastSnapshotDate() {
+        MarketPriceSnapshot firstMarketPriceSnapshot = new MarketPriceSnapshotBuilder()
+                .setMarketPrice(ISIN.MunichRe, new Amount(100.0))
+                .setDate(LocalDate.of(2018, 5, 3))
+                .build();
+
+        MarketPriceSnapshot secondMarketPriceSnapshot = new MarketPriceSnapshotBuilder()
+                .setMarketPrice(ISIN.MunichRe, new Amount(100.0))
+                .setDate(LocalDate.of(2018, 5, 3))
+                .build();
+
+        HistoricalMarketData historicalMarketData = new HistoricalMarketData(firstMarketPriceSnapshot);
+
+        try {
+            historicalMarketData.registerClosedDay(secondMarketPriceSnapshot);
+        }
+        catch(DomainException e) {
+            Assert.assertEquals("The specified date must not equal the date of the last registered market price snapshot.", e.getMessage());
+            return;
+        }
+
+        Assert.fail("DomainException expected.");
+    }
+
+    @Test
+    public void registerSingleClosingPriceFails_ifDate_equals_lastSnapshotDate() {
+        HistoricalMarketData historicalMarketData = new HistoricalMarketData(ISIN.MunichRe, new Amount(100.0), LocalDate.of(2018, 5, 3));
+
+        try {
+            historicalMarketData.registerClosedDay(new Amount(100.0), LocalDate.of(2018, 5, 3));
+        }
+        catch(DomainException e) {
+            Assert.assertEquals("The specified date must not equal the date of the last registered market price snapshot.", e.getMessage());
+            return;
+        }
+
+        Assert.fail("DomainException expected.");
     }
 }

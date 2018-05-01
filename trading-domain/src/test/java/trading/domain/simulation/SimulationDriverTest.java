@@ -16,6 +16,7 @@ import trading.domain.strategy.TradingStrategy;
 import trading.domain.strategy.TradingStrategyFactory;
 import trading.domain.strategy.manual.ManualTradingStrategy;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -41,7 +42,9 @@ public class SimulationDriverTest {
                 new Amount(1200.0),
                 new Amount(1300.0));
 
-        SimulationMarketDataSource marketDataSource = new SingleStockListDataSource(ISIN.MunichRe, closingMarketPrices);
+        List<LocalDate> dates = new DateSequenceGenerator(LocalDate.now()).nextDates(4);
+
+        SimulationMarketDataSource marketDataSource = new SingleStockListDataSource(ISIN.MunichRe, closingMarketPrices, dates);
         parametersBuilder.setSimulationMarketDataSource(marketDataSource);
 
         parametersBuilder.setSeedCapital(new Amount(50000.0));
@@ -458,7 +461,9 @@ public class SimulationDriverTest {
                 new Amount(1000.0),
                 new Amount(1500.0));
 
-        SimulationMarketDataSource marketDataSource = new SingleStockListDataSource(ISIN.MunichRe, closingMarketPrices);
+        List<LocalDate> dates = new DateSequenceGenerator(LocalDate.now()).nextDates(2);
+
+        SimulationMarketDataSource marketDataSource = new SingleStockListDataSource(ISIN.MunichRe, closingMarketPrices, dates);
         this.parametersBuilder.setSimulationMarketDataSource(marketDataSource);
 
         this.parametersBuilder.setTradingStrategyFactory(context -> new ManualTradingStrategy(context.getBroker()));
@@ -479,7 +484,9 @@ public class SimulationDriverTest {
                 new Amount(1000.0),
                 new Amount(2000.0));
 
-        SimulationMarketDataSource marketDataSource = new SingleStockListDataSource(ISIN.MunichRe, closingMarketPrices);
+        List<LocalDate> dates = new DateSequenceGenerator(LocalDate.now()).nextDates(3);
+
+        SimulationMarketDataSource marketDataSource = new SingleStockListDataSource(ISIN.MunichRe, closingMarketPrices, dates);
         this.parametersBuilder.setSimulationMarketDataSource(marketDataSource);
 
         this.parametersBuilder.setTradingStrategyFactory(context -> new ManualTradingStrategy(context.getBroker()));
@@ -500,7 +507,9 @@ public class SimulationDriverTest {
                 new Amount(1000.0),
                 new Amount(2000.0));
 
-        SimulationMarketDataSource marketDataSource = new SingleStockListDataSource(ISIN.MunichRe, closingMarketPrices);
+        List<LocalDate> dates = new DateSequenceGenerator(LocalDate.now()).nextDates(3);
+
+        SimulationMarketDataSource marketDataSource = new SingleStockListDataSource(ISIN.MunichRe, closingMarketPrices, dates);
         this.parametersBuilder.setSimulationMarketDataSource(marketDataSource);
 
         this.parametersBuilder.setTradingStrategyFactory(context -> new ManualTradingStrategy(context.getBroker()));
@@ -518,15 +527,17 @@ public class SimulationDriverTest {
     public void reportsAverageMarketRateOfReturn_ifTwoStocks_andOneDayHistory_andOneDaySimulation() {
         List<MarketPriceSnapshot> marketPriceSnapshots = new ArrayList<>();
 
-        MarketPriceSnapshotBuilder builder = new MarketPriceSnapshotBuilder();
+        marketPriceSnapshots.add(new MarketPriceSnapshotBuilder()
+                .setMarketPrice(ISIN.MunichRe, new Amount(100.0))
+                .setMarketPrice(ISIN.Allianz, new Amount(200.0))
+                .setDate(LocalDate.of(2018, 1, 1))
+                .build());
 
-        builder.setMarketPrice(ISIN.MunichRe, new Amount(100.0));
-        builder.setMarketPrice(ISIN.Allianz, new Amount(200.0));
-        marketPriceSnapshots.add(builder.build());
-
-        builder.setMarketPrice(ISIN.MunichRe, new Amount(150.0)); // rate of return is 0.5
-        builder.setMarketPrice(ISIN.Allianz, new Amount(400.0)); // rate of return is 1.0
-        marketPriceSnapshots.add(builder.build());
+        marketPriceSnapshots.add(new MarketPriceSnapshotBuilder()
+                .setMarketPrice(ISIN.MunichRe, new Amount(150.0)) // rate of return is 0.5
+                .setMarketPrice(ISIN.Allianz, new Amount(400.0)) // rate of return is 1.0
+                .setDate(LocalDate.of(2018, 1, 2))
+                .build());
 
         SimulationMarketDataSource marketDataSource = new MultiStockListDataSource(marketPriceSnapshots);
         this.parametersBuilder.setSimulationMarketDataSource(marketDataSource);

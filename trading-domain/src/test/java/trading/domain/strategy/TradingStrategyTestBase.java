@@ -14,6 +14,8 @@ import trading.domain.market.MarketPriceSnapshot;
 import trading.domain.simulation.Simulation;
 import trading.domain.simulation.SimulationBuilder;
 
+import java.time.LocalDate;
+
 public abstract class TradingStrategyTestBase {
     protected Account account;
     private VirtualBroker broker;
@@ -37,9 +39,9 @@ public abstract class TradingStrategyTestBase {
         }
     }
 
-    protected void beginHistory(ISIN isin, Amount initialClosingMarketPrice) {
+    protected void beginHistory(ISIN isin, Amount initialClosingMarketPrice, LocalDate date) {
         ensureBeginHistoryPreConditions();
-        historicalMarketData = new HistoricalMarketData(isin, initialClosingMarketPrice);
+        historicalMarketData = new HistoricalMarketData(isin, initialClosingMarketPrice, date);
     }
 
     protected void beginHistory(MarketPriceSnapshot initialClosingMarketPrices) {
@@ -57,9 +59,9 @@ public abstract class TradingStrategyTestBase {
         }
     }
 
-    protected void addHistory(Amount closingMarketPrice) {
+    protected void addHistory(Amount closingMarketPrice, LocalDate date) {
         ensureAddHistoryPreconditions();
-        historicalMarketData.registerClosedDay(closingMarketPrice);
+        historicalMarketData.registerClosedDay(closingMarketPrice, date);
     }
 
     protected void addHistory(MarketPriceSnapshot closingMarketPrices) {
@@ -101,9 +103,9 @@ public abstract class TradingStrategyTestBase {
         }
     }
 
-    protected void closeDay(Amount closingMarketPrice) {
+    protected void closeDay(Amount closingMarketPrice, LocalDate date) {
         ensureCloseDayPreconditions();
-        simulation.closeDay(closingMarketPrice);
+        simulation.closeDay(closingMarketPrice, date);
     }
 
     protected void closeDay(MarketPriceSnapshot closingMarketPrices) {

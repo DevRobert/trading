@@ -18,6 +18,8 @@ import trading.domain.strategy.StrategyInitializationException;
 import trading.domain.strategy.TradingStrategyContext;
 import trading.domain.strategy.WaitFixedPeriodTrigger;
 
+import java.time.LocalDate;
+
 public class ProgressiveTradingStrategyInitializationTest {
     private Account account;
     private HistoricalMarketData historicalMarketData;
@@ -35,8 +37,10 @@ public class ProgressiveTradingStrategyInitializationTest {
         Amount availableMoney = new Amount(50000.0);
         this.account = new Account(availableMoney);
 
-        MarketPriceSnapshotBuilder marketPriceSnapshotBuilder = new MarketPriceSnapshotBuilder();
-        MarketPriceSnapshot initialClosingMarketPrices = marketPriceSnapshotBuilder.build();
+        MarketPriceSnapshot initialClosingMarketPrices = new MarketPriceSnapshotBuilder()
+                .setDate(LocalDate.now())
+                .build();
+
         this.historicalMarketData = new HistoricalMarketData(initialClosingMarketPrices);
 
         this.commissionStrategy = new ZeroCommissionStrategy();

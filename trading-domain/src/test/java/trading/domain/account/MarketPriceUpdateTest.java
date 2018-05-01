@@ -7,13 +7,18 @@ import trading.domain.ISIN;
 import trading.domain.market.MarketPriceSnapshot;
 import trading.domain.market.MarketPriceSnapshotBuilder;
 
+import java.time.LocalDate;
+
 public class MarketPriceUpdateTest extends AccountTestBase {
     private void reportMarketPrice(ISIN isin, Amount marketPrice) {
-        MarketPriceSnapshotBuilder marketPriceSnapshotBuilder = new MarketPriceSnapshotBuilder();
-        marketPriceSnapshotBuilder.setMarketPrice(isin, marketPrice);
-        MarketPriceSnapshot marketPriceSnapshot = marketPriceSnapshotBuilder.build();
+        MarketPriceSnapshot marketPriceSnapshot = new MarketPriceSnapshotBuilder()
+                .setMarketPrice(isin, marketPrice)
+                .setDate(LocalDate.now())
+                .build();
+
         account.reportMarketPrices(marketPriceSnapshot);
     }
+
     @Test
     public void increasingMarketPriceIncreasesPositionTotalMarketPrice() throws AccountStateException {
         // Seeding money 10,000

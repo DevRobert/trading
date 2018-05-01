@@ -10,12 +10,14 @@ import trading.domain.market.HistoricalMarketData;
 import trading.domain.strategy.StrategyInitializationException;
 import trading.domain.strategy.WaitFixedPeriodTrigger;
 
+import java.time.LocalDate;
+
 public class ProgressiveTradingStrategyParametersTest {
     private ProgressiveTradingStrategyParametersBuilder builder;
 
     @Before
     public void before() {
-        HistoricalMarketData historicalMarketData = new HistoricalMarketData(ISIN.MunichRe, new Amount(1000.0));
+        HistoricalMarketData historicalMarketData = new HistoricalMarketData(ISIN.MunichRe, new Amount(1000.0), LocalDate.now());
 
         this.builder = new ProgressiveTradingStrategyParametersBuilder();
         this.builder.setISIN(ISIN.MunichRe);

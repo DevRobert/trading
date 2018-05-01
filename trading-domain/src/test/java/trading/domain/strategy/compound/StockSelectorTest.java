@@ -11,6 +11,7 @@ import trading.domain.broker.CommissionStrategy;
 import trading.domain.market.MarketPriceSnapshot;
 import trading.domain.market.MarketPriceSnapshotBuilder;
 
+import java.time.LocalDate;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -32,6 +33,7 @@ public class StockSelectorTest {
         this.marketPrices = new MarketPriceSnapshotBuilder()
                 .setMarketPrice(ISIN.MunichRe, new Amount(1000.0))
                 .setMarketPrice(ISIN.Allianz, new Amount(500.0))
+                .setDate(LocalDate.now())
                 .build();
 
         this.commissionStrategy = CommissionStrategies.getZeroCommissionStrategy();
@@ -42,7 +44,7 @@ public class StockSelectorTest {
 
     private Map<ISIN, Quantity> selectStocks() {
         StockSelector stockSelector = new StockSelector(this.minimumBuyScore, this.maximumPercentage);
-        return stockSelector.selectStocks(this.totalCapital, this.availableMoney, new Scores(stockScores), this.marketPrices, this.commissionStrategy, currentStocks);
+        return stockSelector.selectStocks(this.totalCapital, this.availableMoney, new Scores(stockScores, LocalDate.now()), this.marketPrices, this.commissionStrategy, currentStocks);
     }
 
     @Test

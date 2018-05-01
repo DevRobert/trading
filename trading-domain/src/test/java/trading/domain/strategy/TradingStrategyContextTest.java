@@ -11,6 +11,8 @@ import trading.domain.broker.CommissionStrategies;
 import trading.domain.broker.VirtualBroker;
 import trading.domain.market.HistoricalMarketData;
 
+import java.time.LocalDate;
+
 public class TradingStrategyContextTest {
     private Account account;
     private Broker broker;
@@ -18,7 +20,7 @@ public class TradingStrategyContextTest {
 
     @Before
     public void before() {
-        this.historicalMarketData = new HistoricalMarketData(ISIN.MunichRe, new Amount(1000.0));
+        this.historicalMarketData = new HistoricalMarketData(ISIN.MunichRe, new Amount(1000.0), LocalDate.now());
         this.account = new Account(new Amount(50000.0));
         this.broker = new VirtualBroker(this.account, this.historicalMarketData, CommissionStrategies.getZeroCommissionStrategy());
     }

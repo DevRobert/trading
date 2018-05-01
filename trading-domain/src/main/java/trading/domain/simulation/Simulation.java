@@ -9,6 +9,7 @@ import trading.domain.market.MarketPriceSnapshot;
 import trading.domain.market.MarketPriceSnapshotBuilder;
 import trading.domain.strategy.TradingStrategy;
 
+import java.time.LocalDate;
 import java.util.Set;
 
 public class Simulation {
@@ -79,14 +80,15 @@ public class Simulation {
         this.tradingStrategy.prepareOrdersForNextTradingDay();
     }
 
-    public void closeDay(Amount closingMarketPrice) {
+    public void closeDay(Amount closingMarketPrice, LocalDate date) {
         if(this.singleISIN == null) {
             throw new SimulationStateException("The single-stock close day function must not be used when multiple stocks registered.");
         }
 
-        MarketPriceSnapshotBuilder marketPriceSnapshotBuilder = new MarketPriceSnapshotBuilder();
-        marketPriceSnapshotBuilder.setMarketPrice(this.singleISIN, closingMarketPrice);
-        MarketPriceSnapshot closingMarketPrices = marketPriceSnapshotBuilder.build();
+        MarketPriceSnapshot closingMarketPrices = new MarketPriceSnapshotBuilder()
+                .setMarketPrice(this.singleISIN, closingMarketPrice)
+                .setDate(date)
+                .build();
 
         this.closeDay(closingMarketPrices);
     }

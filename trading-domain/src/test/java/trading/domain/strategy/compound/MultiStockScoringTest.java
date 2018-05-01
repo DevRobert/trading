@@ -9,6 +9,7 @@ import trading.domain.market.HistoricalMarketData;
 import trading.domain.market.MarketPriceSnapshot;
 import trading.domain.market.MarketPriceSnapshotBuilder;
 
+import java.time.LocalDate;
 import java.util.Set;
 
 public class MultiStockScoringTest {
@@ -16,11 +17,12 @@ public class MultiStockScoringTest {
     private Set<ISIN> isins;
 
     @Before
-    public void before() {
-        MarketPriceSnapshotBuilder marketPriceSnapshotBuilder = new MarketPriceSnapshotBuilder();
-        marketPriceSnapshotBuilder.setMarketPrice(ISIN.MunichRe, new Amount(1000.0));
-        marketPriceSnapshotBuilder.setMarketPrice(ISIN.Allianz, new Amount(500.0));
-        MarketPriceSnapshot initialClosingMarketPrices = marketPriceSnapshotBuilder.build();
+        public void before() {
+        MarketPriceSnapshot initialClosingMarketPrices = new MarketPriceSnapshotBuilder()
+                .setMarketPrice(ISIN.MunichRe, new Amount(1000.0))
+                .setMarketPrice(ISIN.Allianz, new Amount(500.0))
+                .setDate(LocalDate.now())
+                .build();
 
         this.historicalMarketData = new HistoricalMarketData(initialClosingMarketPrices);
         this.isins = this.historicalMarketData.getAvailableStocks();
@@ -50,7 +52,7 @@ public class MultiStockScoringTest {
 
     @Test
     public void calculationFailsIfNoScoringStrategySpecified() {
-        HistoricalMarketData historicalMarketData = new HistoricalMarketData(ISIN.MunichRe, new Amount(1000.0));
+        HistoricalMarketData historicalMarketData = new HistoricalMarketData(ISIN.MunichRe, new Amount(1000.0), LocalDate.now());
         ScoringStrategy scoringStrategy = null;
 
         try {

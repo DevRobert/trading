@@ -51,6 +51,7 @@ public class ScoringController {
         }
 
         response.setScores(scoreDtos);
+        response.setMarketPricesDate(scores.getDate());
 
         return response;
     }

@@ -2,14 +2,21 @@ package trading.domain.strategy.compound;
 
 import trading.domain.ISIN;
 
+import java.time.LocalDate;
 import java.util.Arrays;
 import java.util.Map;
 
 public class Scores {
     private final Map<ISIN, Score> values;
+    private final LocalDate date;
 
-    public Scores(Map<ISIN, Score> values) {
+    public Scores(Map<ISIN, Score> values, LocalDate date) {
+        if(date == null) {
+            throw new RuntimeException("The date must be specified.");
+        }
+
         this.values = values;
+        this.date = date;
     }
 
     public Score get(ISIN isin) {
@@ -31,5 +38,9 @@ public class Scores {
         });
 
         return isins;
+    }
+
+    public LocalDate getDate() {
+        return this.date;
     }
 }

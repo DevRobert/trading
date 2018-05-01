@@ -2,10 +2,11 @@ package trading.domain.market;
 
 import trading.domain.Amount;
 import trading.domain.DayCount;
+import trading.domain.DomainException;
 import trading.domain.ISIN;
 
+import java.time.LocalDate;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
@@ -14,6 +15,7 @@ public class HistoricalMarketData {
     private final ISIN singleISIN;
     private int durationNumDays = 1;
     private final Set<ISIN> isins;
+    private MarketPriceSnapshot lastClosingMarketPrices;
 
     public HistoricalMarketData(MarketPriceSnapshot initialClosingMarketPrices) {
         this.historicalStockDataMap = new HashMap<>();
@@ -32,24 +34,12 @@ public class HistoricalMarketData {
         else {
             singleISIN = null;
         }
+
+        this.lastClosingMarketPrices = initialClosingMarketPrices;
     }
 
-    public HistoricalMarketData(ISIN isin, Amount initialClosingMarketPrice) {
-        if(isin == null) {
-            throw new RuntimeException("The ISIN must be specified.");
-        }
-
-        if(initialClosingMarketPrice == null) {
-            throw new RuntimeException("The initialClosingMarketPrice must be specified.");
-        }
-
-        this.historicalStockDataMap = new HashMap<>();
-        this.historicalStockDataMap.put(isin, new HistoricalStockData(initialClosingMarketPrice));
-
-        this.isins = new HashSet<>();
-        this.isins.add(isin);
-
-        this.singleISIN = isin;
+    public HistoricalMarketData(ISIN isin, Amount initialClosingMarketPrice, LocalDate date) {
+        this(new MarketPriceSnapshotBuilder().setMarketPrice(isin, initialClosingMarketPrice).setDate(date).build());
     }
 
     public HistoricalStockData getStockData(ISIN isin) {
@@ -67,6 +57,14 @@ public class HistoricalMarketData {
     }
 
     public void registerClosedDay(MarketPriceSnapshot closingMarketPrices) {
+        if(closingMarketPrices.getDate().isBefore(this.getDate())) {
+            throw new DomainException("The specified date must not lie before the date of the last registered market price snapshot.");
+        }
+
+        if(closingMarketPrices.getDate().isEqual(this.getDate())) {
+            throw new DomainException("The specified date must not equal the date of the last registered market price snapshot.");
+        }
+
         for(ISIN isin: this.isins) {
             HistoricalStockData historicalStockData = this.historicalStockDataMap.get(isin);
 
@@ -83,16 +81,19 @@ public class HistoricalMarketData {
         }
 
         this.durationNumDays++;
+        this.lastClosingMarketPrices = closingMarketPrices;
     }
 
-    public void registerClosedDay(Amount closingMarketPrice) {
-        if(singleISIN == null) {
+    public void registerClosedDay(Amount closingMarketPrice, LocalDate date) {
+        if(this.singleISIN == null) {
             throw new RuntimeException("The single-stock market update function must not be used when multiple stocks registered.");
         }
 
-        MarketPriceSnapshotBuilder marketPriceSnapshotBuilder = new MarketPriceSnapshotBuilder();
-        marketPriceSnapshotBuilder.setMarketPrice(this.singleISIN, closingMarketPrice);
-        MarketPriceSnapshot marketPriceSnapshot = marketPriceSnapshotBuilder.build();
+        MarketPriceSnapshot marketPriceSnapshot = new MarketPriceSnapshotBuilder()
+                .setMarketPrice(this.singleISIN, closingMarketPrice)
+                .setDate(date)
+                .build();
+
         this.registerClosedDay(marketPriceSnapshot);
     }
 
@@ -101,12 +102,10 @@ public class HistoricalMarketData {
     }
 
     public MarketPriceSnapshot getLastClosingMarketPrices() {
-        MarketPriceSnapshotBuilder marketPriceSnapshotBuilder = new MarketPriceSnapshotBuilder();
+        return this.lastClosingMarketPrices;
+    }
 
-        for(ISIN isin: this.getAvailableStocks()) {
-            marketPriceSnapshotBuilder.setMarketPrice(isin, this.getStockData(isin).getLastClosingMarketPrice());
-        }
-
-        return marketPriceSnapshotBuilder.build();
+    public LocalDate getDate() {
+        return this.lastClosingMarketPrices.getDate();
     }
 }

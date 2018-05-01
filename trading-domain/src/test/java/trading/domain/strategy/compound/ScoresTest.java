@@ -4,6 +4,7 @@ import org.junit.Assert;
 import org.junit.Test;
 import trading.domain.ISIN;
 
+import java.time.LocalDate;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -21,7 +22,7 @@ public class ScoresTest {
         values.put(new ISIN("D"), new Score(0.5));
 
 
-        Scores scores = new Scores(values);
+        Scores scores = new Scores(values, LocalDate.now());
         ISIN[] sortedScores = scores.getIsinsOrderByScoreDescending();
 
         ISIN[] expectedScores = new ISIN[] {
@@ -33,5 +34,31 @@ public class ScoresTest {
         };
 
         Assert.assertArrayEquals(expectedScores, sortedScores);
+    }
+
+    @Test
+    public void returnsDate() {
+        Map<ISIN, Score> values = new HashMap<>();
+        LocalDate date = LocalDate.of(2018, 4, 3);
+
+        Scores scores = new Scores(values, date);
+
+        Assert.assertSame(date, scores.getDate());
+    }
+
+    @Test
+    public void initializationFails_ifDateNotSpecified() {
+        Map<ISIN, Score> values = new HashMap<>();
+        LocalDate date = null;
+
+        try {
+            new Scores(values, date);
+        }
+        catch(RuntimeException e) {
+            Assert.assertEquals("The date must be specified.", e.getMessage());
+            return;
+        }
+
+        Assert.fail("RuntimeException expected.");
     }
 }

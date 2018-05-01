@@ -51,13 +51,15 @@ public class HistoricalTestDataProvider {
         singleStockHistoricalPricesByISIN = new HashMap<>();
 
         for(ISIN isin: historicalClosingPrices.get(0).getISINs()) {
-            MarketPriceSnapshotBuilder marketPriceSnapshotBuilder = new MarketPriceSnapshotBuilder();
-
             List<MarketPriceSnapshot> singleStockHistoricalClosingPrices = new ArrayList<>(historicalClosingPrices.size());
 
             for(MarketPriceSnapshot allStocksMarketPriceSnapshot: historicalClosingPrices) {
-                marketPriceSnapshotBuilder.setMarketPrice(isin, allStocksMarketPriceSnapshot.getMarketPrice(isin));
-                singleStockHistoricalClosingPrices.add(marketPriceSnapshotBuilder.build());
+                MarketPriceSnapshot singleStockMarketPriceSnapshot = new MarketPriceSnapshotBuilder()
+                        .setMarketPrice(isin, allStocksMarketPriceSnapshot.getMarketPrice(isin))
+                        .setDate(allStocksMarketPriceSnapshot.getDate())
+                        .build();
+
+                singleStockHistoricalClosingPrices.add(singleStockMarketPriceSnapshot);
             }
 
             singleStockHistoricalPricesByISIN.put(isin, singleStockHistoricalClosingPrices);

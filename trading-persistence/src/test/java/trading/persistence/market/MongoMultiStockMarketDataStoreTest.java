@@ -14,8 +14,9 @@ import trading.domain.Amount;
 import trading.domain.ISIN;
 import trading.domain.market.MarketPriceSnapshot;
 
+import java.sql.Date;
+import java.time.LocalDate;
 import java.util.ArrayList;
-import java.util.GregorianCalendar;
 import java.util.List;
 
 public class MongoMultiStockMarketDataStoreTest {
@@ -48,7 +49,7 @@ public class MongoMultiStockMarketDataStoreTest {
             // #1 entry - 01.01.2000
 
             documents.add(new Document()
-                    .append("_id", new GregorianCalendar(2000, 0, 1).getTime())
+                    .append("_id", Date.valueOf(LocalDate.of(2000, 1, 1)))
                     .append("stocks", new BasicBSONObject()
                             .append(ISIN.MunichRe.getText(), new BasicBSONObject()
                                     .append("close", 100.0))
@@ -60,7 +61,7 @@ public class MongoMultiStockMarketDataStoreTest {
             // #3 entry - 03.01.2000
 
             documents.add(new Document()
-                    .append("_id", new GregorianCalendar(2000, 0, 3).getTime())
+                    .append("_id", Date.valueOf(LocalDate.of(2000, 1, 3)))
                     .append("stocks", new BasicBSONObject()
                             .append(ISIN.MunichRe.getText(), new BasicBSONObject()
                                     .append("close", 102.5))
@@ -72,7 +73,7 @@ public class MongoMultiStockMarketDataStoreTest {
             // #2 entry - 02.01.2000
 
             documents.add(new Document()
-                    .append("_id", new GregorianCalendar(2000, 0, 2).getTime())
+                    .append("_id", Date.valueOf(LocalDate.of(2000, 1, 2)))
                     .append("stocks", new BasicBSONObject()
                             .append(ISIN.MunichRe.getText(), new BasicBSONObject()
                                     .append("close", 101.5))
@@ -138,28 +139,34 @@ public class MongoMultiStockMarketDataStoreTest {
     }
 
     @Test
-    public void testReturnsAllQuotesInCorrectOrder() {
+    public void returnsAllQuotesInCorrectOrder() {
         MongoMultiStockMarketDataStore multiStockMongoDataSource = this.createMongoMultiStockMarketDataStore();
 
         List<MarketPriceSnapshot> marketPriceSnapshots = multiStockMongoDataSource.getAllClosingPrices();
 
         Assert.assertEquals(3, marketPriceSnapshots.size());
 
+        // 2000-01-01
         MarketPriceSnapshot firstDayMarketPriceSnapshot = marketPriceSnapshots.get(0);
         Assert.assertEquals(new Amount(100.0), firstDayMarketPriceSnapshot.getMarketPrice(ISIN.MunichRe));
         Assert.assertEquals(new Amount(50.0), firstDayMarketPriceSnapshot.getMarketPrice(ISIN.Allianz));
+        Assert.assertEquals(LocalDate.of(2000, 1, 1), firstDayMarketPriceSnapshot.getDate());
 
+        // 2000-01-02
         MarketPriceSnapshot secondDayMarketPriceSnapshot = marketPriceSnapshots.get(1);
         Assert.assertEquals(new Amount(101.5), secondDayMarketPriceSnapshot.getMarketPrice(ISIN.MunichRe));
         Assert.assertEquals(new Amount(49.0), secondDayMarketPriceSnapshot.getMarketPrice(ISIN.Allianz));
+        Assert.assertEquals(LocalDate.of(2000, 1, 2), secondDayMarketPriceSnapshot.getDate());
 
+        // 2000-01-03
         MarketPriceSnapshot thirdDayMarketPriceSnapshot = marketPriceSnapshots.get(2);
         Assert.assertEquals(new Amount(102.5), thirdDayMarketPriceSnapshot.getMarketPrice(ISIN.MunichRe));
         Assert.assertEquals(new Amount(49.5), thirdDayMarketPriceSnapshot.getMarketPrice(ISIN.Allianz));
+        Assert.assertEquals(LocalDate.of(2000, 1, 3), thirdDayMarketPriceSnapshot.getDate());
     }
 
     @Test
-    public void testReturnsLastClosingPrices() {
+    public void returnsLastClosingPrices() {
         MongoMultiStockMarketDataStore mongoMultiStockMarketDataStore = this.createMongoMultiStockMarketDataStore();
 
         MarketPriceSnapshot lastClosingPrices = mongoMultiStockMarketDataStore.getLastClosingPrices();
