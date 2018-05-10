@@ -418,4 +418,100 @@ public class HistoricalMarketDataTest {
 
         Assert.fail("DomainException expected.");
     }
+
+    // countDaysAfter
+
+    @Test
+    public void countDaysAfter_returnsZero_ifCalledForLastDay() {
+        HistoricalMarketData historicalMarketData = new HistoricalMarketData(ISIN.MunichRe, new Amount(100.0), LocalDate.of(2018, 5, 4));
+        historicalMarketData.registerClosedDay(new Amount(110.0), LocalDate.of(2018, 5, 7));
+
+        DayCount dayCount = historicalMarketData.countDaysAfter(LocalDate.of(2018, 5, 7));
+
+        Assert.assertEquals(0, dayCount.getValue());
+    }
+
+    @Test
+    public void countDaysAfter_returnsOne_ifCalledForPreviousDay() {
+        HistoricalMarketData historicalMarketData = new HistoricalMarketData(ISIN.MunichRe, new Amount(100.0), LocalDate.of(2018, 5, 4));
+        historicalMarketData.registerClosedDay(new Amount(110.0), LocalDate.of(2018, 5, 7));
+
+        DayCount dayCount = historicalMarketData.countDaysAfter(LocalDate.of(2018, 5, 4));
+
+        Assert.assertEquals(1, dayCount.getValue());
+    }
+
+    @Test
+    public void countDaysAfter_returnsTwo_ifCalledForDayBeforePreviousDay() {
+        HistoricalMarketData historicalMarketData = new HistoricalMarketData(ISIN.MunichRe, new Amount(100.0), LocalDate.of(2018, 5, 4));
+        historicalMarketData.registerClosedDay(new Amount(110.0), LocalDate.of(2018, 5, 7));
+        historicalMarketData.registerClosedDay(new Amount(110.0), LocalDate.of(2018, 5, 8));
+
+        DayCount dayCount = historicalMarketData.countDaysAfter(LocalDate.of(2018, 5, 4));
+
+        Assert.assertEquals(2, dayCount.getValue());
+    }
+
+    @Test
+    public void countDaysAfter_fails_ifDateNotSpecified() {
+        HistoricalMarketData historicalMarketData = new HistoricalMarketData(ISIN.MunichRe, new Amount(100.0), LocalDate.of(2018, 5, 4));
+
+        try {
+            historicalMarketData.countDaysAfter(null);
+        }
+        catch(RuntimeException e) {
+            Assert.assertEquals("The date must be specified.", e.getMessage());
+            return;
+        }
+
+        Assert.fail("RuntimeException expected.");
+    }
+
+    @Test
+    public void countDaysAfter_fails_ifCalledForUnknownDate() {
+        HistoricalMarketData historicalMarketData = new HistoricalMarketData(ISIN.MunichRe, new Amount(100.0), LocalDate.of(2018, 5, 4));
+        historicalMarketData.registerClosedDay(new Amount(110.0), LocalDate.of(2018, 5, 7));
+
+        try {
+            historicalMarketData.countDaysAfter(LocalDate.of(2018, 5, 6));
+        }
+        catch(RuntimeException e) {
+            Assert.assertEquals("The given date is unknown.", e.getMessage());
+            return;
+        }
+
+        Assert.fail("RuntimeException expected.");
+    }
+
+    @Test
+    public void countDaysAfter_fails_ifCalledForDateAfterHistory() {
+        HistoricalMarketData historicalMarketData = new HistoricalMarketData(ISIN.MunichRe, new Amount(100.0), LocalDate.of(2018, 5, 4));
+        historicalMarketData.registerClosedDay(new Amount(110.0), LocalDate.of(2018, 5, 7));
+
+        try {
+            historicalMarketData.countDaysAfter(LocalDate.of(2018, 5, 8));
+        }
+        catch(RuntimeException e) {
+            Assert.assertEquals("The given date lies after the market data history time line.", e.getMessage());
+            return;
+        }
+
+        Assert.fail("RuntimeException expected.");
+    }
+
+    @Test
+    public void countDaysAfter_fails_ifCalledForDateBeforeHistory() {
+        HistoricalMarketData historicalMarketData = new HistoricalMarketData(ISIN.MunichRe, new Amount(100.0), LocalDate.of(2018, 5, 4));
+        historicalMarketData.registerClosedDay(new Amount(110.0), LocalDate.of(2018, 5, 7));
+
+        try {
+            historicalMarketData.countDaysAfter(LocalDate.of(2018, 5, 3));
+        }
+        catch(RuntimeException e) {
+            Assert.assertEquals("The given date lies before the market data history time line.", e.getMessage());
+            return;
+        }
+
+        Assert.fail("RuntimeException expected.");
+    }
 }

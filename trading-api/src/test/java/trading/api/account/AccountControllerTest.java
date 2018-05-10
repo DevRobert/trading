@@ -39,6 +39,7 @@ public class AccountControllerTest extends AccountControllerTestBase {
                 .andExpect(jsonPath("marketPricesDate", is("2018-05-09")));
     }
 
+    /*
     @Test
     public void getPosition() throws Exception {
         this.mvc.perform(MockMvcRequestBuilders
@@ -47,6 +48,7 @@ public class AccountControllerTest extends AccountControllerTestBase {
                 .andExpect(status().isOk())
                 .andExpect(content().json("Test"));
     }
+    */
 
     @Test
     public void getTransactions() throws Exception {
@@ -73,6 +75,7 @@ public class AccountControllerTest extends AccountControllerTestBase {
                 .andExpect(jsonPath("transactions[1].commission", is(20.0)));
     }
 
+    /*
     @Test
     public void getTransaction() throws Exception {
         this.mvc.perform(MockMvcRequestBuilders
@@ -81,4 +84,5 @@ public class AccountControllerTest extends AccountControllerTestBase {
                 .andExpect(status().isOk())
                 .andExpect(content().json("Test"));
     }
+    */
 }

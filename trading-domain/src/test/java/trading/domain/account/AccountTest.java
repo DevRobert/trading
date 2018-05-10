@@ -4,6 +4,7 @@ import org.junit.Assert;
 import org.junit.Test;
 import trading.domain.*;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
 
@@ -33,6 +34,7 @@ public class AccountTest extends AccountTestBase {
                 .setQuantity(quantity)
                 .setTotalPrice(fullPrice)
                 .setCommission(commission)
+                .setDate(LocalDate.of(2000, 1, 1))
                 .build();
 
         account.registerTransaction(transaction);
@@ -55,6 +57,7 @@ public class AccountTest extends AccountTestBase {
                 .setQuantity(new Quantity(1))
                 .setTotalPrice(fullPrice)
                 .setCommission(commission)
+                .setDate(LocalDate.of(2000, 1, 1))
                 .build();
 
         account.registerTransaction(transaction);
@@ -78,6 +81,7 @@ public class AccountTest extends AccountTestBase {
                 .setQuantity(quantity)
                 .setTotalPrice(fullBuyPrice)
                 .setCommission(buyCommission)
+                .setDate(LocalDate.of(2000, 1, 1))
                 .build();
 
         Transaction sellTransaction = new TransactionBuilder()
@@ -86,6 +90,7 @@ public class AccountTest extends AccountTestBase {
                 .setQuantity(quantity)
                 .setTotalPrice(fullSellPrice)
                 .setCommission(sellCommission)
+                .setDate(LocalDate.of(2000, 1, 2))
                 .build();
 
         account.registerTransaction(buyTransaction);
@@ -109,6 +114,7 @@ public class AccountTest extends AccountTestBase {
                 .setQuantity(quantity)
                 .setTotalPrice(totalPrice)
                 .setCommission(commission)
+                .setDate(LocalDate.of(2000, 1, 1))
                 .build();
 
         try {
@@ -136,6 +142,7 @@ public class AccountTest extends AccountTestBase {
                 .setQuantity(new Quantity(2))
                 .setTotalPrice(fullBuyPrice)
                 .setCommission(buyCommission)
+                .setDate(LocalDate.of(2000, 1, 1))
                 .build();
 
         Transaction sellTransaction = new TransactionBuilder()
@@ -144,6 +151,7 @@ public class AccountTest extends AccountTestBase {
                 .setQuantity(new Quantity(1))
                 .setTotalPrice(fullSellPrice)
                 .setCommission(sellCommission)
+                .setDate(LocalDate.of(2000, 1, 2))
                 .build();
 
         account.registerTransaction(buyTransaction);
@@ -173,6 +181,7 @@ public class AccountTest extends AccountTestBase {
                 .setQuantity(new Quantity(1))
                 .setTotalPrice(fullBuyPrice)
                 .setCommission(buyCommission)
+                .setDate(LocalDate.of(2000, 1, 1))
                 .build();
 
         Transaction sellTransaction = new TransactionBuilder()
@@ -181,6 +190,7 @@ public class AccountTest extends AccountTestBase {
                 .setQuantity(new Quantity(2))
                 .setTotalPrice(fullSellPrice)
                 .setCommission(sellCommission)
+                .setDate(LocalDate.of(2000, 1, 2))
                 .build();
 
         account.registerTransaction(buyTransaction);
@@ -208,6 +218,7 @@ public class AccountTest extends AccountTestBase {
                 .setQuantity(new Quantity(2))
                 .setTotalPrice(fullBuyPrice)
                 .setCommission(buyCommission)
+                .setDate(LocalDate.of(2000, 1, 1))
                 .build();
 
         Transaction furtherBuyTransaction = new TransactionBuilder()
@@ -216,6 +227,7 @@ public class AccountTest extends AccountTestBase {
                 .setQuantity(new Quantity(2))
                 .setTotalPrice(fullBuyPrice)
                 .setCommission(buyCommission)
+                .setDate(LocalDate.of(2000, 1, 2))
                 .build();
 
         account.registerTransaction(buyTransaction);
@@ -246,6 +258,7 @@ public class AccountTest extends AccountTestBase {
                 .setQuantity(new Quantity(2))
                 .setTotalPrice(fullBuyPrice)
                 .setCommission(buyCommission)
+                .setDate(LocalDate.of(2000, 1, 1))
                 .build();
 
         Transaction sellTransaction = new TransactionBuilder()
@@ -254,6 +267,7 @@ public class AccountTest extends AccountTestBase {
                 .setQuantity(new Quantity(2))
                 .setTotalPrice(fullSellPrice)
                 .setCommission(sellCommission)
+                .setDate(LocalDate.of(2000, 1, 2))
                 .build();
 
         Transaction furtherBuyTransaction = new TransactionBuilder()
@@ -262,6 +276,7 @@ public class AccountTest extends AccountTestBase {
                 .setQuantity(new Quantity(5))
                 .setTotalPrice(furtherBuyPrice)
                 .setCommission(buyCommission)
+                .setDate(LocalDate.of(2000, 1, 3))
                 .build();
 
         account.registerTransaction(buyTransaction);
@@ -284,6 +299,7 @@ public class AccountTest extends AccountTestBase {
                 .setQuantity(new Quantity(1))
                 .setTotalPrice(fullPrice)
                 .setCommission(commission)
+                .setDate(LocalDate.of(2000, 1, 1))
                 .build();
 
         boolean registrationFailed = false;
@@ -326,6 +342,7 @@ public class AccountTest extends AccountTestBase {
                 .setQuantity(new Quantity(1))
                 .setTotalPrice(new Amount(100.0))
                 .setCommission(Amount.Zero)
+                .setDate(LocalDate.of(2000, 1, 1))
                 .build();
 
         Transaction secondTransaction = new TransactionBuilder()
@@ -334,6 +351,7 @@ public class AccountTest extends AccountTestBase {
                 .setQuantity(new Quantity(1))
                 .setTotalPrice(new Amount(110.0))
                 .setCommission(Amount.Zero)
+                .setDate(LocalDate.of(2000, 1, 2))
                 .build();
 
         account.registerTransaction(firstTransaction);
@@ -354,6 +372,7 @@ public class AccountTest extends AccountTestBase {
                 .setQuantity(new Quantity(1))
                 .setTotalPrice(new Amount(1000.0))
                 .setCommission(Amount.Zero)
+                .setDate(LocalDate.of(2000, 1, 1))
                 .build();
 
         Transaction secondTransaction = new TransactionBuilder()
@@ -362,6 +381,7 @@ public class AccountTest extends AccountTestBase {
                 .setQuantity(new Quantity(2))
                 .setTotalPrice(new Amount(500.0))
                 .setCommission(Amount.Zero)
+                .setDate(LocalDate.of(2000, 1, 2))
                 .build();
 
         account.registerTransaction(firstTransaction);
@@ -384,6 +404,7 @@ public class AccountTest extends AccountTestBase {
                 .setQuantity(new Quantity(1))
                 .setTotalPrice(new Amount(1000.0))
                 .setCommission(Amount.Zero)
+                .setDate(LocalDate.of(2000, 1, 1))
                 .build();
 
         Transaction secondTransaction = new TransactionBuilder()
@@ -392,6 +413,7 @@ public class AccountTest extends AccountTestBase {
                 .setQuantity(new Quantity(2))
                 .setTotalPrice(new Amount(500.0))
                 .setCommission(Amount.Zero)
+                .setDate(LocalDate.of(2000, 1, 2))
                 .build();
 
         account.registerTransaction(firstTransaction);
@@ -410,6 +432,7 @@ public class AccountTest extends AccountTestBase {
                 .setQuantity(new Quantity(1))
                 .setTotalPrice(new Amount(1000.0))
                 .setCommission(Amount.Zero)
+                .setDate(LocalDate.of(2000, 1, 1))
                 .build();
 
         Transaction secondTransaction = new TransactionBuilder()
@@ -418,6 +441,7 @@ public class AccountTest extends AccountTestBase {
                 .setQuantity(new Quantity(2))
                 .setTotalPrice(new Amount(500.0))
                 .setCommission(Amount.Zero)
+                .setDate(LocalDate.of(2000, 1, 2))
                 .build();
 
         Transaction thirdTransaction = new TransactionBuilder()
@@ -426,6 +450,7 @@ public class AccountTest extends AccountTestBase {
                 .setQuantity(new Quantity(3))
                 .setTotalPrice(new Amount(500.0))
                 .setCommission(Amount.Zero)
+                .setDate(LocalDate.of(2000, 1, 3))
                 .build();
 
         account.registerTransaction(firstTransaction);
@@ -433,5 +458,77 @@ public class AccountTest extends AccountTestBase {
         account.registerTransaction(thirdTransaction);
 
         Assert.assertEquals(new Quantity(6), account.getTotalStocksQuantity());
+    }
+
+    @Test
+    public void returnsLastTransaction() {
+        Transaction firstBuyTransaction = new TransactionBuilder()
+                .setTransactionType(TransactionType.Buy)
+                .setIsin(ISIN.MunichRe)
+                .setQuantity(new Quantity(1))
+                .setTotalPrice(new Amount(100.0))
+                .setCommission(Amount.Zero)
+                .setDate(LocalDate.of(2000, 1, 1))
+                .build();
+
+        Transaction sellTransaction = new TransactionBuilder()
+                .setTransactionType(TransactionType.Sell)
+                .setIsin(ISIN.MunichRe)
+                .setQuantity(new Quantity(1))
+                .setTotalPrice(new Amount(150.0))
+                .setCommission(Amount.Zero)
+                .setDate(LocalDate.of(2000, 1, 2))
+                .build();
+
+        Transaction secondBuyTransaction = new TransactionBuilder()
+                .setTransactionType(TransactionType.Buy)
+                .setIsin(ISIN.MunichRe)
+                .setQuantity(new Quantity(2))
+                .setTotalPrice(new Amount(120.0))
+                .setCommission(new Amount(0))
+                .setDate(LocalDate.of(2000, 1, 3))
+                .build();
+
+        Transaction otherBuyTransaction = new TransactionBuilder()
+                .setTransactionType(TransactionType.Buy)
+                .setIsin(ISIN.Allianz)
+                .setQuantity(new Quantity(1))
+                .setTotalPrice(new Amount(100.0))
+                .setCommission(new Amount(0))
+                .setDate(LocalDate.of(2000, 1, 4))
+                .build();
+
+        this.account.registerTransaction(firstBuyTransaction);
+        this.account.registerTransaction(sellTransaction);
+        this.account.registerTransaction(secondBuyTransaction);
+        this.account.registerTransaction(otherBuyTransaction);
+
+        Transaction lastTransaction = this.account.getLastTransaction(ISIN.MunichRe);
+
+        Assert.assertSame(lastTransaction, secondBuyTransaction);
+    }
+
+    @Test
+    public void getLastTransactionFails_ifNoBuyTransactionAvailable() {
+        Transaction otherBuyTransaction = new TransactionBuilder()
+                .setTransactionType(TransactionType.Buy)
+                .setIsin(ISIN.Allianz)
+                .setQuantity(new Quantity(1))
+                .setTotalPrice(new Amount(100.0))
+                .setCommission(new Amount(0))
+                .setDate(LocalDate.of(2000, 1, 1))
+                .build();
+
+        this.account.registerTransaction(otherBuyTransaction);
+
+        try {
+            this.account.getLastTransaction(ISIN.MunichRe);
+        }
+        catch(RuntimeException e) {
+            Assert.assertEquals("There was no transaction registered yet for the specified ISIN.", e.getMessage());
+            return;
+        }
+
+        Assert.fail("RuntimeException expected.");
     }
 }

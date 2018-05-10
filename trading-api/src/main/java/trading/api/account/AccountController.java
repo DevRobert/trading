@@ -12,6 +12,7 @@ import trading.domain.market.InstrumentNameProvider;
 import trading.domain.market.MarketPriceSnapshot;
 import trading.domain.simulation.MultiStockMarketDataStore;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -28,7 +29,7 @@ public class AccountController {
     private MultiStockMarketDataStore multiStockMarketDataStore;
 
     // TODO get account id from JWT
-    private AccountId accountId = new AccountId(2);
+    private AccountId accountId = new AccountId(1);
 
     private Account getAccount() {
         return this.accountService.getAccount(this.accountId);
@@ -167,6 +168,8 @@ public class AccountController {
                 Amount commission = new Amount(request.getCommission());
                 transactionBuilder.setCommission(commission);
             }
+
+            transactionBuilder.setDate(LocalDate.now());
 
             Transaction transaction = transactionBuilder.build();
             this.accountService.registerTransaction(this.accountId, transaction);

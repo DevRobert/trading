@@ -5,15 +5,18 @@ import org.junit.Before;
 import org.junit.Test;
 import trading.domain.Amount;
 import trading.domain.ISIN;
+import trading.domain.account.Account;
 import trading.domain.market.HistoricalMarketData;
 import trading.domain.market.MarketPriceSnapshot;
 import trading.domain.market.MarketPriceSnapshotBuilder;
 
 import java.time.LocalDate;
+import java.util.HashSet;
 import java.util.Set;
 
 public class MultiStockScoringTest {
     private HistoricalMarketData historicalMarketData;
+    private Account account;
     private Set<ISIN> isins;
 
     @Before
@@ -25,6 +28,7 @@ public class MultiStockScoringTest {
                 .build();
 
         this.historicalMarketData = new HistoricalMarketData(initialClosingMarketPrices);
+        this.account = new Account(new Amount(10000.0));
         this.isins = this.historicalMarketData.getAvailableStocks();
     }
 
@@ -34,13 +38,13 @@ public class MultiStockScoringTest {
 
         ScoringStrategy scoringStrategy = new ScoringStrategy() {
             @Override
-            public Score calculateScore(HistoricalMarketData historicalMarketData, ISIN isin) {
+            public Score calculateScore(HistoricalMarketData historicalMarketData, Account account, ISIN isin) {
                 return new Score(0.0);
             }
         };
 
         try {
-            new MultiStockScoring().calculateScores(historicalMarketData, scoringStrategy);
+            new MultiStockScoring().calculateScores(historicalMarketData, this.account, scoringStrategy, new HashSet<>());
         }
         catch(RuntimeException ex) {
             Assert.assertEquals("The historical market data have to be specified.", ex.getMessage());
@@ -56,7 +60,7 @@ public class MultiStockScoringTest {
         ScoringStrategy scoringStrategy = null;
 
         try {
-            new MultiStockScoring().calculateScores(historicalMarketData, scoringStrategy);
+            new MultiStockScoring().calculateScores(historicalMarketData, this.account, scoringStrategy, new HashSet<>());
         }
         catch(RuntimeException ex) {
             Assert.assertEquals("The scoring strategy has to be specified.", ex.getMessage());
@@ -68,9 +72,13 @@ public class MultiStockScoringTest {
 
     @Test
     public void multiStockScoringCalculatesScoresUsingScoringStrategy() {
-        Scores scores = new MultiStockScoring().calculateScores(historicalMarketData, new ScoringStrategy() {
+        Set<ISIN> isins = new HashSet<>();
+        isins.add(ISIN.MunichRe);
+        isins.add(ISIN.Allianz);
+
+        Scores scores = new MultiStockScoring().calculateScores(this.historicalMarketData, this.account, new ScoringStrategy() {
             @Override
-            public Score calculateScore(HistoricalMarketData historicalMarketData, ISIN isin) {
+            public Score calculateScore(HistoricalMarketData historicalMarketData, Account account, ISIN isin) {
                 if(isin.equals(ISIN.MunichRe)) {
                     return new Score(1.0);
                 }
@@ -81,7 +89,7 @@ public class MultiStockScoringTest {
 
                 return null;
             }
-        });
+        }, isins);
 
         Score munichReScore  = scores.get(ISIN.MunichRe);
         Score allianzScore = scores.get(ISIN.Allianz);

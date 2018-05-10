@@ -40,6 +40,7 @@ public class AccountServiceTest {
                 .setQuantity(new Quantity(1))
                 .setTotalPrice(new Amount(100.0))
                 .setCommission(new Amount(5.0))
+                .setDate(LocalDate.now())
                 .build();
 
         AccountRepository accountRepository = mock(AccountRepository.class);
@@ -50,9 +51,6 @@ public class AccountServiceTest {
             Account saveAccount = invocation.getArgument(0);
             Assert.assertSame(account, saveAccount);
             Assert.assertTrue("The transaction has not been registered.", account.getProcessedTransactions().contains(transaction));
-
-            Assert.assertNotNull("The transaction date has not been set.", transaction.getDate());
-            Assert.assertEquals(LocalDate.now(), transaction.getDate());
 
             transaction.setId(transactionId);
             return null;

@@ -9,6 +9,7 @@ import trading.domain.broker.CommissionStrategy;
 import trading.domain.broker.OrderRequest;
 import trading.domain.broker.OrderType;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -24,7 +25,7 @@ public class ManualTradingStrategyTest {
             }
 
             @Override
-            public void notifyDayOpened() {
+            public void notifyDayOpened(LocalDate date) {
 
             }
 

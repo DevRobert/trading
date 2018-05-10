@@ -53,7 +53,7 @@ public class RegisterTransactionTest extends AccountControllerTestBase {
 
             transaction.setId(new TransactionId(100));
             return null;
-        }).when(this.accountService).registerTransaction(ArgumentMatchers.eq(new AccountId(2)), any(Transaction.class));
+        }).when(this.accountService).registerTransaction(ArgumentMatchers.eq(new AccountId(1)), any(Transaction.class));
 
         this.performRequest()
                 .andExpect(status().isOk())
@@ -136,7 +136,7 @@ public class RegisterTransactionTest extends AccountControllerTestBase {
     public void registerTransactionFails_ifDomainRuleViolated() throws Exception {
         doAnswer(invocation -> {
             throw new DomainException("Example for domain exception.");
-        }).when(this.accountService).registerTransaction(ArgumentMatchers.eq(new AccountId(2)), any(Transaction.class));
+        }).when(this.accountService).registerTransaction(ArgumentMatchers.eq(new AccountId(1)), any(Transaction.class));
 
         this.performRequest()
                 .andExpect(status().is(HttpStatus.BAD_REQUEST.value()))

@@ -79,15 +79,16 @@ public class HistoricalStockData {
             throw new RuntimeException("The look behind period must not be negative.");
         }
 
-        Amount maximumClosingMarketPrice = this.getLastClosingMarketPrice();
         final int numClosingMarketPrices = this.closingMarketPrices.size();
+
+        if(lookBehindPeriod.getValue() > numClosingMarketPrices) {
+            throw new RuntimeException("The look behind period exceeds the available market data history.");
+        }
+
+        Amount maximumClosingMarketPrice = this.getLastClosingMarketPrice();
 
         for(int lookBehindDays = 2; lookBehindDays <= lookBehindPeriod.getValue(); lookBehindDays++) {
             int closingMarketPriceIndex = numClosingMarketPrices - lookBehindDays;
-
-            if(closingMarketPriceIndex < 0) {
-                break;
-            }
 
             Amount closingMarketPrice = this.closingMarketPrices.get(closingMarketPriceIndex);
 

@@ -4,6 +4,8 @@ import org.junit.Assert;
 import org.junit.Test;
 import trading.domain.*;
 
+import java.time.LocalDate;
+
 public class AvailableMoneyTest extends AccountTestBase {
     @Test()
     public void accountIsInitializedWithSpecifiedAvailableMoney() {
@@ -23,6 +25,7 @@ public class AvailableMoneyTest extends AccountTestBase {
                 .setQuantity(new Quantity(1))
                 .setTotalPrice(totalPrice)
                 .setCommission(commission)
+                .setDate(LocalDate.of(2000, 1, 1))
                 .build();
 
         account.registerTransaction(transaction);
@@ -45,6 +48,7 @@ public class AvailableMoneyTest extends AccountTestBase {
                 .setQuantity(new Quantity(1))
                 .setTotalPrice(totalBuyPrice)
                 .setCommission(buyCommission)
+                .setDate(LocalDate.of(2000, 1, 1))
                 .build();
 
         account.registerTransaction(buyTransaction);
@@ -60,6 +64,7 @@ public class AvailableMoneyTest extends AccountTestBase {
                 .setQuantity(new Quantity(1))
                 .setTotalPrice(totalSellPrice)
                 .setCommission(sellCommission)
+                .setDate(LocalDate.of(2000, 1, 2))
                 .build();
 
         account.registerTransaction(sellTransaction);
@@ -80,6 +85,7 @@ public class AvailableMoneyTest extends AccountTestBase {
                 .setQuantity(new Quantity(1))
                 .setTotalPrice(buyTotalPrice)
                 .setCommission(buyCommission)
+                .setDate(LocalDate.of(2000, 1, 1))
                 .build();
 
         try {
@@ -103,6 +109,7 @@ public class AvailableMoneyTest extends AccountTestBase {
                 .setQuantity(new Quantity(1))
                 .setTotalPrice(buyTotalPrice)
                 .setCommission(buyCommission)
+                .setDate(LocalDate.of(2000, 1, 1))
                 .build();
 
         account.registerTransaction(transaction);
@@ -123,6 +130,7 @@ public class AvailableMoneyTest extends AccountTestBase {
                 .setQuantity(new Quantity(1))
                 .setTotalPrice(buyTotalPrice)
                 .setCommission(buyCommission)
+                .setDate(LocalDate.of(2000, 1, 1))
                 .build();
 
         account.registerTransaction(transaction);
@@ -141,6 +149,7 @@ public class AvailableMoneyTest extends AccountTestBase {
                 .setQuantity(new Quantity(1))
                 .setTotalPrice(buyTotalPrice)
                 .setCommission(buyCommission)
+                .setDate(LocalDate.of(2000, 1, 1))
                 .build();
 
         account.registerTransaction(transaction);
@@ -159,6 +168,7 @@ public class AvailableMoneyTest extends AccountTestBase {
                 .setQuantity(new Quantity(1))
                 .setTotalPrice(buyTotalPrice)
                 .setCommission(buyCommission)
+                .setDate(LocalDate.of(2000, 1, 1))
                 .build();
 
         account.registerTransaction(buyTransaction);
@@ -174,6 +184,7 @@ public class AvailableMoneyTest extends AccountTestBase {
                 .setQuantity(new Quantity(1))
                 .setTotalPrice(sellTotalPrice)
                 .setCommission(sellCommission)
+                .setDate(LocalDate.of(2000, 1, 2))
                 .build();
 
         account.registerTransaction(sellTransaction);
@@ -194,6 +205,7 @@ public class AvailableMoneyTest extends AccountTestBase {
                 .setQuantity(new Quantity(1))
                 .setTotalPrice(buyTotalPrice1)
                 .setCommission(buyCommission1)
+                .setDate(LocalDate.of(2000, 1, 1))
                 .build();
 
         account.registerTransaction(buyTransaction1);
@@ -209,6 +221,7 @@ public class AvailableMoneyTest extends AccountTestBase {
                 .setQuantity(new Quantity(1))
                 .setTotalPrice(buyTotalPrice2)
                 .setCommission(buyCommission2)
+                .setDate(LocalDate.of(2000, 1, 2))
                 .build();
 
         account.registerTransaction(buyTransaction2);
@@ -224,6 +237,7 @@ public class AvailableMoneyTest extends AccountTestBase {
                 .setQuantity(new Quantity(1))
                 .setTotalPrice(sellTotalPrice1)
                 .setCommission(sellCommission1)
+                .setDate(LocalDate.of(2000, 1, 3))
                 .build();
 
         account.registerTransaction(sellTransaction1);
@@ -239,6 +253,7 @@ public class AvailableMoneyTest extends AccountTestBase {
                 .setQuantity(new Quantity(1))
                 .setTotalPrice(sellTotalPrice2)
                 .setCommission(sellCommission2)
+                .setDate(LocalDate.of(2000, 1, 4))
                 .build();
 
         account.registerTransaction(sellTransaction2);

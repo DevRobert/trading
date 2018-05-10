@@ -4,17 +4,19 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import trading.domain.DayCount;
 import trading.domain.ISIN;
+import trading.domain.account.Account;
 import trading.domain.challenges.HistoricalTestDataProvider;
 import trading.domain.market.HistoricalMarketData;
-import trading.domain.market.HistoricalStockData;
 import trading.domain.market.MarketPriceSnapshot;
 import trading.domain.simulation.MultiStockMarketDataStore;
 import trading.domain.strategy.compound.MultiStockScoring;
-import trading.domain.strategy.compound.Score;
 import trading.domain.strategy.compound.Scores;
 import trading.domain.strategy.compound.ScoringStrategy;
+import trading.domain.strategy.compoundLocalMaximum.LocalMaximumBuyScoringStrategy;
+import trading.domain.strategy.compoundLocalMaximum.LocalMaximumSellScoringStrategy;
 
 import java.util.List;
+import java.util.Set;
 
 @Component
 public class ScoringServiceImpl implements ScoringService {
@@ -26,7 +28,35 @@ public class ScoringServiceImpl implements ScoringService {
     }
 
     @Override
-    public Scores getCurrentScoring() {
+    public Scores calculateBuyScoring(Account account) {
+        DayCount buyTriggerLocalMaximumLookBehindPeriod = new DayCount(10);
+        double buyTriggerMinDeclineSinceMaximumPercentage = 0.1;
+
+        ScoringStrategy scoringStrategy = new LocalMaximumBuyScoringStrategy(
+                buyTriggerLocalMaximumLookBehindPeriod,
+                buyTriggerMinDeclineSinceMaximumPercentage
+        );
+
+        Set<ISIN> isins = this.multiStockMarketDataStore.getAllClosingPrices().get(0).getISINs();
+        return calculateScoring(account, scoringStrategy, isins);
+    }
+
+    @Override
+    public Scores calculateSellScoring(Account account) {
+        double activateTrailingStopLossMinRaiseSinceBuyingPercentage = 0.03;
+        double sellTriggerStopLossMinimumDeclineSinceBuyingPercentage = 0.1;
+        double sellTriggerTrailingStopLossMinDeclineSinceMaximumAfterBuyingPercentage = 0.07;
+
+        ScoringStrategy scoringStrategy = new LocalMaximumSellScoringStrategy(
+                activateTrailingStopLossMinRaiseSinceBuyingPercentage,
+                sellTriggerStopLossMinimumDeclineSinceBuyingPercentage,
+                sellTriggerTrailingStopLossMinDeclineSinceMaximumAfterBuyingPercentage
+        );
+
+        return calculateScoring(account, scoringStrategy, account.getCurrentStocks().keySet());
+    }
+
+    private Scores calculateScoring(Account account, ScoringStrategy scoringStrategy, Set<ISIN> isins) {
         HistoricalTestDataProvider historicalTestDataProvider = new HistoricalTestDataProvider(this.multiStockMarketDataStore);
 
         List<MarketPriceSnapshot> historicalClosingPrices = historicalTestDataProvider.getHistoricalClosingPrices();
@@ -36,43 +66,6 @@ public class ScoringServiceImpl implements ScoringService {
             historicalMarketData.registerClosedDay(historicalClosingPrices.get(dayIndex));
         }
 
-        return new MultiStockScoring().calculateScores(historicalMarketData, new ScoringStrategy() {
-            @Override
-            public Score calculateScore(HistoricalMarketData historicalMarketData, ISIN isin) {
-                return ScoringServiceImpl.calculateScore(historicalMarketData, isin);
-            }
-        });
-    }
-
-    private static Score calculateScore(HistoricalMarketData historicalMarketData, ISIN isin) {
-        StringBuilder comment = new StringBuilder();
-
-        DayCount buyTriggerLocalMaximumLookBehindPeriod = new DayCount(10);
-        double buyTriggerMinDeclineSinceMaximumPercentage = 0.1;
-
-        HistoricalStockData historicalStockData = historicalMarketData.getStockData(isin);
-
-        double lastClosingPrice = historicalStockData.getLastClosingMarketPrice().getValue();
-        comment.append("Last closing price: " + lastClosingPrice + "\n");
-
-        double localMaximum = historicalStockData.getMaximumClosingMarketPrice(buyTriggerLocalMaximumLookBehindPeriod).getValue();
-        comment.append("Local maximum: " + localMaximum + "\n");
-
-        double maxBuyPrice = localMaximum * (1.0 - buyTriggerMinDeclineSinceMaximumPercentage);
-        comment.append("Max buy price: " + maxBuyPrice + "\n");
-
-        boolean buy = lastClosingPrice <= maxBuyPrice;
-        double score;
-
-        if(buy) {
-            comment.append("Result: Buy!");
-            score = 1.0;
-        }
-        else {
-            comment.append("Result: Do not buy!");
-            score = 0.0;
-        }
-
-        return new Score(score, comment.toString());
+        return new MultiStockScoring().calculateScores(historicalMarketData, account, scoringStrategy, isins);
     }
 }

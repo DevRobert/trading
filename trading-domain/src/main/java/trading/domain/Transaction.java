@@ -40,6 +40,10 @@ public class Transaction {
             throw new DomainException("The commission must be specified.");
         }
 
+        if(date == null) {
+            throw new DomainException("The date must be specified.");
+        }
+
         this.transactionType = transactionType;
         this.isin = isin;
         this.quantity = quantity;
@@ -78,14 +82,6 @@ public class Transaction {
 
     public LocalDate getDate() {
         return this.date;
-    }
-
-    public void setDate(LocalDate date) {
-        if(this.date != null) {
-            throw new DomainException("The transaction date must not be changed.");
-        }
-
-        this.date = date;
     }
 
     @Override

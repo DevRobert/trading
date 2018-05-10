@@ -107,7 +107,7 @@ public class VirtualBrokerTest {
         OrderRequest orderRequest = new OrderRequest(OrderType.BuyMarket, ISIN.MunichRe, quantity);
 
         virtualBroker.setOrder(orderRequest);
-        virtualBroker.notifyDayOpened();
+        virtualBroker.notifyDayOpened(LocalDate.now());
 
         Position position = account.getPosition(ISIN.MunichRe);
         Assert.assertEquals(quantity, position.getQuantity());
@@ -127,11 +127,12 @@ public class VirtualBrokerTest {
                 .setQuantity(quantity)
                 .setTotalPrice(buyTotalPrice)
                 .setCommission(buyCommission)
+                .setDate(LocalDate.of(2000, 1, 1))
                 .build());
 
         OrderRequest orderRequest = new OrderRequest(OrderType.SellMarket, ISIN.MunichRe, quantity);
         virtualBroker.setOrder(orderRequest);
-        virtualBroker.notifyDayOpened();
+        virtualBroker.notifyDayOpened(LocalDate.of(2000, 1, 2));
 
         Position position = account.getPosition(ISIN.MunichRe);
         Assert.assertTrue(position.getQuantity().isZero());
@@ -146,7 +147,7 @@ public class VirtualBrokerTest {
         OrderRequest orderRequest = new OrderRequest(OrderType.BuyMarket, ISIN.MunichRe, quantity);
 
         virtualBroker.setOrder(orderRequest);
-        virtualBroker.notifyDayOpened();
+        virtualBroker.notifyDayOpened(LocalDate.now());
 
         Position position = account.getPosition(ISIN.MunichRe);
         Assert.assertEquals(new Amount(10000.0), position.getFullMarketPrice());
@@ -168,6 +169,7 @@ public class VirtualBrokerTest {
                 .setQuantity(quantity)
                 .setTotalPrice(buyTotalPrice)
                 .setCommission(buyCommission)
+                .setDate(this.historicalMarketData.getDate())
                 .build());
 
         // Available money after buying: 50,000 - 10,000 = 40,000
@@ -184,7 +186,7 @@ public class VirtualBrokerTest {
 
         OrderRequest orderRequest = new OrderRequest(OrderType.SellMarket, ISIN.MunichRe, quantity);
         virtualBroker.setOrder(orderRequest);
-        virtualBroker.notifyDayOpened();
+        virtualBroker.notifyDayOpened(LocalDate.now());
 
         // Available money after selling: 40,000 + 20,000 = 60,000
 
@@ -208,7 +210,7 @@ public class VirtualBrokerTest {
         Quantity quantity = new Quantity(10);
         OrderRequest orderRequest = new OrderRequest(OrderType.BuyMarket, ISIN.MunichRe, quantity);
         virtualBroker.setOrder(orderRequest);
-        virtualBroker.notifyDayOpened();
+        virtualBroker.notifyDayOpened(LocalDate.now());
 
         // Available money after buying: 50,000 - 10,000 - 10 = 39,990
 
@@ -239,13 +241,14 @@ public class VirtualBrokerTest {
                 .setQuantity(quantity)
                 .setTotalPrice(buyTotalPrice)
                 .setCommission(buyCommission)
+                .setDate(LocalDate.of(2000, 1, 1))
                 .build());
 
         // Available money after buying: 50,000 - 10,000 = 40,000
 
         OrderRequest orderRequest = new OrderRequest(OrderType.SellMarket, ISIN.MunichRe, quantity);
         virtualBroker.setOrder(orderRequest);
-        virtualBroker.notifyDayOpened();
+        virtualBroker.notifyDayOpened(LocalDate.of(2000, 1, 2));
 
         // Available money after selling: 40,000 + 10,000 - 10 = 49,990
 

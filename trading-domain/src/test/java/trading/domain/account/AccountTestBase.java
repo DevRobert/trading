@@ -3,6 +3,8 @@ package trading.domain.account;
 import org.junit.Before;
 import trading.domain.*;
 
+import java.time.LocalDate;
+
 public abstract class AccountTestBase {
     protected Account account;
 
@@ -25,6 +27,7 @@ public abstract class AccountTestBase {
                 .setQuantity(new Quantity(10))
                 .setTotalPrice(fullPrice)
                 .setCommission(commission)
+                .setDate(LocalDate.of(2000, 1, 1))
                 .build();
 
         account.registerTransaction(transaction);

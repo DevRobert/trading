@@ -89,12 +89,12 @@ public abstract class TradingStrategyTestBase {
         this.simulation = simulationBuilder.beginSimulation();
     }
 
-    protected void openDay() {
+    protected void openDay(LocalDate date) {
         if(simulation == null) {
             throw new RuntimeException("The simulation has not been started yet.");
         }
 
-        simulation.openDay();
+        simulation.openDay(date);
     }
 
     private void ensureCloseDayPreconditions() {

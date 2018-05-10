@@ -4,6 +4,8 @@ import org.junit.Assert;
 import org.junit.Test;
 import trading.domain.*;
 
+import java.time.LocalDate;
+
 public class BalanceTest extends AccountTestBase {
     @Test
     public void balanceIsInitializedWithInitialAvailableMoney() {
@@ -32,6 +34,7 @@ public class BalanceTest extends AccountTestBase {
                 .setQuantity(new Quantity(10))
                 .setTotalPrice(fullPrice)
                 .setCommission(commission)
+                .setDate(LocalDate.of(2000, 1, 1))
                 .build();
 
         account.registerTransaction(transaction);
@@ -56,6 +59,7 @@ public class BalanceTest extends AccountTestBase {
                 .setQuantity(new Quantity(10))
                 .setTotalPrice(fullPrice)
                 .setCommission(commission)
+                .setDate(LocalDate.of(2000, 1, 1))
                 .build();
 
         account.registerTransaction(transaction);
@@ -80,6 +84,7 @@ public class BalanceTest extends AccountTestBase {
                 .setQuantity(new Quantity(10))
                 .setTotalPrice(fullPrice)
                 .setCommission(commission)
+                .setDate(LocalDate.of(2000, 1, 1))
                 .build();
 
         account.registerTransaction(transaction);

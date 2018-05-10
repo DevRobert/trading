@@ -1,6 +1,7 @@
 package trading.domain.simulation;
 
 import trading.domain.Amount;
+import trading.domain.DomainException;
 import trading.domain.ISIN;
 import trading.domain.account.Account;
 import trading.domain.broker.Broker;
@@ -20,6 +21,7 @@ public class Simulation {
     private final ISIN singleISIN;
 
     private boolean activeDay;
+    private LocalDate openedDayDate;
 
     protected Simulation(HistoricalMarketData historicalMarketData, Account account, Broker broker, TradingStrategy tradingStrategy) {
         if(historicalMarketData == null) {
@@ -56,19 +58,32 @@ public class Simulation {
         this.tradingStrategy.prepareOrdersForNextTradingDay();
     }
 
-    public void openDay() {
+    public void openDay(LocalDate date) {
+        if(date == null) {
+            throw new DomainException("The date must be specified.");
+        }
+
+        if(!date.isAfter(this.historicalMarketData.getDate())) {
+            throw new DomainException("The date must lie after the date of the last closed market day.");
+        }
+
         if(this.activeDay) {
             throw new SimulationStateException("A new day cannot be opened because the active day has not been closed yet.");
         }
 
         this.activeDay = true;
 
-        this.broker.notifyDayOpened();
+        this.broker.notifyDayOpened(date);
+        this.openedDayDate = date;
     }
 
     public void closeDay(MarketPriceSnapshot closingMarketPrices) {
         if(!this.activeDay) {
             throw new SimulationStateException("There is no active day to be closed.");
+        }
+
+        if(!closingMarketPrices.getDate().equals(this.openedDayDate)) {
+            throw new DomainException("The market price date must equal the date given when the day was opened.");
         }
 
         this.activeDay = false;

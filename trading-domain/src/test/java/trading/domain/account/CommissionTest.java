@@ -4,6 +4,8 @@ import org.junit.Assert;
 import org.junit.Test;
 import trading.domain.*;
 
+import java.time.LocalDate;
+
 public class CommissionTest extends AccountTestBase {
     @Test
     public void accountIsInitializedWithZeroCommissions() {
@@ -21,6 +23,7 @@ public class CommissionTest extends AccountTestBase {
                 .setQuantity(new Quantity(1))
                 .setTotalPrice(fullPrice)
                 .setCommission(commission)
+                .setDate(LocalDate.of(2000, 1, 1))
                 .build();
 
         account.registerTransaction(transaction);
@@ -43,6 +46,7 @@ public class CommissionTest extends AccountTestBase {
                 .setQuantity(quantity)
                 .setTotalPrice(fullBuyPrice)
                 .setCommission(buyCommission)
+                .setDate(LocalDate.of(2000, 1, 1))
                 .build();
 
         Transaction sellTransaction = new TransactionBuilder()
@@ -51,6 +55,7 @@ public class CommissionTest extends AccountTestBase {
                 .setQuantity(quantity)
                 .setTotalPrice(fullSellPrice)
                 .setCommission(sellCommission)
+                .setDate(LocalDate.of(2000, 1, 2))
                 .build();
 
         account.registerTransaction(buyTransaction);

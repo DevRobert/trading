@@ -8,6 +8,9 @@ import trading.domain.account.Account;
 import trading.domain.account.AccountId;
 import trading.domain.account.AccountRepository;
 import trading.domain.simulation.MultiStockMarketDataStore;
+import trading.persistence.MySqlRepositoryParameters;
+import trading.persistence.MySqlRepositoryParametersBuilder;
+import trading.persistence.account.MySqlAccountRepository;
 import trading.persistence.market.MongoMultiStockMarketDataStore;
 import trading.persistence.market.MongoMultiStockMarketDataStoreParameters;
 import trading.persistence.market.MongoMultiStockMarketDataStoreParametersBuilder;
@@ -26,21 +29,13 @@ public class ApplicationConfiguration {
 
     @Bean
     public AccountRepository getAccountRepository() {
-        return new AccountRepository() {
-            @Override
-            public Account createAccount(ClientId clientId, Amount seedCapital) {
-                return null;
-            }
+        MySqlRepositoryParameters parameters = new MySqlRepositoryParametersBuilder()
+                .setServer("localhost")
+                .setUsername("root")
+                .setPassword("testtest")
+                .setDatabase("trading-production")
+                .build();
 
-            @Override
-            public Account getAccount(AccountId accountId) {
-                return null;
-            }
-
-            @Override
-            public void saveAccount(Account account) {
-
-            }
-        };
+        return new MySqlAccountRepository(parameters);
     }
 }

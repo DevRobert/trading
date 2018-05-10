@@ -7,8 +7,6 @@ import trading.domain.account.Account;
 import trading.domain.account.AccountId;
 import trading.domain.account.AccountRepository;
 
-import java.time.LocalDate;
-
 @Component
 public class AccountServiceImpl implements AccountService {
     private AccountRepository accountRepository;
@@ -27,7 +25,6 @@ public class AccountServiceImpl implements AccountService {
     public void registerTransaction(AccountId accountId, Transaction transaction) {
         Account account = this.accountRepository.getAccount(accountId);
         account.registerTransaction(transaction);
-        transaction.setDate(LocalDate.now());
         this.accountRepository.saveAccount(account);
     }
 }

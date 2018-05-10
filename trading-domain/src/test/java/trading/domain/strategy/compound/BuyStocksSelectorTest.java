@@ -15,7 +15,7 @@ import java.time.LocalDate;
 import java.util.HashMap;
 import java.util.Map;
 
-public class StockSelectorTest {
+public class BuyStocksSelectorTest {
     private Amount totalCapital;
     private Amount availableMoney;
     private MarketPriceSnapshot marketPrices;
@@ -43,8 +43,8 @@ public class StockSelectorTest {
     }
 
     private Map<ISIN, Quantity> selectStocks() {
-        StockSelector stockSelector = new StockSelector(this.minimumBuyScore, this.maximumPercentage);
-        return stockSelector.selectStocks(this.totalCapital, this.availableMoney, new Scores(stockScores, LocalDate.now()), this.marketPrices, this.commissionStrategy, currentStocks);
+        BuyStocksSelector buyStocksSelector = new BuyStocksSelector(this.minimumBuyScore, this.maximumPercentage);
+        return buyStocksSelector.selectStocks(this.totalCapital, this.availableMoney, new Scores(stockScores, LocalDate.now()), this.marketPrices, this.commissionStrategy, currentStocks);
     }
 
     @Test

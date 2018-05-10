@@ -6,6 +6,7 @@ import trading.domain.account.AccountId;
 import trading.domain.account.AccountNotFoundException;
 import trading.domain.account.AccountRepository;
 import trading.persistence.MySqlRepository;
+import trading.persistence.MySqlRepositoryParameters;
 
 import java.sql.*;
 import java.time.LocalDate;
@@ -13,6 +14,10 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class MySqlAccountRepository extends MySqlRepository implements AccountRepository {
+    public MySqlAccountRepository(MySqlRepositoryParameters parameters) {
+        super(parameters);
+    }
+
     @Override
     public Account createAccount(ClientId clientId, Amount seedCapital) {
         Connection connection = this.openNewConnection();

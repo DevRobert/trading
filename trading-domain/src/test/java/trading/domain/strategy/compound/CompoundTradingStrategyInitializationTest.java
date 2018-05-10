@@ -18,9 +18,10 @@ import java.time.LocalDate;
 
 public class CompoundTradingStrategyInitializationTest {
     private TradingStrategyContext tradingStrategyContext;
-    private ScoringStrategy scoringStrategy;
-    private StockSelector stockSelector;
-    private TriggerFactory sellTriggerFactory;
+    private ScoringStrategy buyScoringStrategy;
+    private BuyStocksSelector buyStocksSelector;
+    private ScoringStrategy sellScoringStrategy;
+    private SellStocksSelector sellStocksSelector;
 
     @Before
     public void before() {
@@ -29,16 +30,18 @@ public class CompoundTradingStrategyInitializationTest {
         Broker broker = new VirtualBroker(account, historicalMarketData, CommissionStrategies.getZeroCommissionStrategy());
 
         this.tradingStrategyContext = new TradingStrategyContext(account, broker, historicalMarketData);
-        this.scoringStrategy = new FixedScoringStrategy();
-        this.stockSelector = new StockSelector(new Score(0.0), 1.0);
-        this.sellTriggerFactory = isin -> new NotImplementedTrigger();
+        this.buyScoringStrategy = new FixedScoringStrategy();
+        this.buyStocksSelector = new BuyStocksSelector(new Score(0.0), 1.0);
+        this.sellScoringStrategy = new FixedScoringStrategy();
+        this.sellStocksSelector =new SellStocksSelector(new Score(0.0));
     }
 
     protected CompoundTradingStrategy createCompoundTradingStrategy() {
         CompoundTradingStrategyParameters compoundTradingStrategyParameters = new CompoundTradingStrategyParametersBuilder()
-                .setScoringStrategy(this.scoringStrategy)
-                .setStockSelector(this.stockSelector)
-                .setSellTriggerFactory(this.sellTriggerFactory)
+                .setBuyScoringStrategy(this.buyScoringStrategy)
+                .setBuyStocksSelector(this.buyStocksSelector)
+                .setSellScoringStrategy(this.sellScoringStrategy)
+                .setSellStocksSelector(this.sellStocksSelector)
                 .build();
 
         return new CompoundTradingStrategy(compoundTradingStrategyParameters, this.tradingStrategyContext);
@@ -74,13 +77,13 @@ public class CompoundTradingStrategyInitializationTest {
 
     @Test
     public void initializationFails_ifScoringStrategyNotSpecified() {
-        this.scoringStrategy = null;
+        this.buyScoringStrategy = null;
 
         try {
             createCompoundTradingStrategy();
         }
         catch(RuntimeException ex) {
-            Assert.assertEquals("The scoring strategy was not specified.", ex.getMessage());
+            Assert.assertEquals("The buy scoring strategy was not specified.", ex.getMessage());
             return;
         }
 
@@ -88,14 +91,30 @@ public class CompoundTradingStrategyInitializationTest {
     }
 
     @Test
-    public void initializationFails_ifStockSelectorNotSpecified() {
-        this.stockSelector = null;
+    public void initializationFails_ifBuyStockSelectorNotSpecified() {
+        this.buyStocksSelector = null;
 
         try {
             createCompoundTradingStrategy();
         }
         catch(RuntimeException ex) {
-            Assert.assertEquals("The stock selector was not specified.", ex.getMessage());
+            Assert.assertEquals("The buy stock selector was not specified.", ex.getMessage());
+            return;
+        }
+
+        Assert.fail("RuntimeException expected.");
+    }
+
+
+    @Test
+    public void initializationFails_ifSellScoringStrategyNotSpecified() {
+        this.sellScoringStrategy = null;
+
+        try {
+            createCompoundTradingStrategy();
+        }
+        catch(RuntimeException ex) {
+            Assert.assertEquals("The sell scoring strategy was not specified.", ex.getMessage());
             return;
         }
 
@@ -103,14 +122,14 @@ public class CompoundTradingStrategyInitializationTest {
     }
 
     @Test
-    public void initializationFails_ifSellTriggerNotSpecified() {
-        this.sellTriggerFactory = null;
+    public void initializationFails_ifSellStockSelectorNotSpecified() {
+        this.sellStocksSelector = null;
 
         try {
             createCompoundTradingStrategy();
         }
         catch(RuntimeException ex) {
-            Assert.assertEquals("The sell trigger factory was not specified.", ex.getMessage());
+            Assert.assertEquals("The sell stock selector was not specified.", ex.getMessage());
             return;
         }
 

@@ -13,9 +13,11 @@ import java.util.Set;
 public class HistoricalMarketData {
     private final Map<ISIN, HistoricalStockData> historicalStockDataMap;
     private final ISIN singleISIN;
-    private int durationNumDays = 1;
+    private int durationNumDays;
     private final Set<ISIN> isins;
     private MarketPriceSnapshot lastClosingMarketPrices;
+    private final Map<LocalDate, Integer> dayIndexByDate;
+    private final LocalDate historyBegin;
 
     public HistoricalMarketData(MarketPriceSnapshot initialClosingMarketPrices) {
         this.historicalStockDataMap = new HashMap<>();
@@ -36,6 +38,12 @@ public class HistoricalMarketData {
         }
 
         this.lastClosingMarketPrices = initialClosingMarketPrices;
+
+        this.durationNumDays = 1;
+
+        this.dayIndexByDate = new HashMap();
+        this.dayIndexByDate.put(initialClosingMarketPrices.getDate(), this.durationNumDays - 1);
+        this.historyBegin = initialClosingMarketPrices.getDate();
     }
 
     public HistoricalMarketData(ISIN isin, Amount initialClosingMarketPrice, LocalDate date) {
@@ -82,6 +90,8 @@ public class HistoricalMarketData {
 
         this.durationNumDays++;
         this.lastClosingMarketPrices = closingMarketPrices;
+
+        this.dayIndexByDate.put(closingMarketPrices.getDate(), this.durationNumDays - 1);
     }
 
     public void registerClosedDay(Amount closingMarketPrice, LocalDate date) {
@@ -107,5 +117,27 @@ public class HistoricalMarketData {
 
     public LocalDate getDate() {
         return this.lastClosingMarketPrices.getDate();
+    }
+
+    public DayCount countDaysAfter(LocalDate date) {
+        if(date == null) {
+            throw new RuntimeException("The date must be specified.");
+        }
+
+        Integer dayIndex = this.dayIndexByDate.get(date);
+
+        if(dayIndex == null) {
+            if(date.isBefore(this.historyBegin)) {
+                throw new RuntimeException("The given date lies before the market data history time line.");
+            }
+
+            if(date.isAfter(this.getLastClosingMarketPrices().getDate())) {
+                throw new RuntimeException("The given date lies after the market data history time line.");
+            }
+
+            throw new RuntimeException("The given date is unknown.");
+        }
+
+        return new DayCount(this.durationNumDays - dayIndex - 1);
     }
 }

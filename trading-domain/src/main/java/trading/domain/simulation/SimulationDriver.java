@@ -48,9 +48,8 @@ public class SimulationDriver {
         }
 
         for(int simulationDayIndex = 0; simulationDayIndex < numSimulationDays; simulationDayIndex++) {
-            simulation.openDay();
-
             MarketPriceSnapshot nextClosingMarketPrices = simulationMarketDataSource.getNextClosingMarketPrices();
+            simulation.openDay(nextClosingMarketPrices.getDate());
             simulation.closeDay(nextClosingMarketPrices);
 
             if(this.dailyReporting) {

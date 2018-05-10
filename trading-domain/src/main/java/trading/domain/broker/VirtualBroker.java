@@ -4,6 +4,7 @@ import trading.domain.*;
 import trading.domain.account.Account;
 import trading.domain.market.HistoricalMarketData;
 
+import java.time.LocalDate;
 import java.util.Queue;
 import java.util.concurrent.LinkedBlockingQueue;
 
@@ -38,11 +39,11 @@ public class VirtualBroker implements Broker {
     }
 
     @Override
-    public void notifyDayOpened() {
+    public void notifyDayOpened(LocalDate date) {
         OrderRequest orderRequest;
 
         while((orderRequest = this.registeredOrderRequests.poll()) != null) {
-            processOrderRequest(orderRequest);
+            processOrderRequest(orderRequest, date);
         }
     }
 
@@ -51,21 +52,21 @@ public class VirtualBroker implements Broker {
         return this.commissionStrategy;
     }
 
-    private void processOrderRequest(OrderRequest orderRequest) {
+    private void processOrderRequest(OrderRequest orderRequest, LocalDate date) {
         switch (orderRequest.getOrderType()) {
             case BuyMarket:
-                this.processMarketBuyOrderRequest(orderRequest);
+                this.processMarketBuyOrderRequest(orderRequest, date);
                 return;
 
             case SellMarket:
-                this.processMarketSellOrderRequest(orderRequest);
+                this.processMarketSellOrderRequest(orderRequest, date);
                 return;
         }
 
         throw new RuntimeException("The order request type is not supported.");
     }
 
-    private void processMarketBuyOrderRequest(OrderRequest orderRequest) {
+    private void processMarketBuyOrderRequest(OrderRequest orderRequest, LocalDate date) {
         ISIN isin = orderRequest.getIsin();
         Amount lastMarketPrice = this.historicalMarketData.getStockData(isin).getLastClosingMarketPrice();
         Amount totalPrice = lastMarketPrice.multiply(orderRequest.getQuantity());
@@ -77,12 +78,13 @@ public class VirtualBroker implements Broker {
                 .setQuantity(orderRequest.getQuantity())
                 .setTotalPrice(totalPrice)
                 .setCommission(commission)
+                .setDate(date)
                 .build();
 
         account.registerTransaction(transaction);
     }
 
-    private void processMarketSellOrderRequest(OrderRequest orderRequest) {
+    private void processMarketSellOrderRequest(OrderRequest orderRequest, LocalDate date) {
         ISIN isin = orderRequest.getIsin();
         Amount lastMarketPrice = this.historicalMarketData.getStockData(isin).getLastClosingMarketPrice();
         Amount totalPrice = lastMarketPrice.multiply(orderRequest.getQuantity());
@@ -94,6 +96,7 @@ public class VirtualBroker implements Broker {
                 .setQuantity(orderRequest.getQuantity())
                 .setTotalPrice(totalPrice)
                 .setCommission(commission)
+                .setDate(date)
                 .build();
 
         account.registerTransaction(transaction);

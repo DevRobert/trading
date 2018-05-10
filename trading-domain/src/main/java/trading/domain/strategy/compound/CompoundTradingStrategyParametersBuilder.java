@@ -1,44 +1,37 @@
 package trading.domain.strategy.compound;
 
-import trading.domain.strategy.TriggerFactory;
-
 public class CompoundTradingStrategyParametersBuilder {
-    private ScoringStrategy scoringStrategy;
-    private StockSelector stockSelector;
-    private TriggerFactory sellTriggerFactory;
+    private ScoringStrategy buyScoringStrategy;
+    private BuyStocksSelector buyStocksSelector;
+    private ScoringStrategy sellScoringStrategy;
+    private SellStocksSelector sellStocksSelector;
 
-    public CompoundTradingStrategyParametersBuilder setScoringStrategy(ScoringStrategy scoringStrategy) {
-        this.scoringStrategy = scoringStrategy;
+    public CompoundTradingStrategyParametersBuilder setBuyScoringStrategy(ScoringStrategy scoringStrategy) {
+        this.buyScoringStrategy = scoringStrategy;
         return this;
     }
 
-    public CompoundTradingStrategyParametersBuilder setStockSelector(StockSelector stockSelector) {
-        this.stockSelector = stockSelector;
+    public CompoundTradingStrategyParametersBuilder setBuyStocksSelector(BuyStocksSelector buyStocksSelector) {
+        this.buyStocksSelector = buyStocksSelector;
         return this;
     }
 
-    public CompoundTradingStrategyParametersBuilder setSellTriggerFactory(TriggerFactory sellTriggerFactory) {
-        this.sellTriggerFactory = sellTriggerFactory;
+    public CompoundTradingStrategyParametersBuilder setSellScoringStrategy(ScoringStrategy scoringStrategy) {
+        this.sellScoringStrategy = scoringStrategy;
+        return this;
+    }
+
+    public CompoundTradingStrategyParametersBuilder setSellStocksSelector(SellStocksSelector sellStocksSelector) {
+        this.sellStocksSelector = sellStocksSelector;
         return this;
     }
 
     public CompoundTradingStrategyParameters build() {
-        if(this.scoringStrategy == null) {
-            throw new RuntimeException("The scoring strategy was not specified.");
-        }
-
-        if(this.stockSelector == null) {
-            throw new RuntimeException("The stock selector was not specified.");
-        }
-
-        if(this.sellTriggerFactory == null) {
-            throw new RuntimeException("The sell trigger factory was not specified.");
-        }
-
         return new CompoundTradingStrategyParameters(
-                this.scoringStrategy,
-                this.stockSelector,
-                this.sellTriggerFactory
+                this.buyScoringStrategy,
+                this.buyStocksSelector,
+                this.sellScoringStrategy,
+                this.sellStocksSelector
         );
     }
 }

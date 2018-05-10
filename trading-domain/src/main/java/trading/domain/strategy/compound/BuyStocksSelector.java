@@ -12,11 +12,11 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class StockSelector {
+public class BuyStocksSelector {
     private final Score minimumBuyScore;
     private final double maximumPercentage;
 
-    public StockSelector(Score minimumBuyScore, double maximumPercentage) {
+    public BuyStocksSelector(Score minimumBuyScore, double maximumPercentage) {
         this.minimumBuyScore = minimumBuyScore;
         this.maximumPercentage = maximumPercentage;
     }

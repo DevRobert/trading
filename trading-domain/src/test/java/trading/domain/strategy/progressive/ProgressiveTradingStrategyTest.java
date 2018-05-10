@@ -38,7 +38,7 @@ public class ProgressiveTradingStrategyTest extends ProgressiveTradingStrategyTe
         beginHistory(ISIN.MunichRe, new Amount(1000.0), LocalDate.now());
 
         beginSimulation();
-        openDay();
+        openDay(historicalMarketData.getDate().plusDays(1));
 
         assertPositionHasPositiveQuantity(ISIN.MunichRe);
     }
@@ -50,7 +50,7 @@ public class ProgressiveTradingStrategyTest extends ProgressiveTradingStrategyTe
         beginHistory(ISIN.MunichRe, new Amount(1000.0), LocalDate.now());
 
         beginSimulation();
-        openDay();
+        openDay(historicalMarketData.getDate().plusDays(1));
 
         assertNoneOrEmptyPosition(ISIN.MunichRe);
     }
@@ -63,10 +63,10 @@ public class ProgressiveTradingStrategyTest extends ProgressiveTradingStrategyTe
 
         beginSimulation();
 
-        openDay();
+        openDay(historicalMarketData.getDate().plusDays(1));
         closeDay(new Amount(1100.0), historicalMarketData.getDate().plusDays(1));
 
-        openDay();
+        openDay(historicalMarketData.getDate().plusDays(1));
         assertPositionHasPositiveQuantity(ISIN.MunichRe);
     }
 
@@ -77,7 +77,7 @@ public class ProgressiveTradingStrategyTest extends ProgressiveTradingStrategyTe
         beginHistory(ISIN.MunichRe, new Amount(1000.0), LocalDate.now());
 
         beginSimulation();
-        openDay();
+        openDay(historicalMarketData.getDate().plusDays(1));
 
         // Account initial balance is: 50,000
         // Expected price = 1,000
@@ -97,7 +97,7 @@ public class ProgressiveTradingStrategyTest extends ProgressiveTradingStrategyTe
         beginHistory(ISIN.MunichRe, new Amount(1000.0), LocalDate.now());
 
         beginSimulation();
-        openDay();
+        openDay(historicalMarketData.getDate().plusDays(1));
 
         // Account initial balance is: 50,000.0
         // Expected price = 1,000
@@ -119,7 +119,7 @@ public class ProgressiveTradingStrategyTest extends ProgressiveTradingStrategyTe
         beginHistory(ISIN.MunichRe, new Amount(1000.0), LocalDate.now());
 
         beginSimulation();
-        openDay();
+        openDay(historicalMarketData.getDate().plusDays(1));
 
         assertNoneOrEmptyPosition(ISIN.MunichRe);
     }
@@ -140,11 +140,11 @@ public class ProgressiveTradingStrategyTest extends ProgressiveTradingStrategyTe
         beginHistory(ISIN.MunichRe, new Amount(1000.0), LocalDate.now());
         beginSimulation();
 
-        openDay();
+        openDay(historicalMarketData.getDate().plusDays(1));
         assertPositionHasPositiveQuantity(ISIN.MunichRe);
         closeDay(new Amount(1100.0), historicalMarketData.getDate().plusDays(1));
 
-        openDay();
+        openDay(historicalMarketData.getDate().plusDays(1));
         assertNoneOrEmptyPosition(ISIN.MunichRe);
     }
 
@@ -157,15 +157,15 @@ public class ProgressiveTradingStrategyTest extends ProgressiveTradingStrategyTe
         beginHistory(ISIN.MunichRe, new Amount(1000.0), LocalDate.now());
         beginSimulation();
 
-        openDay();
+        openDay(historicalMarketData.getDate().plusDays(1));
         assertPositionHasPositiveQuantity(ISIN.MunichRe);
         closeDay(new Amount(1100.0), historicalMarketData.getDate().plusDays(1));
 
-        openDay();
+        openDay(historicalMarketData.getDate().plusDays(1));
         assertPositionHasPositiveQuantity(ISIN.MunichRe);
         closeDay(new Amount(1200.0), historicalMarketData.getDate().plusDays(1));
 
-        openDay();
+        openDay(historicalMarketData.getDate().plusDays(1));
         assertNoneOrEmptyPosition(ISIN.MunichRe);
     }
 
@@ -187,19 +187,19 @@ public class ProgressiveTradingStrategyTest extends ProgressiveTradingStrategyTe
 
         // First buying expected for next day (due to buy trigger period = 0)
 
-        openDay();
+        openDay(historicalMarketData.getDate().plusDays(1));
         assertPositionHasPositiveQuantity(ISIN.MunichRe);
         closeDay(new Amount(1100.0), historicalMarketData.getDate().plusDays(1));
 
         // First selling expected for next day (due to sell trigger period = 0)
 
-        openDay();
+        openDay(historicalMarketData.getDate().plusDays(1));
         assertNoneOrEmptyPosition(ISIN.MunichRe);
         closeDay(new Amount(900.0), historicalMarketData.getDate().plusDays(1));
 
         // Second buying expected for next day (due to reset trigger period = 0 and buy trigger period = 0)
 
-        openDay();
+        openDay(historicalMarketData.getDate().plusDays(1));
         assertPositionHasPositiveQuantity(ISIN.MunichRe);
     }
 
@@ -216,25 +216,25 @@ public class ProgressiveTradingStrategyTest extends ProgressiveTradingStrategyTe
 
         // First buying expected for next day (due to buy trigger period = 0)
 
-        openDay();
+        openDay(historicalMarketData.getDate().plusDays(1));
         assertPositionHasPositiveQuantity(ISIN.MunichRe);
         closeDay(new Amount(1100.0), historicalMarketData.getDate().plusDays(1));
 
         // First selling expected for next day (due to sell trigger period = 0)
 
-        openDay();
+        openDay(historicalMarketData.getDate().plusDays(1));
         assertNoneOrEmptyPosition(ISIN.MunichRe);
         closeDay(new Amount(1200.0), historicalMarketData.getDate().plusDays(1));
 
         // Wait expected for next day (due to reset trigger period = 1 / not fulfilled yet)
 
-        openDay();
+        openDay(historicalMarketData.getDate().plusDays(1));
         assertNoneOrEmptyPosition(ISIN.MunichRe);
         closeDay(new Amount(1100.0), historicalMarketData.getDate().plusDays(1)); // declined (1 day in sequence)
 
         // Second buying expected for next day (due to reset trigger period = 1 / now fulfilled)
 
-        openDay();
+        openDay(historicalMarketData.getDate().plusDays(1));
         assertPositionHasPositiveQuantity(ISIN.MunichRe);
     }
 }

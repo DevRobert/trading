@@ -146,7 +146,7 @@ public class SimulationTest {
                 .setDate(historicalMarketData.getDate().plusDays(1))
                 .build();
 
-        simulation.openDay();
+        simulation.openDay(closingMarketPrices.getDate());
         simulation.closeDay(closingMarketPrices);
 
         try {
@@ -164,10 +164,10 @@ public class SimulationTest {
     public void openDayFailsIfActiveDayNotClosed() {
         startSimulation();
 
-        simulation.openDay();
+        simulation.openDay(historicalMarketData.getDate().plusDays(1));
 
         try {
-            simulation.openDay();
+            simulation.openDay(historicalMarketData.getDate().plusDays(2));
         }
         catch(SimulationStateException ex) {
             Assert.assertEquals("A new day cannot be opened because the active day has not been closed yet.", ex.getMessage());
@@ -176,6 +176,54 @@ public class SimulationTest {
 
         Assert.fail("SimulationStateException expected.");
     }
+
+    @Test
+    public void openDayFailsIfDateNotSpecified() {
+        startSimulation();
+
+        LocalDate date = null;
+
+        try {
+            simulation.openDay(date);
+        }
+        catch(DomainException e) {
+            Assert.assertEquals("The date must be specified.", e.getMessage());
+            return;
+        }
+
+        Assert.fail("DomainException expected.");
+    }
+
+    @Test
+    public void openDayFailsIfDateEqualsLastDate() {
+        startSimulation();
+
+        try {
+            simulation.openDay(historicalMarketData.getDate());
+        }
+        catch(DomainException e) {
+            Assert.assertEquals("The date must lie after the date of the last closed market day.", e.getMessage());
+            return;
+        }
+
+        Assert.fail("DomainException expected.");
+    }
+
+    @Test
+    public void openDayFailsIfDateBeforeLastDate() {
+        startSimulation();
+
+        try {
+            simulation.openDay(historicalMarketData.getDate().minusDays(1));
+        }
+        catch(DomainException e) {
+            Assert.assertEquals("The date must lie after the date of the last closed market day.", e.getMessage());
+            return;
+        }
+
+        Assert.fail("DomainException expected.");
+    }
+
 
     // Redirect signals
 
@@ -190,7 +238,7 @@ public class SimulationTest {
             }
 
             @Override
-            public void notifyDayOpened() {
+            public void notifyDayOpened(LocalDate date) {
                 dayOpenedSignalReceived.set(true);
             }
 
@@ -202,7 +250,7 @@ public class SimulationTest {
 
         startSimulation();
 
-        simulation.openDay();
+        simulation.openDay(historicalMarketData.getDate().plusDays(1));
 
         Assert.assertTrue(dayOpenedSignalReceived.get());
     }
@@ -210,7 +258,6 @@ public class SimulationTest {
     @Test
     public void updateHistoricalMarketDataWhenDayClosed() {
         startSimulation();
-        simulation.openDay();
 
         Amount newMarketPriceMunichRe = new Amount(1100.0);
 
@@ -219,6 +266,7 @@ public class SimulationTest {
                 .setDate(historicalMarketData.getDate().plusDays(1))
                 .build();
 
+        simulation.openDay(marketPriceSnapshot.getDate());
         simulation.closeDay(marketPriceSnapshot);
 
         Assert.assertEquals(newMarketPriceMunichRe, historicalMarketData.getStockData(ISIN.MunichRe).getLastClosingMarketPrice());
@@ -227,12 +275,49 @@ public class SimulationTest {
     @Test
     public void updateHistoricalMarketDataWhenDayClosed_forSingleStock() {
         startSimulation();
-        simulation.openDay();
+
+        simulation.openDay(historicalMarketData.getDate().plusDays(1));
 
         Amount newMarketPriceMunichRe = new Amount(1100.0);
         simulation.closeDay(newMarketPriceMunichRe, historicalMarketData.getDate().plusDays(1));
 
         Assert.assertEquals(newMarketPriceMunichRe, historicalMarketData.getStockData(ISIN.MunichRe).getLastClosingMarketPrice());
+    }
+
+    @Test
+    public void closeDayFails_ifDateBeforeOpenDayDate() {
+        startSimulation();
+
+        LocalDate openDayDate = historicalMarketData.getDate().plusDays(4);
+        simulation.openDay(openDayDate);
+
+        try {
+            simulation.closeDay(new Amount(1100.0), openDayDate.minusDays(1));
+        }
+        catch(DomainException e) {
+            Assert.assertEquals("The market price date must equal the date given when the day was opened.", e.getMessage());
+            return;
+        }
+
+        Assert.fail("DomainException expected.");
+    }
+
+    @Test
+    public void closeDayFails_ifDateAfterOpenDayDate() {
+        startSimulation();
+
+        LocalDate openDayDate = historicalMarketData.getDate().plusDays(4);
+        simulation.openDay(openDayDate);
+
+        try {
+            simulation.closeDay(new Amount(1100.0), openDayDate.plusDays(1));
+        }
+        catch(DomainException e) {
+            Assert.assertEquals("The market price date must equal the date given when the day was opened.", e.getMessage());
+            return;
+        }
+
+        Assert.fail("DomainException expected.");
     }
 
     @Test
@@ -246,7 +331,7 @@ public class SimulationTest {
         historicalMarketData = new HistoricalMarketData(marketPriceSnapshot);
 
         startSimulation();
-        simulation.openDay();
+        simulation.openDay(historicalMarketData.getDate().plusDays(1));
 
         Amount newMarketPriceMunichRe = new Amount(1100.0);
 
@@ -268,7 +353,7 @@ public class SimulationTest {
         this.tradingStrategy = () -> dayClosedSignalReceived.set(true);
 
         startSimulation();
-        simulation.openDay();
+        simulation.openDay(historicalMarketData.getDate().plusDays(1));
 
         MarketPriceSnapshot marketPriceSnapshot = new MarketPriceSnapshotBuilder()
                 .setMarketPrice(ISIN.MunichRe, new Amount(1100.0))
@@ -291,10 +376,11 @@ public class SimulationTest {
                 .setQuantity(new Quantity(2))
                 .setTotalPrice(buyStocksTotalPrice)
                 .setCommission(buyStocksComission)
+                .setDate(historicalMarketData.getDate())
                 .build());
 
         startSimulation();
-        simulation.openDay();
+        simulation.openDay(historicalMarketData.getDate().plusDays(1));
         simulation.closeDay(new Amount(110.0), historicalMarketData.getDate().plusDays(1));
 
         Assert.assertEquals(new Amount(220.0), account.getPosition(ISIN.MunichRe).getFullMarketPrice());

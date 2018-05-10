@@ -223,4 +223,16 @@ public class Account {
 
         return totalStocksQuantity;
     }
+
+    public Transaction getLastTransaction(ISIN isin) {
+        for(int transactionIndex = this.processedTransactions.size() - 1; transactionIndex >= 0; transactionIndex--) {
+            Transaction transaction = this.processedTransactions.get(transactionIndex);
+
+            if(transaction.getIsin().equals(isin)) {
+                return transaction;
+            }
+        }
+
+        throw new RuntimeException("There was no transaction registered yet for the specified ISIN.");
+    }
 }

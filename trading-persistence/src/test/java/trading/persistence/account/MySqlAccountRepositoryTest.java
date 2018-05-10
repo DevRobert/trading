@@ -8,6 +8,8 @@ import trading.domain.account.Account;
 import trading.domain.account.AccountId;
 import trading.domain.account.AccountNotFoundException;
 import trading.domain.account.AccountRepository;
+import trading.persistence.MySqlRepositoryParameters;
+import trading.persistence.MySqlRepositoryParametersBuilder;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -17,7 +19,14 @@ public class MySqlAccountRepositoryTest {
 
     @Before
     public void before() {
-        this.accountRepository = new MySqlAccountRepository();
+        MySqlRepositoryParameters parameters = new MySqlRepositoryParametersBuilder()
+                .setServer("localhost")
+                .setUsername("root")
+                .setPassword("testtest")
+                .setDatabase("trading-test")
+                .build();
+
+        this.accountRepository = new MySqlAccountRepository(parameters);
     }
 
     @Test

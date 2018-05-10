@@ -5,24 +5,29 @@ import org.junit.Test;
 import trading.domain.Amount;
 import trading.domain.DayCount;
 import trading.domain.ISIN;
+import trading.domain.account.Account;
 import trading.domain.account.Position;
+import trading.domain.market.HistoricalMarketData;
 import trading.domain.market.MarketPriceSnapshot;
 import trading.domain.market.MarketPriceSnapshotBuilder;
 import trading.domain.strategy.*;
 
 import java.time.LocalDate;
+import java.util.concurrent.atomic.AtomicReference;
 
 public class CompoundTradingStrategyTest extends TradingStrategyTestBase {
-    private ScoringStrategy scoringStrategy;
-    private StockSelector stockSelector;
-    private TriggerFactory sellTriggerFactory;
+    private ScoringStrategy buyScoringStrategy;
+    private BuyStocksSelector buyStocksSelector;
+    private ScoringStrategy sellScoringStrategy;
+    private SellStocksSelector sellStocksSelector;
 
     @Override
     protected TradingStrategy initializeTradingStrategy(TradingStrategyContext tradingStrategyContext) {
         CompoundTradingStrategyParameters compoundTradingStrategyParameters = new CompoundTradingStrategyParametersBuilder()
-                .setScoringStrategy(this.scoringStrategy)
-                .setStockSelector(this.stockSelector)
-                .setSellTriggerFactory(this.sellTriggerFactory)
+                .setBuyScoringStrategy(this.buyScoringStrategy)
+                .setBuyStocksSelector(this.buyStocksSelector)
+                .setSellScoringStrategy(this.sellScoringStrategy)
+                .setSellStocksSelector(this.sellStocksSelector)
                 .build();
 
         return new CompoundTradingStrategy(compoundTradingStrategyParameters, tradingStrategyContext);
@@ -30,13 +35,17 @@ public class CompoundTradingStrategyTest extends TradingStrategyTestBase {
 
     @Test
     public void dividesBuyAmountEquallyBetweenTwoStocksWithSameScore() {
-        this.scoringStrategy = new FixedScoringStrategy()
+        this.buyScoringStrategy = new FixedScoringStrategy()
                 .setScore(ISIN.MunichRe, new Score(1.0))
                 .setScore(ISIN.Allianz, new Score(1.0));
 
-        this.stockSelector = new StockSelector(new Score(0.0), 1.0);
+        this.buyStocksSelector = new BuyStocksSelector(new Score(0.0), 1.0);
 
-        this.sellTriggerFactory = (historicalMarketData) -> new NeverFiresTrigger();
+        this.sellScoringStrategy = new FixedScoringStrategy()
+                .setScore(ISIN.MunichRe, new Score(0.0))
+                .setScore(ISIN.Allianz, new Score(0.0));
+
+        this.sellStocksSelector = new SellStocksSelector(new Score(1.0));
 
         MarketPriceSnapshot marketPriceSnapshot = new MarketPriceSnapshotBuilder()
                 .setMarketPrice(ISIN.MunichRe, new Amount(1000.0))
@@ -47,7 +56,7 @@ public class CompoundTradingStrategyTest extends TradingStrategyTestBase {
         this.beginHistory(marketPriceSnapshot);
 
         this.beginSimulation();
-        this.openDay();
+        this.openDay(historicalMarketData.getDate().plusDays(1));
 
         // Seed capital: 50,000
         // Zero commissions
@@ -64,13 +73,17 @@ public class CompoundTradingStrategyTest extends TradingStrategyTestBase {
 
     @Test
     public void excludedStocksBelowMinScoreWhenBuyingStocks() {
-        this.scoringStrategy = new FixedScoringStrategy()
+        this.buyScoringStrategy = new FixedScoringStrategy()
                 .setScore(ISIN.MunichRe, new Score(0.3))
                 .setScore(ISIN.Allianz, new Score(0.2));
 
-        this.stockSelector = new StockSelector(new Score(0.3), 1.0);
+        this.buyStocksSelector = new BuyStocksSelector(new Score(0.3), 1.0);
 
-        this.sellTriggerFactory = (historicalMarketData) -> new NeverFiresTrigger();
+        this.sellScoringStrategy = new FixedScoringStrategy()
+                .setScore(ISIN.MunichRe, new Score(0.0))
+                .setScore(ISIN.Allianz, new Score(0.0));
+
+        this.sellStocksSelector = new SellStocksSelector(new Score(1.0));
 
         MarketPriceSnapshot marketPriceSnapshot = new MarketPriceSnapshotBuilder()
                 .setMarketPrice(ISIN.MunichRe, new Amount(1000.0))
@@ -81,7 +94,7 @@ public class CompoundTradingStrategyTest extends TradingStrategyTestBase {
         this.beginHistory(marketPriceSnapshot);
 
         this.beginSimulation();
-        this.openDay();
+        this.openDay(historicalMarketData.getDate().plusDays(1));
 
         // Seed capital: 50,000
         // Zero commissions
@@ -95,18 +108,28 @@ public class CompoundTradingStrategyTest extends TradingStrategyTestBase {
     }
     
     @Test
-    public void stockIsSoldAfterTriggerFires() {
-        this.scoringStrategy = new FixedScoringStrategy()
+    public void stockIsSoldRespectiveToSellScoring() {
+        AtomicReference<Score> sellScore = new AtomicReference<>(new Score(0.0));
+
+        this.buyScoringStrategy = new FixedScoringStrategy()
                 .setScore(ISIN.MunichRe, new Score(1.0));
 
-        this.stockSelector = new StockSelector(new Score(0.2), 1.0);
+        this.buyStocksSelector = new BuyStocksSelector(new Score(0.2), 1.0);
 
-        this.sellTriggerFactory = isin -> new WaitFixedPeriodTrigger(historicalMarketData, new DayCount(1));
+        this.sellScoringStrategy = new ScoringStrategy() {
+            @Override
+            public Score calculateScore(HistoricalMarketData historicalMarketData, Account account, ISIN isin) {
+                Assert.assertEquals(ISIN.MunichRe, isin);
+                return sellScore.get();
+            }
+        };
+
+        this.sellStocksSelector = new SellStocksSelector(new Score(1.0));
 
         this.beginHistory(ISIN.MunichRe, new Amount(1000.0), LocalDate.now());
 
         this.beginSimulation();
-        this.openDay();
+        this.openDay(historicalMarketData.getDate().plusDays(1));
 
         // Seed capital: 50,000
         // Zero commissions
@@ -116,15 +139,17 @@ public class CompoundTradingStrategyTest extends TradingStrategyTestBase {
         Assert.assertEquals(50, munichRePosition.getQuantity().getValue());
 
         this.closeDay(new Amount(1000.0), historicalMarketData.getDate().plusDays(1));
-        this.openDay();
+        this.openDay(historicalMarketData.getDate().plusDays(1));
 
         // First day passed
         // Stocks should not have been sold yet
 
         Assert.assertEquals(50, munichRePosition.getQuantity().getValue());
 
+        sellScore.set(new Score(1.0));
+
         this.closeDay(new Amount(1000.0), historicalMarketData.getDate().plusDays(1));
-        this.openDay();
+        this.openDay(historicalMarketData.getDate().plusDays(1));
 
         // Second day passed
         // Stocks should have been sold

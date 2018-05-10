@@ -38,6 +38,8 @@ public class RestExceptionHandler extends ResponseEntityExceptionHandler {
 
         faultResponse.setMessage(message);
 
+        exception.printStackTrace();
+
         return this.handleExceptionInternal(exception, faultResponse, new HttpHeaders(), HttpStatus.INTERNAL_SERVER_ERROR, request);
     }
 }

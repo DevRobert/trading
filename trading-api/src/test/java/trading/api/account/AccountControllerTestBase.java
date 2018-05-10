@@ -60,7 +60,7 @@ public abstract class AccountControllerTestBase {
                 .setDate(LocalDate.of(2018, 4, 13))
                 .build());
 
-        given(this.accountService.getAccount(new AccountId(2))).willReturn(account);
+        given(this.accountService.getAccount(new AccountId(1))).willReturn(account);
 
         given(this.instrumentNameProvider.getInstrumentName(new ISIN("A"))).willReturn("Company A");
 

@@ -1,27 +1,49 @@
 package trading.domain.strategy.compound;
 
-import trading.domain.strategy.TriggerFactory;
-
 public class CompoundTradingStrategyParameters {
-    private final ScoringStrategy scoringStrategy;
-    private final StockSelector stockSelector;
-    private final TriggerFactory sellTriggerFactory;
+    private final ScoringStrategy buyScoringStrategy;
+    private final BuyStocksSelector buyStocksSelector;
+    private final ScoringStrategy sellScoringStrategy;
+    private final SellStocksSelector sellStocksSelector;
 
-    public ScoringStrategy getScoringStrategy() {
-        return this.scoringStrategy;
+    public ScoringStrategy getBuyScoringStrategy() {
+        return this.buyScoringStrategy;
     }
 
-    public StockSelector getStockSelector() {
-        return this.stockSelector;
+    public BuyStocksSelector getBuyStocksSelector() {
+        return this.buyStocksSelector;
     }
 
-    public TriggerFactory getSellTriggerFactory() {
-        return this.sellTriggerFactory;
+    public ScoringStrategy getSellScoringStrategy() {
+        return this.sellScoringStrategy;
     }
 
-    public CompoundTradingStrategyParameters(ScoringStrategy scoringStrategy, StockSelector stockSelector, TriggerFactory sellTriggerFactory) {
-        this.scoringStrategy = scoringStrategy;
-        this.stockSelector = stockSelector;
-        this.sellTriggerFactory = sellTriggerFactory;
+    public SellStocksSelector getSellStocksSelector() {
+        return this.sellStocksSelector;
+    }
+
+    public CompoundTradingStrategyParameters(ScoringStrategy buyScoringStrategy, BuyStocksSelector buyStocksSelector, ScoringStrategy sellScoringStrategy, SellStocksSelector sellStocksSelector) {
+        if(buyScoringStrategy == null) {
+            throw new RuntimeException("The buy scoring strategy was not specified.");
+        }
+
+        if(buyStocksSelector == null) {
+            throw new RuntimeException("The buy stock selector was not specified.");
+        }
+
+        if(sellScoringStrategy == null) {
+            throw new RuntimeException("The sell scoring strategy was not specified.");
+        }
+
+
+        if(sellStocksSelector == null) {
+            throw new RuntimeException("The sell stock selector was not specified.");
+        }
+
+
+        this.buyScoringStrategy = buyScoringStrategy;
+        this.buyStocksSelector = buyStocksSelector;
+        this.sellScoringStrategy = sellScoringStrategy;
+        this.sellStocksSelector = sellStocksSelector;
     }
 }

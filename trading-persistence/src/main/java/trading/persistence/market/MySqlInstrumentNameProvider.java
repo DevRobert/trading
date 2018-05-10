@@ -3,6 +3,7 @@ package trading.persistence.market;
 import trading.domain.ISIN;
 import trading.domain.market.InstrumentNameProvider;
 import trading.persistence.MySqlRepository;
+import trading.persistence.MySqlRepositoryParameters;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -13,6 +14,10 @@ import java.util.Map;
 
 public class MySqlInstrumentNameProvider extends MySqlRepository implements InstrumentNameProvider {
     private Map<ISIN, String> instrumentNames;
+
+    public MySqlInstrumentNameProvider(MySqlRepositoryParameters parameters) {
+        super(parameters);
+    }
 
     private void loadInstrumentNames() {
         if(this.instrumentNames != null) {

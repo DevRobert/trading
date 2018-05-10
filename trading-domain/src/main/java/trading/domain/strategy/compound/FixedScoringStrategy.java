@@ -1,6 +1,7 @@
 package trading.domain.strategy.compound;
 
 import trading.domain.ISIN;
+import trading.domain.account.Account;
 import trading.domain.market.HistoricalMarketData;
 
 import java.util.HashMap;
@@ -19,7 +20,7 @@ public class FixedScoringStrategy implements ScoringStrategy {
     }
 
     @Override
-    public Score calculateScore(HistoricalMarketData historicalMarketData, ISIN isin) {
+    public Score calculateScore(HistoricalMarketData historicalMarketData, Account account, ISIN isin) {
         return this.fixedScores.get(isin);
     }
 }
