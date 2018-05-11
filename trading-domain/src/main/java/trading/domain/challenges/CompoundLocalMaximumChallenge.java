@@ -11,6 +11,7 @@ import trading.domain.strategy.compoundLocalMaximum.CompoundLocalMaximumTradingS
 import trading.domain.strategy.compoundLocalMaximum.CompoundLocalMaximumTradingStrategyParameters;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 public class CompoundLocalMaximumChallenge implements Challenge {
@@ -70,6 +71,7 @@ public class CompoundLocalMaximumChallenge implements Challenge {
         return result;
     }
 
+    /*
     @Override
     public ParameterTupleSource getParametersSource() {
         List<Object[]> parameterTuples = new ArrayList<>();
@@ -94,27 +96,26 @@ public class CompoundLocalMaximumChallenge implements Challenge {
 
         return new PreparedParameterTupleSource(parameterTuples);
     }
-
-    /*
-    @Override
-    public ParameterTupleSource getParametersSource() {
-        return new LazyParameterTupleSource(Arrays.asList(
-                this.getBuyTriggerLocalMaximumLookBehindPeriod(),
-                this.getBuyTriggerMinDeclineFromLocalMaximumPercentage(),
-                this.getSellTriggerTrailingStopLossMinDeclineFromMaximumAfterBuyingPercentage(),
-                this.getActivateTrailingStopLossMinRaiseSinceBuyingPercentage(),
-                this.getSellTriggerStopLossMinimumDeclineSinceBuyingPercentage(),
-                this.getMaximumPercentage()
-        ));
-    }
     */
 
-    @Override
-    public SimulationDriverParameters buildSimulationDriverParametersForRun(Object[] runParameters) {
-        final int buyTriggerLocalMaximumLookBehindPeriod = (int) runParameters[0];
-        final double buyTriggerMinDeclineFromLocalMaximumPercentage = (double) runParameters[1];
-        final double sellTriggerTrailingStopLossMinDeclineFromMaximumAfterBuyingPercentage = (double) runParameters[2];
-        final double activateTrailingStopLossMinRaiseSinceBuyingPercentage = (double) runParameters[3];
+        @Override
+        public ParameterTupleSource getParametersSource() {
+            return new LazyParameterTupleSource(Arrays.asList(
+                    this.getBuyTriggerLocalMaximumLookBehindPeriod(),
+                    this.getBuyTriggerMinDeclineFromLocalMaximumPercentage(),
+                    this.getSellTriggerTrailingStopLossMinDeclineFromMaximumAfterBuyingPercentage(),
+                    this.getActivateTrailingStopLossMinRaiseSinceBuyingPercentage(),
+                    this.getSellTriggerStopLossMinimumDeclineSinceBuyingPercentage(),
+                    this.getMaximumPercentage()
+            ));
+        }
+
+        @Override
+        public SimulationDriverParameters buildSimulationDriverParametersForRun(Object[] runParameters) {
+            final int buyTriggerLocalMaximumLookBehindPeriod = (int) runParameters[0];
+            final double buyTriggerMinDeclineFromLocalMaximumPercentage = (double) runParameters[1];
+            final double sellTriggerTrailingStopLossMinDeclineFromMaximumAfterBuyingPercentage = (double) runParameters[2];
+            final double activateTrailingStopLossMinRaiseSinceBuyingPercentage = (double) runParameters[3];
         final double sellTriggerStopLossMinimumDeclineSinceBuyingPercentage = (double) runParameters[4];
         final double maximumPercentage = (double) runParameters[5];
 
