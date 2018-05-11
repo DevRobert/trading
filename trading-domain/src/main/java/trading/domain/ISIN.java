@@ -9,6 +9,7 @@ public class ISIN {
     public static final ISIN Infineon = new ISIN("DE0006231004");
 
     private final String text;
+    private final int hashCode;
 
     public String getText() {
         return text;
@@ -24,6 +25,7 @@ public class ISIN {
         }
 
         this.text = text;
+        this.hashCode = this.text.hashCode();
     }
 
     @Override
@@ -36,7 +38,7 @@ public class ISIN {
 
     @Override
     public int hashCode() {
-        return Objects.hash(text);
+        return this.hashCode;
     }
 
     @Override
