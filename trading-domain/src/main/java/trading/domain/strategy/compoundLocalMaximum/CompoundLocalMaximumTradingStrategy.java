@@ -12,13 +12,13 @@ public class CompoundLocalMaximumTradingStrategy implements TradingStrategy {
                 .setBuyScoringStrategy(new LocalMaximumBuyScoringStrategy(
                         parameters.getBuyTriggerLocalMaximumLookBehindPeriod(),
                         parameters.getBuyTriggerMinDeclineFromLocalMaximumPercentage()))
-                .setSellStocksSelector(new SellStocksSelector(new Score(0.5)))
+                .setSellStocksSelector(new SellStocksSelector(new Score(1.0)))
                 .setSellScoringStrategy(new LocalMaximumSellScoringStrategy(
                         parameters.getActivateTrailingStopLossMinRaiseSinceBuyingPercentage(),
                         parameters.getSellTriggerStopLossMinimumDeclineSinceBuyingPercentage(),
                         parameters.getSellTriggerTrailingStopLossMinDeclineFromMaximumAfterBuyingPercentage()
                 ))
-                .setBuyStocksSelector(new BuyStocksSelector(new Score(0.5), parameters.getMaximumPercentage()))
+                .setBuyStocksSelector(new BuyStocksSelector(new Score(1.0), parameters.getMaximumPercentage()))
                 .build();
 
         this.compoundTradingStrategy = new CompoundTradingStrategy(compoundTradingStrategyParameters, context);

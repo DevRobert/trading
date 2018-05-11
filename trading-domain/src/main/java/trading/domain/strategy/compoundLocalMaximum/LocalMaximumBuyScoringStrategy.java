@@ -35,6 +35,12 @@ public class LocalMaximumBuyScoringStrategy implements ScoringStrategy {
         boolean buy = lastClosingPrice <= maxBuyPrice;
         comment.append(buy ? "Result: Buy!" : "Result: Do not buy!");
 
-        return new Score(buy ? 1.0 : 0.0, comment.toString());
+        double score = 1.0;
+
+        if(!buy) {
+            score = maxBuyPrice / lastClosingPrice;
+        }
+
+        return new Score(score, comment.toString());
     }
 }
