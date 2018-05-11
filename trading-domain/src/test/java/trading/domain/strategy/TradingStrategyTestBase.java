@@ -81,12 +81,12 @@ public abstract class TradingStrategyTestBase {
         this.broker = new VirtualBroker(this.account, this.historicalMarketData, this.commissionStrategy);
         this.tradingStrategy = this.initializeTradingStrategy(new TradingStrategyContext(this.account, this.broker, this.historicalMarketData));
 
-        SimulationBuilder simulationBuilder = new SimulationBuilder();
-        simulationBuilder.setTradingStrategy(this.tradingStrategy);
-        simulationBuilder.setHistoricalMarketData(this.historicalMarketData);
-        simulationBuilder.setAccount(this.account);
-        simulationBuilder.setBroker(this.broker);
-        this.simulation = simulationBuilder.beginSimulation();
+        this.simulation = new SimulationBuilder()
+                .setTradingStrategy(this.tradingStrategy)
+                .setHistoricalMarketData(this.historicalMarketData)
+                .setAccount(this.account)
+                .setBroker(this.broker)
+                .beginSimulation();
     }
 
     protected void openDay(LocalDate date) {

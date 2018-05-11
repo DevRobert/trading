@@ -1,14 +1,8 @@
 package trading.api;
 
 import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
-import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
-import org.springframework.test.context.junit4.SpringRunner;
-import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import trading.application.AccountService;
 import trading.application.ScoringService;
@@ -30,13 +24,7 @@ import static org.mockito.BDDMockito.given;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-@RunWith(SpringRunner.class)
-@SpringBootTest
-@AutoConfigureMockMvc
-public class ScoringControllerTest {
-    @Autowired
-    private MockMvc mockMvc;
-
+public class ScoringControllerTest extends ControllerTestBase {
     @MockBean
     private AccountService accountService;
 
@@ -61,7 +49,7 @@ public class ScoringControllerTest {
 
         given(this.instrumentNameProvider.getInstrumentName(new ISIN("A"))).willReturn("My first stock");
 
-        this.mockMvc.perform(MockMvcRequestBuilders
+        this.mvc.perform(MockMvcRequestBuilders
                 .get("/api/scoring/buy")
                 .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
@@ -92,7 +80,7 @@ public class ScoringControllerTest {
 
         given(this.instrumentNameProvider.getInstrumentName(new ISIN("A"))).willReturn("My first stock");
 
-        this.mockMvc.perform(MockMvcRequestBuilders
+        this.mvc.perform(MockMvcRequestBuilders
                 .get("/api/scoring/sell")
                 .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())

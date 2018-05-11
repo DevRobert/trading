@@ -5,17 +5,15 @@ import org.springframework.stereotype.Component;
 import trading.domain.DayCount;
 import trading.domain.ISIN;
 import trading.domain.account.Account;
-import trading.domain.challenges.HistoricalTestDataProvider;
 import trading.domain.market.HistoricalMarketData;
-import trading.domain.market.MarketPriceSnapshot;
 import trading.domain.simulation.MultiStockMarketDataStore;
 import trading.domain.strategy.compound.MultiStockScoring;
 import trading.domain.strategy.compound.Scores;
 import trading.domain.strategy.compound.ScoringStrategy;
+import trading.domain.strategy.compoundLocalMaximum.CompoundLocalMaximumTradingStrategyParameters;
 import trading.domain.strategy.compoundLocalMaximum.LocalMaximumBuyScoringStrategy;
 import trading.domain.strategy.compoundLocalMaximum.LocalMaximumSellScoringStrategy;
 
-import java.util.List;
 import java.util.Set;
 
 @Component
@@ -29,12 +27,14 @@ public class ScoringServiceImpl implements ScoringService {
 
     @Override
     public Scores calculateBuyScoring(Account account) {
-        DayCount buyTriggerLocalMaximumLookBehindPeriod = new DayCount(10);
-        double buyTriggerMinDeclineSinceMaximumPercentage = 0.1;
+        CompoundLocalMaximumTradingStrategyParameters parameters = TradingConfiguration.getParameters();
+
+        DayCount buyTriggerLocalMaximumLookBehindPeriod = parameters.getBuyTriggerLocalMaximumLookBehindPeriod();
+        double buyTriggerMinDeclineFromLocalMaximumPercentage = parameters.getBuyTriggerMinDeclineFromLocalMaximumPercentage();
 
         ScoringStrategy scoringStrategy = new LocalMaximumBuyScoringStrategy(
                 buyTriggerLocalMaximumLookBehindPeriod,
-                buyTriggerMinDeclineSinceMaximumPercentage
+                buyTriggerMinDeclineFromLocalMaximumPercentage
         );
 
         Set<ISIN> isins = this.multiStockMarketDataStore.getAllClosingPrices().get(0).getISINs();
@@ -43,9 +43,11 @@ public class ScoringServiceImpl implements ScoringService {
 
     @Override
     public Scores calculateSellScoring(Account account) {
-        double activateTrailingStopLossMinRaiseSinceBuyingPercentage = 0.03;
-        double sellTriggerStopLossMinimumDeclineSinceBuyingPercentage = 0.1;
-        double sellTriggerTrailingStopLossMinDeclineSinceMaximumAfterBuyingPercentage = 0.07;
+        CompoundLocalMaximumTradingStrategyParameters parameters = TradingConfiguration.getParameters();
+
+        double activateTrailingStopLossMinRaiseSinceBuyingPercentage = parameters.getActivateTrailingStopLossMinRaiseSinceBuyingPercentage();
+        double sellTriggerStopLossMinimumDeclineSinceBuyingPercentage = parameters.getSellTriggerStopLossMinimumDeclineSinceBuyingPercentage();
+        double sellTriggerTrailingStopLossMinDeclineSinceMaximumAfterBuyingPercentage = parameters.getSellTriggerTrailingStopLossMinDeclineFromMaximumAfterBuyingPercentage();
 
         ScoringStrategy scoringStrategy = new LocalMaximumSellScoringStrategy(
                 activateTrailingStopLossMinRaiseSinceBuyingPercentage,
@@ -57,15 +59,7 @@ public class ScoringServiceImpl implements ScoringService {
     }
 
     private Scores calculateScoring(Account account, ScoringStrategy scoringStrategy, Set<ISIN> isins) {
-        HistoricalTestDataProvider historicalTestDataProvider = new HistoricalTestDataProvider(this.multiStockMarketDataStore);
-
-        List<MarketPriceSnapshot> historicalClosingPrices = historicalTestDataProvider.getHistoricalClosingPrices();
-        HistoricalMarketData historicalMarketData = new HistoricalMarketData(historicalClosingPrices.get(0));
-
-        for(int dayIndex = 1; dayIndex < historicalClosingPrices.size(); dayIndex++) {
-            historicalMarketData.registerClosedDay(historicalClosingPrices.get(dayIndex));
-        }
-
+        HistoricalMarketData historicalMarketData = HistoricalMarketData.of(this.multiStockMarketDataStore.getAllClosingPrices());
         return new MultiStockScoring().calculateScores(historicalMarketData, account, scoringStrategy, isins);
     }
 }

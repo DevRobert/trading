@@ -7,6 +7,7 @@ import trading.domain.ISIN;
 
 import java.time.LocalDate;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -48,6 +49,24 @@ public class HistoricalMarketData {
 
     public HistoricalMarketData(ISIN isin, Amount initialClosingMarketPrice, LocalDate date) {
         this(new MarketPriceSnapshotBuilder().setMarketPrice(isin, initialClosingMarketPrice).setDate(date).build());
+    }
+
+    public static HistoricalMarketData of(List<MarketPriceSnapshot> marketPriceSnapshotList) {
+        if(marketPriceSnapshotList == null) {
+            throw new RuntimeException("The market price snapshot list must be specified.");
+        }
+
+        if(marketPriceSnapshotList.isEmpty()) {
+            throw new RuntimeException("The market price snapshot list must not be empty.");
+        }
+
+        HistoricalMarketData historicalMarketData = new HistoricalMarketData(marketPriceSnapshotList.get(0));
+
+        for(int dayIndex = 1; dayIndex < marketPriceSnapshotList.size(); dayIndex++) {
+            historicalMarketData.registerClosedDay(marketPriceSnapshotList.get(dayIndex));
+        }
+
+        return historicalMarketData;
     }
 
     public HistoricalStockData getStockData(ISIN isin) {

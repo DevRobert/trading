@@ -10,9 +10,7 @@ import trading.domain.broker.Broker;
 import trading.domain.broker.CommissionStrategies;
 import trading.domain.broker.VirtualBroker;
 import trading.domain.market.HistoricalMarketData;
-import trading.domain.strategy.NotImplementedTrigger;
 import trading.domain.strategy.TradingStrategyContext;
-import trading.domain.strategy.TriggerFactory;
 
 import java.time.LocalDate;
 

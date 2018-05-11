@@ -39,12 +39,12 @@ public class SimulationTest {
     }
 
     protected void startSimulation() {
-        SimulationBuilder simulationBuilder = new SimulationBuilder();
-        simulationBuilder.setHistoricalMarketData(historicalMarketData);
-        simulationBuilder.setAccount(account);
-        simulationBuilder.setBroker(broker);
-        simulationBuilder.setTradingStrategy(tradingStrategy);
-        simulation = simulationBuilder.beginSimulation();
+        simulation = new SimulationBuilder()
+                .setHistoricalMarketData(historicalMarketData)
+                .setAccount(account)
+                .setBroker(broker)
+                .setTradingStrategy(tradingStrategy)
+                .beginSimulation();
     }
 
     // Simulation preconditions

@@ -395,6 +395,43 @@ public class AccountTest extends AccountTestBase {
     }
 
     @Test
+    public void returnsCurrentStocksWithoutEmptyPositions() {
+        Account account = new Account(new Amount(10000.0));
+
+        account.registerTransaction(new TransactionBuilder()
+                .setTransactionType(TransactionType.Buy)
+                .setIsin(ISIN.MunichRe)
+                .setQuantity(new Quantity(10))
+                .setTotalPrice(new Amount(1000.0))
+                .setCommission(new Amount(0.0))
+                .setDate(LocalDate.of(2000, 1, 1))
+                .build());
+
+        account.registerTransaction(new TransactionBuilder()
+                .setTransactionType(TransactionType.Buy)
+                .setIsin(ISIN.Allianz)
+                .setQuantity(new Quantity(10))
+                .setTotalPrice(new Amount(1000.0))
+                .setCommission(new Amount(0.0))
+                .setDate(LocalDate.of(2000, 1, 2))
+                .build());
+
+        account.registerTransaction(new TransactionBuilder()
+                .setTransactionType(TransactionType.Sell)
+                .setIsin(ISIN.MunichRe)
+                .setQuantity(new Quantity(10))
+                .setTotalPrice(new Amount(1000.0))
+                .setCommission(new Amount(0.0))
+                .setDate(LocalDate.of(2000, 1, 3))
+                .build());
+
+        Map<ISIN, Quantity> currentStocks = account.getCurrentStocks();
+
+        Assert.assertEquals(1, currentStocks.size());
+        Assert.assertTrue(currentStocks.containsKey(ISIN.Allianz));
+    }
+
+    @Test
     public void returnsTotalMarketPrice() {
         Account account = new Account(new Amount(50000.0));
 

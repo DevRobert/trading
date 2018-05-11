@@ -5,6 +5,8 @@ import trading.domain.account.Account;
 import trading.domain.market.HistoricalMarketData;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Queue;
 import java.util.concurrent.LinkedBlockingQueue;
 
@@ -100,5 +102,9 @@ public class VirtualBroker implements Broker {
                 .build();
 
         account.registerTransaction(transaction);
+    }
+
+    public List<OrderRequest> getRegisteredOrderRequests() {
+        return new ArrayList<>(this.registeredOrderRequests);
     }
 }

@@ -6,6 +6,9 @@ import org.junit.Test;
 import trading.domain.*;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 import java.util.Set;
 
 public class HistoricalMarketDataTest {
@@ -509,6 +512,71 @@ public class HistoricalMarketDataTest {
         }
         catch(RuntimeException e) {
             Assert.assertEquals("The given date lies before the market data history time line.", e.getMessage());
+            return;
+        }
+
+        Assert.fail("RuntimeException expected.");
+    }
+
+    // Multi initialization
+
+    @Test
+    public void initializeWithMultipleMarketPriceSnapshots() {
+        MarketPriceSnapshot firstSnapshot = new MarketPriceSnapshotBuilder()
+                .setMarketPrice(new ISIN("A"), new Amount(100.0))
+                .setMarketPrice(new ISIN("B"), new Amount(200.0))
+                .setDate(LocalDate.of(2000, 1, 1))
+                .build();
+
+        MarketPriceSnapshot secondSnapshot = new MarketPriceSnapshotBuilder()
+                .setMarketPrice(new ISIN("A"), new Amount(120.0))
+                .setMarketPrice(new ISIN("B"), new Amount(220.0))
+                .setDate(LocalDate.of(2000, 1, 2))
+                .build();
+
+        MarketPriceSnapshot thirdSnapshot = new MarketPriceSnapshotBuilder()
+                .setMarketPrice(new ISIN("A"), new Amount(130.0))
+                .setMarketPrice(new ISIN("B"), new Amount(190.0))
+                .setDate(LocalDate.of(2000, 1, 3))
+                .build();
+
+        List<MarketPriceSnapshot> marketPriceSnapshotList = Arrays.asList(
+                firstSnapshot,
+                secondSnapshot,
+                thirdSnapshot
+        );
+
+        HistoricalMarketData historicalMarketData = HistoricalMarketData.of(marketPriceSnapshotList);
+
+        Assert.assertEquals(thirdSnapshot.getDate(), historicalMarketData.getDate());
+        Assert.assertSame(thirdSnapshot, historicalMarketData.getLastClosingMarketPrices());
+        Assert.assertEquals(3, historicalMarketData.getDuration().getValue());
+    }
+
+    @Test
+    public void initializeWithMultipleMarketPriceSnapshots_fails_ifListIsNull() {
+        List<MarketPriceSnapshot> marketPriceSnapshotList = null;
+
+        try {
+            HistoricalMarketData.of(marketPriceSnapshotList);
+        }
+        catch(RuntimeException e) {
+            Assert.assertEquals("The market price snapshot list must be specified.", e.getMessage());
+            return;
+        }
+
+        Assert.fail("RuntimeException expected.");
+    }
+
+    @Test
+    public void initializeWithMultipleMarketPriceSnapshots_fails_ifListIsEmpty() {
+        List<MarketPriceSnapshot> marketPriceSnapshotList = new ArrayList<>();
+
+        try {
+            HistoricalMarketData.of(marketPriceSnapshotList);
+        }
+        catch(RuntimeException e) {
+            Assert.assertEquals("The market price snapshot list must not be empty.", e.getMessage());
             return;
         }
 

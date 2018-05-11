@@ -77,7 +77,7 @@ public class BuyStocksSelector {
                 continue;
             }
 
-            if(currentStocks.get(isin) != null && !currentStocks.get(isin).isZero()) {
+            if(currentStocks.containsKey(isin)) {
                 continue;
             }
 

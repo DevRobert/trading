@@ -1,13 +1,8 @@
 package trading.api.account;
 
 import org.junit.Before;
-import org.junit.runner.RunWith;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
-import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.test.context.junit4.SpringRunner;
-import org.springframework.test.web.servlet.MockMvc;
+import trading.api.ControllerTestBase;
 import trading.application.AccountService;
 import trading.domain.*;
 import trading.domain.account.Account;
@@ -21,13 +16,7 @@ import java.time.LocalDate;
 
 import static org.mockito.BDDMockito.given;
 
-@RunWith(SpringRunner.class)
-@SpringBootTest
-@AutoConfigureMockMvc
-public abstract class AccountControllerTestBase {
-    @Autowired
-    protected MockMvc mvc;
-
+public abstract class AccountControllerTestBase extends ControllerTestBase {
     @MockBean
     protected AccountService accountService;
 

@@ -198,7 +198,11 @@ public class Account {
         Map<ISIN, Quantity> currentStocks = new HashMap<>();
 
         for(ISIN isin: this.positions.keySet()) {
-            currentStocks.put(isin, this.positions.get(isin).getQuantity());
+            Quantity quantity = this.positions.get(isin).getQuantity();
+
+            if(!quantity.isZero()) {
+                currentStocks.put(isin, quantity);
+            }
         }
 
         return currentStocks;

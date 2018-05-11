@@ -6,8 +6,6 @@ import org.junit.Test;
 import trading.domain.Amount;
 import trading.domain.DayCount;
 
-import java.time.LocalDate;
-
 public class HistoricalStockDataTest {
     private HistoricalStockData historicalStockData;
 

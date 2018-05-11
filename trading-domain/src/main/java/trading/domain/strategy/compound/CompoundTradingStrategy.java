@@ -46,16 +46,8 @@ public class CompoundTradingStrategy implements TradingStrategy {
     }
 
     private void prepareSellOrders() {
-        Set<ISIN> currentStockIsins = new HashSet<>();
         Map<ISIN, Quantity> currentStocks = this.context.getAccount().getCurrentStocks();
-
-        for(ISIN isin: currentStocks.keySet()) {
-            Quantity quantity = currentStocks.get(isin);
-
-            if(!quantity.isZero()) {
-                currentStockIsins.add(isin);
-            }
-        }
+        Set<ISIN> currentStockIsins = currentStocks.keySet();
 
         Scores scores = new MultiStockScoring().calculateScores(
                 this.context.getHistoricalMarketData(),

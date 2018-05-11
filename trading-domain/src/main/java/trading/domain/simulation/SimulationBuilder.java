@@ -11,20 +11,24 @@ public class SimulationBuilder {
     private Broker broker;
     private TradingStrategy tradingStrategy;
 
-    public void setHistoricalMarketData(HistoricalMarketData historicalMarketData) {
+    public SimulationBuilder setHistoricalMarketData(HistoricalMarketData historicalMarketData) {
         this.historicalMarketData = historicalMarketData;
+        return this;
     }
 
-    public void setAccount(Account account) {
+    public SimulationBuilder setAccount(Account account) {
         this.account = account;
+        return this;
     }
 
-    public void setBroker(Broker broker) {
+    public SimulationBuilder setBroker(Broker broker) {
         this.broker = broker;
+        return this;
     }
 
-    public void setTradingStrategy(TradingStrategy tradingStrategy) {
+    public SimulationBuilder setTradingStrategy(TradingStrategy tradingStrategy) {
         this.tradingStrategy = tradingStrategy;
+        return this;
     }
 
     public Simulation beginSimulation() {

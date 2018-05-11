@@ -3,14 +3,15 @@ package trading.domain.strategy.compound;
 import org.junit.Assert;
 import org.junit.Test;
 import trading.domain.Amount;
-import trading.domain.DayCount;
 import trading.domain.ISIN;
 import trading.domain.account.Account;
 import trading.domain.account.Position;
 import trading.domain.market.HistoricalMarketData;
 import trading.domain.market.MarketPriceSnapshot;
 import trading.domain.market.MarketPriceSnapshotBuilder;
-import trading.domain.strategy.*;
+import trading.domain.strategy.TradingStrategy;
+import trading.domain.strategy.TradingStrategyContext;
+import trading.domain.strategy.TradingStrategyTestBase;
 
 import java.time.LocalDate;
 import java.util.concurrent.atomic.AtomicReference;
