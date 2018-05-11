@@ -32,10 +32,12 @@ public class ScoringServiceImpl implements ScoringService {
         DayCount buyTriggerLocalMaximumLookBehindPeriod = parameters.getBuyTriggerLocalMaximumLookBehindPeriod();
         double buyTriggerMinDeclineFromLocalMaximumPercentage = parameters.getBuyTriggerMinDeclineFromLocalMaximumPercentage();
 
-        ScoringStrategy scoringStrategy = new LocalMaximumBuyScoringStrategy(
+        LocalMaximumBuyScoringStrategy scoringStrategy = new LocalMaximumBuyScoringStrategy(
                 buyTriggerLocalMaximumLookBehindPeriod,
                 buyTriggerMinDeclineFromLocalMaximumPercentage
         );
+
+        scoringStrategy.enableComments();
 
         Set<ISIN> isins = this.multiStockMarketDataStore.getAllClosingPrices().get(0).getISINs();
         return calculateScoring(account, scoringStrategy, isins);
@@ -49,11 +51,13 @@ public class ScoringServiceImpl implements ScoringService {
         double sellTriggerStopLossMinimumDeclineSinceBuyingPercentage = parameters.getSellTriggerStopLossMinimumDeclineSinceBuyingPercentage();
         double sellTriggerTrailingStopLossMinDeclineSinceMaximumAfterBuyingPercentage = parameters.getSellTriggerTrailingStopLossMinDeclineFromMaximumAfterBuyingPercentage();
 
-        ScoringStrategy scoringStrategy = new LocalMaximumSellScoringStrategy(
+        LocalMaximumSellScoringStrategy scoringStrategy = new LocalMaximumSellScoringStrategy(
                 activateTrailingStopLossMinRaiseSinceBuyingPercentage,
                 sellTriggerStopLossMinimumDeclineSinceBuyingPercentage,
                 sellTriggerTrailingStopLossMinDeclineSinceMaximumAfterBuyingPercentage
         );
+
+        scoringStrategy.enableComments();
 
         return calculateScoring(account, scoringStrategy, account.getCurrentStocks().keySet());
     }

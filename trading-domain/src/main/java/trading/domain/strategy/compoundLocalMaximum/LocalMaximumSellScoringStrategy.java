@@ -11,6 +11,7 @@ public class LocalMaximumSellScoringStrategy implements ScoringStrategy {
     private final double activateTrailingStopLossMinRaiseSinceBuyingPercentage;
     private final double sellTriggerStopLossMinimumDeclineSinceBuyingPercentage;
     private final double sellTriggerTrailingStopLossMinDeclineSinceMaximumAfterBuyingPercentage;
+    private boolean commentsEnabled;
 
     public LocalMaximumSellScoringStrategy(
             double activateTrailingStopLossMinRaiseSinceBuyingPercentage,
@@ -19,19 +20,34 @@ public class LocalMaximumSellScoringStrategy implements ScoringStrategy {
         this.activateTrailingStopLossMinRaiseSinceBuyingPercentage = activateTrailingStopLossMinRaiseSinceBuyingPercentage;
         this.sellTriggerStopLossMinimumDeclineSinceBuyingPercentage = sellTriggerStopLossMinimumDeclineSinceBuyingPercentage;
         this.sellTriggerTrailingStopLossMinDeclineSinceMaximumAfterBuyingPercentage = sellTriggerTrailingStopLossMinDeclineSinceMaximumAfterBuyingPercentage;
+        this.commentsEnabled = false;
+    }
+
+    public void enableComments() {
+        this.commentsEnabled = true;
     }
 
     @Override
     public Score calculateScore(HistoricalMarketData historicalMarketData, Account account, ISIN isin) {
-        StringBuilder comment = new StringBuilder();
-        boolean sellStock = this.sellStock(historicalMarketData, account, isin, comment);
+        StringBuilder commentBuilder = null;
 
-        comment.append(sellStock ? "Result: Sell!" : "Result: Do not sell!");
+        if(this.commentsEnabled) {
+            commentBuilder = new StringBuilder();
+        }
 
-        return new Score(sellStock ? 1.0 : 0.0, comment.toString().trim());
+        boolean sellStock = this.sellStock(historicalMarketData, account, isin, commentBuilder);
+
+        String comment = null;
+
+        if(this.commentsEnabled) {
+            commentBuilder.append(sellStock ? "Result: Sell!" : "Result: Do not sell!");
+            comment = commentBuilder.toString().trim();
+        }
+
+        return new Score(sellStock ? 1.0 : 0.0, comment);
     }
 
-    public boolean sellStock(HistoricalMarketData historicalMarketData, Account account, ISIN isin, StringBuilder comment) {
+    public boolean sellStock(HistoricalMarketData historicalMarketData, Account account, ISIN isin, StringBuilder commentBuilder) {
         HistoricalStockData historicalStockData = historicalMarketData.getStockData(isin);
         Amount closingMarketPrice = historicalStockData.getLastClosingMarketPrice();
         Transaction buyTransaction = this.getLastBuyTransaction(account, isin);
@@ -40,21 +56,23 @@ public class LocalMaximumSellScoringStrategy implements ScoringStrategy {
         DayCount lookBehindPeriod = new DayCount(daysPassedAfterBuyingDate.getValue() + 1);
         Amount maximumMarketPriceSinceBuying = historicalStockData.getMaximumClosingMarketPrice(lookBehindPeriod);
 
-        comment.append("Buy price: " + buyPrice.getValue() + System.lineSeparator());
-        comment.append("Closing market price: " + closingMarketPrice.getValue() + System.lineSeparator());
-        comment.append("Max. closing since buying: " + maximumMarketPriceSinceBuying.getValue() + System.lineSeparator());
+        if(this.commentsEnabled) {
+            commentBuilder.append("Buy price: " + buyPrice.getValue() + System.lineSeparator());
+            commentBuilder.append("Closing market price: " + closingMarketPrice.getValue() + System.lineSeparator());
+            commentBuilder.append("Max. closing since buying: " + maximumMarketPriceSinceBuying.getValue() + System.lineSeparator());
+        }
 
         boolean sell = false;
 
-        if(this.stopLoss(buyPrice, closingMarketPrice, comment)) {
+        if(this.stopLoss(buyPrice, closingMarketPrice, commentBuilder)) {
             return true;
         }
 
-        if(!this.trailingStopLossActivated(buyPrice, maximumMarketPriceSinceBuying, comment)) {
+        if(!this.trailingStopLossActivated(buyPrice, maximumMarketPriceSinceBuying, commentBuilder)) {
            return false;
         }
 
-        return this.trailingStopLoss(closingMarketPrice, maximumMarketPriceSinceBuying, comment);
+        return this.trailingStopLoss(closingMarketPrice, maximumMarketPriceSinceBuying, commentBuilder);
     }
 
     private Transaction getLastBuyTransaction(Account account, ISIN isin) {
@@ -67,36 +85,42 @@ public class LocalMaximumSellScoringStrategy implements ScoringStrategy {
         return transaction;
     }
 
-    private boolean stopLoss(Amount buyPrice, Amount closingMarketPrice, StringBuilder comment) {
+    private boolean stopLoss(Amount buyPrice, Amount closingMarketPrice, StringBuilder commentBuilder) {
         double sellIfBelow = buyPrice.getValue() * (1.0 - this.sellTriggerStopLossMinimumDeclineSinceBuyingPercentage);
         boolean stopLoss = closingMarketPrice.getValue() < sellIfBelow;
 
-        comment.append("Stop loss if closing price below: " + sellIfBelow + System.lineSeparator());
-        comment.append(stopLoss ? "Stop loss!" : "No stop loss");
-        comment.append(System.lineSeparator());
+        if(this.commentsEnabled) {
+            commentBuilder.append("Stop loss if closing price below: " + sellIfBelow + System.lineSeparator());
+            commentBuilder.append(stopLoss ? "Stop loss!" : "No stop loss");
+            commentBuilder.append(System.lineSeparator());
+        }
 
         return stopLoss;
     }
 
-    private boolean trailingStopLossActivated(Amount buyPrice, Amount maximumMarketPriceSinceBuying, StringBuilder comment) {
+    private boolean trailingStopLossActivated(Amount buyPrice, Amount maximumMarketPriceSinceBuying, StringBuilder commentBuilder) {
         Amount minActivationPrice = new Amount(buyPrice.getValue() * (1.0 + this.activateTrailingStopLossMinRaiseSinceBuyingPercentage));
         boolean trailingStopLossActivated = maximumMarketPriceSinceBuying.getValue() >= minActivationPrice.getValue();
 
-        comment.append("Trailing stop loss activated if closing price once above: " + minActivationPrice.getValue() + System.lineSeparator());
-        comment.append(trailingStopLossActivated ? "Trailing stop loss activated!" : "Trailing stop loss not activated");
-        comment.append(System.lineSeparator());
+        if(this.commentsEnabled) {
+            commentBuilder.append("Trailing stop loss activated if closing price once above: " + minActivationPrice.getValue() + System.lineSeparator());
+            commentBuilder.append(trailingStopLossActivated ? "Trailing stop loss activated!" : "Trailing stop loss not activated");
+            commentBuilder.append(System.lineSeparator());
+        }
 
         return trailingStopLossActivated;
 
     }
 
-    private boolean trailingStopLoss(Amount closingMarketPrice, Amount maximumMarketPriceSinceBuying, StringBuilder comment) {
+    private boolean trailingStopLoss(Amount closingMarketPrice, Amount maximumMarketPriceSinceBuying, StringBuilder commentBuilder) {
         double sellIfBelow = maximumMarketPriceSinceBuying.getValue() * (1.0 - this.sellTriggerTrailingStopLossMinDeclineSinceMaximumAfterBuyingPercentage);
         boolean trailingStopLoss = closingMarketPrice.getValue() < sellIfBelow;
 
-        comment.append("Trailing stop loss if closing price below: " + sellIfBelow + System.lineSeparator());
-        comment.append(trailingStopLoss ? "Trailing stop loss!" : "No trailing stop loss");
-        comment.append(System.lineSeparator());
+        if(this.commentsEnabled) {
+            commentBuilder.append("Trailing stop loss if closing price below: " + sellIfBelow + System.lineSeparator());
+            commentBuilder.append(trailingStopLoss ? "Trailing stop loss!" : "No trailing stop loss");
+            commentBuilder.append(System.lineSeparator());
+        }
 
         return trailingStopLoss;
     }

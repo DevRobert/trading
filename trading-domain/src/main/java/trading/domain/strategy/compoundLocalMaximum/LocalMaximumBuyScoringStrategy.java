@@ -11,29 +11,26 @@ import trading.domain.strategy.compound.ScoringStrategy;
 public class LocalMaximumBuyScoringStrategy implements ScoringStrategy {
     private final DayCount buyTriggerLocalMaximumLookBehindPeriod;
     private final double buyTriggerMinDeclineSinceMaximumPercentage;
+    private boolean commentsEnabled;
 
     public LocalMaximumBuyScoringStrategy(DayCount buyTriggerLocalMaximumLookBehindPeriod, double buyTriggerMinDeclineSinceMaximumPercentage) {
         this.buyTriggerLocalMaximumLookBehindPeriod = buyTriggerLocalMaximumLookBehindPeriod;
         this.buyTriggerMinDeclineSinceMaximumPercentage = buyTriggerMinDeclineSinceMaximumPercentage;
+        this.commentsEnabled = false;
+    }
+
+    public void enableComments() {
+        this.commentsEnabled = true;
     }
 
     @Override
     public Score calculateScore(HistoricalMarketData historicalMarketData, Account account, ISIN isin) {
         HistoricalStockData historicalStockData = historicalMarketData.getStockData(isin);
 
-        StringBuilder comment = new StringBuilder();
-
         double lastClosingPrice = historicalStockData.getLastClosingMarketPrice().getValue();
-        comment.append("Last closing price: " + lastClosingPrice + "\n");
-
         double localMaximum = historicalStockData.getMaximumClosingMarketPrice(this.buyTriggerLocalMaximumLookBehindPeriod).getValue();
-        comment.append("Local maximum: " + localMaximum + "\n");
-
         double maxBuyPrice = localMaximum * (1.0 - this.buyTriggerMinDeclineSinceMaximumPercentage);
-        comment.append("Max buy price: " + maxBuyPrice + "\n");
-
         boolean buy = lastClosingPrice <= maxBuyPrice;
-        comment.append(buy ? "Result: Buy!" : "Result: Do not buy!");
 
         double score = 1.0;
 
@@ -41,6 +38,17 @@ public class LocalMaximumBuyScoringStrategy implements ScoringStrategy {
             score = maxBuyPrice / lastClosingPrice;
         }
 
-        return new Score(score, comment.toString());
+        String comment = null;
+
+        if(this.commentsEnabled) {
+            StringBuilder commentBuilder = new StringBuilder();
+            commentBuilder.append("Last closing price: " + lastClosingPrice + "\n");
+            commentBuilder.append("Local maximum: " + localMaximum + "\n");
+            commentBuilder.append("Max buy price: " + maxBuyPrice + "\n");
+            commentBuilder.append(buy ? "Result: Buy!" : "Result: Do not buy!");
+            comment = commentBuilder.toString();
+        }
+
+        return new Score(score, comment);
     }
 }
