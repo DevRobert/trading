@@ -15,12 +15,14 @@ public class Account {
     private Amount commissions;
     private Amount balance;
     private final List<Transaction> processedTransactions;
+    private final Map<ISIN, Transaction> lastTransactionByIsin;
 
     public Account(Amount availableMoney) {
         this.commissions = Amount.Zero;
         this.availableMoney = availableMoney;
         this.balance = availableMoney;
         this.processedTransactions = new ArrayList<>();
+        this.lastTransactionByIsin = new HashMap<>();
     }
 
     public Amount getCommissions() {
@@ -86,6 +88,7 @@ public class Account {
         this.updateBalances(transaction);
 
         this.processedTransactions.add(transaction);
+        this.lastTransactionByIsin.put(transaction.getIsin(), transaction);
     }
 
     private Position getPositionOrCreatePending(ISIN isin) {
@@ -229,14 +232,12 @@ public class Account {
     }
 
     public Transaction getLastTransaction(ISIN isin) {
-        for(int transactionIndex = this.processedTransactions.size() - 1; transactionIndex >= 0; transactionIndex--) {
-            Transaction transaction = this.processedTransactions.get(transactionIndex);
+        Transaction transaction = this.lastTransactionByIsin.get(isin);
 
-            if(transaction.getIsin().equals(isin)) {
-                return transaction;
-            }
+        if(transaction == null) {
+            throw new RuntimeException("There was no transaction registered yet for the specified ISIN.");
         }
 
-        throw new RuntimeException("There was no transaction registered yet for the specified ISIN.");
+        return transaction;
     }
 }
