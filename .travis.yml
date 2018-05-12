@@ -7,10 +7,10 @@ jdk:
 
 services:
   - docker
+  - mysql
+  - mongodb
 
 script:
   - set -e
-  - docker-compose -f "trading-persistence/integration-test/docker-compose.yml" up -d
-  - sleep 10
   - docker ps
   - ./gradlew build
