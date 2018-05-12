@@ -5,7 +5,7 @@ mysql-databae:
   environment:
     - MYSQL_ROOT_PASSWORD=testtest
 
-mongo-databae:
+mongo-database:
   image: mongo:3.6.4-jessie
   ports:
     - "27017:27017"
