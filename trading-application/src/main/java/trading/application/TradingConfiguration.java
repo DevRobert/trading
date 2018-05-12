@@ -11,7 +11,7 @@ public class TradingConfiguration {
         double buyTriggerMinDeclineFromLocalMaximumPercentage = 0.1;
         double sellTriggerTrailingStopLossMinDeclineFromMaximumAfterBuyingPercentage = 0.07;
         double activateTrailingStopLossMinRaiseSinceBuyingPercentage = 0.03;
-        double sellTriggerStopLossMinimumDeclineSinceBuyingPercentage = 0.1;
+        double sellTriggerStopLossMinimumDeclineSinceBuyingPercentage = 0.07;
         double maximumPercentage = 0.2;
 
         return new CompoundLocalMaximumTradingStrategyParameters(
