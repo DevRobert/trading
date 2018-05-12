@@ -23,7 +23,7 @@ public class MySqlAccountRepositoryTest {
                 .setServer("localhost")
                 .setUsername("root")
                 .setPassword("testtest")
-                .setDatabase("trading-test")
+                .setDatabase("trading_test")
                 .build();
 
         this.accountRepository = new MySqlAccountRepository(parameters);
