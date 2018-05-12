@@ -17,7 +17,7 @@ public class MySqlInstrumentNameProviderTest {
                 .setServer("localhost")
                 .setUsername("root")
                 .setPassword("testtest")
-                .setDatabase("trading-test")
+                .setDatabase("trading_test")
                 .build();
 
         this.instrumentNameProvider = new MySqlInstrumentNameProvider(parameters);
