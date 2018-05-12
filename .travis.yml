@@ -1,4 +1,16 @@
+sudo: required
+
 language: java
 
 jdk:
   - oraclejdk8
+
+services:
+  - docker
+
+script:
+  - set -e
+  - docker-compose -f "trading-persistence/integration-test/docker-compose.yml" up -d
+  - sleep 10
+  - docker ps
+  - ./gradlew build
