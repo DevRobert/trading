@@ -15,7 +15,7 @@ public class HistoricalStockDataTest {
         historicalStockData = new HistoricalStockData(initialMarketPrice);
     }
 
-    // closingMarketPrice
+    // lastClosingMarketPrice
 
     @Test
     public void returnsInitialClosingMarketPriceAsClosingMarketPrice() {
@@ -27,6 +27,86 @@ public class HistoricalStockDataTest {
         Amount newMarketPrice = new Amount(1100.0);
         historicalStockData.registerClosedDay(newMarketPrice);
         Assert.assertEquals(newMarketPrice, historicalStockData.getLastClosingMarketPrice());
+    }
+
+    // closingMarketPrice
+
+    @Test
+    public void getClosingMarketPrice_fails_ifNoLookBehindSpecified() {
+        DayCount lookBehind = null;
+
+        try {
+            this.historicalStockData.getClosingMarketPrice(lookBehind);
+        }
+        catch(RuntimeException e) {
+            Assert.assertEquals("The look behind must be specified.", e.getMessage());
+            return;
+        }
+
+        Assert.fail("RuntimeException expected.");
+    }
+
+    @Test
+    public void getClosingMarketPrice_fails_ifZeroLookBehindSpecified() {
+        DayCount lookBehind = new DayCount(0);
+
+        try {
+            this.historicalStockData.getClosingMarketPrice(lookBehind);
+        }
+        catch(RuntimeException e) {
+            Assert.assertEquals("The look behind must not be zero.", e.getMessage());
+            return;
+        }
+
+        Assert.fail("RuntimeException expected.");
+    }
+
+    @Test
+    public void getClosingMarketPrice_fails_ifNegativeLookBehindSpecified() {
+        DayCount lookBehind = new DayCount(-1);
+
+        try {
+            this.historicalStockData.getClosingMarketPrice(lookBehind);
+        }
+        catch(RuntimeException e) {
+            Assert.assertEquals("The look behind must not be negative.", e.getMessage());
+            return;
+        }
+
+        Assert.fail("RuntimeException expected.");
+    }
+
+    @Test
+    public void getClosingMarketPrice_fails_ifLookBehindExceedsHistoryLength() {
+        DayCount lookBehind = new DayCount(2);
+
+        try {
+            this.historicalStockData.getClosingMarketPrice(lookBehind);
+        }
+        catch(RuntimeException e) {
+            Assert.assertEquals("The given look behind (2) exceeds the history length (1).", e.getMessage());
+            return;
+        }
+
+        Assert.fail("RuntimeException expected.");
+    }
+
+    @Test
+    public void getClosingMarketPrice_returnsLastClosingMarketPrice_ifLookBehindOne() {
+        this.historicalStockData.registerClosedDay(new Amount(1200.0));
+
+        Amount closingMarketPrice = this.historicalStockData.getClosingMarketPrice(new DayCount(1));
+
+        Assert.assertEquals(new Amount(1200.0), closingMarketPrice);
+    }
+
+    @Test
+    public void getClosingMarketPrice_returnsPreviousClosingMarketPrice_ifLookBehindTwo() {
+        this.historicalStockData.registerClosedDay(new Amount(1200.0));
+
+        Amount closingMarketPrice = this.historicalStockData.getClosingMarketPrice(new DayCount(2));
+
+        Assert.assertEquals(new Amount(1000.0), closingMarketPrice);
     }
 
     // numRisingDaysInSequence
