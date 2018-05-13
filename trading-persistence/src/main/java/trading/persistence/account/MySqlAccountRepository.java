@@ -48,7 +48,9 @@ public class MySqlAccountRepository extends MySqlRepository implements AccountRe
 
     @Override
     public void saveAccount(Account account) {
-        // TODO test account id must be set
+        if(account.getId() == null) {
+            throw new RuntimeException("The account id must be set so that the account can be updated.");
+        }
 
         Connection connection = this.openNewConnection();
 

@@ -50,6 +50,21 @@ public class MySqlAccountRepositoryTest {
     }
 
     @Test
+    public void createAccountFails_ifAccountIdNotSet() {
+        Account account = new Account(new Amount(10000.0));
+
+        try {
+            this.accountRepository.saveAccount(account);
+        }
+        catch(RuntimeException e) {
+            Assert.assertEquals("The account id must be set so that the account can be updated.", e.getMessage());
+            return;
+        }
+
+        Assert.fail("RuntimeException expected.");
+    }
+
+    @Test
     public void getAccount() {
         Account account = this.accountRepository.getAccount(new AccountId(1));
 
