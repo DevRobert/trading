@@ -14,6 +14,7 @@ public class HistoricalTestDataProvider {
     private List<MarketPriceSnapshot> historicalClosingPrices;
     private HashMap<ISIN, List<MarketPriceSnapshot>> singleStockHistoricalPricesByISIN;
     private MultiStockMarketDataStore multiStockMarketDataStore;
+    private Object lockPopulateData = new Object();
 
     public HistoricalTestDataProvider(MultiStockMarketDataStore multiStockMarketDataStore) {
         this.multiStockMarketDataStore = multiStockMarketDataStore;
@@ -35,11 +36,11 @@ public class HistoricalTestDataProvider {
     }
 
     private void populateData() {
-        // todo introduce locking when introducing multi-threading
-
-        if(historicalClosingPrices == null) {
-            populateHistoricalClosingPrices();
-            populateHistoricalClosingPricesByISIN();
+        synchronized (this.lockPopulateData) {
+            if(historicalClosingPrices == null) {
+                populateHistoricalClosingPrices();
+                populateHistoricalClosingPricesByISIN();
+            }
         }
     }
 
