@@ -568,4 +568,32 @@ public class AccountTest extends AccountTestBase {
 
         Assert.fail("RuntimeException expected.");
     }
+
+    // AccountId
+
+    @Test
+    public void setAccountId() {
+        Account account = new Account(new Amount(10000.0));
+        AccountId accountId = new AccountId(1);
+
+        account.setId(accountId);
+
+        Assert.assertSame(accountId, account.getId());
+    }
+
+    @Test
+    public void setAccountIdFails_ifAccountIdAlreadySet() {
+        Account account = new Account(new Amount(10000.0));
+        account.setId(new AccountId(1));
+
+        try {
+            account.setId(new AccountId(2));
+        }
+        catch(DomainException e) {
+            Assert.assertEquals("The account id must not be changed if set once.", e.getMessage());
+            return;
+        }
+
+        Assert.fail("DomainException expected.");
+    }
 }

@@ -60,7 +60,9 @@ public class Account {
     }
 
     public void setId(AccountId accountId) {
-        // todo test must not be updated if set
+        if(this.id != null) {
+            throw new DomainException("The account id must not be changed if set once.");
+        }
 
         this.id = accountId;
     }
