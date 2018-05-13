@@ -86,6 +86,7 @@ public class MySqlAccountRepositoryTest {
         Assert.assertEquals(new ISIN("DE0008430026"), buyTransaction.getIsin());
         Assert.assertEquals(new Amount(5000.0), buyTransaction.getTotalPrice());
         Assert.assertEquals(new Amount(10.0), buyTransaction.getCommission());
+        Assert.assertNotNull(buyTransaction.getId());
 
         Transaction sellTransaction = transactions.get(1);
 
@@ -94,6 +95,7 @@ public class MySqlAccountRepositoryTest {
         Assert.assertEquals(new ISIN("DE0008430026"), sellTransaction.getIsin());
         Assert.assertEquals(new Amount(5500.0), sellTransaction.getTotalPrice());
         Assert.assertEquals(new Amount(10.0), sellTransaction.getCommission());
+        Assert.assertNotNull(sellTransaction.getId());
     }
 
     @Test

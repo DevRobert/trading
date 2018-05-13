@@ -154,7 +154,7 @@ public class MySqlAccountRepository extends MySqlRepository implements AccountRe
                     .setDate(date)
                     .build();
 
-            transaction.setId(new TransactionId(transactionId)); // todo write test for this line
+            transaction.setId(new TransactionId(transactionId));
 
             transactions.add(transaction);
         }
