@@ -23,7 +23,7 @@ public class MySqlAccountRepositoryTest {
                 .setServer("localhost")
                 .setUsername("root")
                 .setPassword("testtest")
-                .setDatabase("trading-test")
+                .setDatabase("trading_test")
                 .build();
 
         this.accountRepository = new MySqlAccountRepository(parameters);
@@ -50,6 +50,21 @@ public class MySqlAccountRepositoryTest {
     }
 
     @Test
+    public void createAccountFails_ifAccountIdNotSet() {
+        Account account = new Account(new Amount(10000.0));
+
+        try {
+            this.accountRepository.saveAccount(account);
+        }
+        catch(RuntimeException e) {
+            Assert.assertEquals("The account id must be set so that the account can be updated.", e.getMessage());
+            return;
+        }
+
+        Assert.fail("RuntimeException expected.");
+    }
+
+    @Test
     public void getAccount() {
         Account account = this.accountRepository.getAccount(new AccountId(1));
 
@@ -71,6 +86,7 @@ public class MySqlAccountRepositoryTest {
         Assert.assertEquals(new ISIN("DE0008430026"), buyTransaction.getIsin());
         Assert.assertEquals(new Amount(5000.0), buyTransaction.getTotalPrice());
         Assert.assertEquals(new Amount(10.0), buyTransaction.getCommission());
+        Assert.assertNotNull(buyTransaction.getId());
 
         Transaction sellTransaction = transactions.get(1);
 
@@ -79,6 +95,7 @@ public class MySqlAccountRepositoryTest {
         Assert.assertEquals(new ISIN("DE0008430026"), sellTransaction.getIsin());
         Assert.assertEquals(new Amount(5500.0), sellTransaction.getTotalPrice());
         Assert.assertEquals(new Amount(10.0), sellTransaction.getCommission());
+        Assert.assertNotNull(sellTransaction.getId());
     }
 
     @Test

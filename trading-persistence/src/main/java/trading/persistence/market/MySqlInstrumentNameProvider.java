@@ -27,7 +27,7 @@ public class MySqlInstrumentNameProvider extends MySqlRepository implements Inst
         Connection connection = this.openNewConnection();
 
         try {
-            PreparedStatement preparedStatement = connection.prepareStatement("select `Isin`, `Name` from `instrument`");
+            PreparedStatement preparedStatement = connection.prepareStatement("select `Isin`, `Name` from `instrument`;");
 
             ResultSet resultSet = preparedStatement.executeQuery();
 

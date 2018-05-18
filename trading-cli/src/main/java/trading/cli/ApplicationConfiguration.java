@@ -29,7 +29,7 @@ public class ApplicationConfiguration {
                 .setServer("localhost")
                 .setUsername("root")
                 .setPassword("testtest")
-                .setDatabase("trading-production")
+                .setDatabase("trading_production")
                 .build();
 
         return new MySqlAccountRepository(parameters);

@@ -51,14 +51,24 @@ public class HistoricalStockData {
     }
 
     public Amount getClosingMarketPrice(DayCount lookBehind) {
-        // TODO write tests
+        if(lookBehind == null) {
+            throw new RuntimeException("The look behind must be specified.");
+        }
 
-        // TODO validate lookBehind > 1
+        if(lookBehind.getValue() < 0) {
+            throw new RuntimeException("The look behind must not be negative.");
+        }
+
+        if(lookBehind.isZero()) {
+            throw new RuntimeException("The look behind must not be zero.");
+        }
 
         int lastDayIndex = this.closingMarketPrices.size() - 1;
         int specifiedDayIndex = lastDayIndex - lookBehind.getValue() + 1;
 
-        // TODO validate index OK
+        if(specifiedDayIndex < 0) {
+            throw new RuntimeException(String.format("The given look behind (%s) exceeds the history length (%s).", lookBehind.getValue(), lastDayIndex + 1));
+        }
 
         return this.closingMarketPrices.get(specifiedDayIndex);
     }

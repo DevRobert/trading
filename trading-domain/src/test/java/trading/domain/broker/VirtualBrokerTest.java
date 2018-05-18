@@ -255,5 +255,30 @@ public class VirtualBrokerTest {
         Assert.assertEquals(new Amount(49990.0), account.getAvailableMoney());
     }
 
-    // TODO Tests for feasibility checks of order requests
+    @Test
+    public void buyOrderRequestFailsIfTotalPricePlusCommissionExceedsAvailableMoney() {
+        // Available money: 50,000
+        // Munich RE price: 1,000
+        // 50 x 1,000 = 50,000
+        // plus commission 10 = 50,010
+        // is more than the available money 50,000
+
+        this.commissionStrategy = totalPrice -> new Amount(10.0);
+
+        OrderRequest orderRequest = new OrderRequest(OrderType.BuyMarket, ISIN.MunichRe, new Quantity(50));
+
+        VirtualBroker virtualBroker = this.createVirtualBroker();
+
+        virtualBroker.setOrder(orderRequest);
+
+        try {
+            virtualBroker.notifyDayOpened(this.historicalMarketData.getDate().plusDays(1));
+        }
+        catch(RuntimeException e) {
+            Assert.assertEquals("The order request cannot be processed as it requires more money than available.", e.getMessage());
+            return;
+        }
+
+        Assert.fail("RuntimeException expected.");
+    }
 }

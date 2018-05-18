@@ -1,0 +1,11 @@
+mysql-databae:
+  image: mysql:8.0.11
+  ports:
+    - "3306:3306"
+  environment:
+    - MYSQL_ROOT_PASSWORD=testtest
+
+mongo-database:
+  image: mongo:3.6.4-jessie
+  ports:
+    - "27017:27017"

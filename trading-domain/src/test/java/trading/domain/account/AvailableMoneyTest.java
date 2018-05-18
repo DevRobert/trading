@@ -115,8 +115,6 @@ public class AvailableMoneyTest extends AccountTestBase {
         account.registerTransaction(transaction);
 
         Assert.assertEquals(new Amount(-1000.0), account.getAvailableMoney());
-
-        // TODO develop pricing model for tolerated overdraft
     }
 
     @Test
