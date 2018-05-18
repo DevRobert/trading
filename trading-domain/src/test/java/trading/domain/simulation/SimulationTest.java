@@ -15,6 +15,7 @@ import trading.domain.strategy.manual.ManualTradingStrategy;
 import java.time.LocalDate;
 import java.util.HashMap;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicReference;
 
 public class SimulationTest {
     private Simulation simulation;
@@ -388,6 +389,31 @@ public class SimulationTest {
 
     @Test
     public void historicalMarketDataAreUpdatedBeforeDayClosedSignalIsForwardedToTradingStrategy() {
-        // TODO write test
+        AtomicReference<Boolean> ignoreCall = new AtomicReference<>(true);
+        AtomicReference<Boolean> tradingStrategyCalled = new AtomicReference<>(false);
+
+        this.tradingStrategy = () -> {
+            if(ignoreCall.get()) {
+                return;
+            }
+
+            Assert.assertEquals(new Amount(200.0), historicalMarketData.getStockData(ISIN.MunichRe).getLastClosingMarketPrice());
+            tradingStrategyCalled.set(true);
+        };
+
+        this.startSimulation();
+
+        this.simulation.openDay(this.historicalMarketData.getDate().plusDays(1));
+
+        ignoreCall.set(false);
+
+        this.simulation.closeDay(new MarketPriceSnapshotBuilder()
+                .setMarketPrice(ISIN.MunichRe, new Amount(200.0))
+                .setDate(this.historicalMarketData.getDate().plusDays(1))
+                .build());
+
+        this.simulation.openDay(this.historicalMarketData.getDate().plusDays(1));
+
+        Assert.assertTrue(tradingStrategyCalled.get());
     }
 }
