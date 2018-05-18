@@ -39,7 +39,7 @@ public class ScoringServiceImpl implements ScoringService {
 
         scoringStrategy.enableComments();
 
-        Set<ISIN> isins = this.multiStockMarketDataStore.getAllClosingPrices().get(0).getISINs();
+        Set<ISIN> isins = this.multiStockMarketDataStore.getLastClosingPrices().getISINs();
         return calculateScoring(account, scoringStrategy, isins);
     }
 
