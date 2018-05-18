@@ -74,6 +74,10 @@ public class VirtualBroker implements Broker {
         Amount totalPrice = lastMarketPrice.multiply(orderRequest.getQuantity());
         Amount commission = this.commissionStrategy.calculateCommission(totalPrice);
 
+        if(totalPrice.getValue() + commission.getValue() > this.account.getAvailableMoney().getValue()) {
+            throw new DomainException("The order request cannot be processed as it requires more money than available.");
+        }
+
         Transaction transaction = new TransactionBuilder()
                 .setTransactionType(TransactionType.Buy)
                 .setIsin(isin)
