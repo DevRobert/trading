@@ -1,7 +1,6 @@
 ALTER TABLE `instrument`
 ADD COLUMN `Code` VARCHAR(10) NULL AFTER `Name`,
 ADD UNIQUE INDEX `Code_UNIQUE` (`Code` ASC);
-ADD UNIQUE INDEX `Code_UNIQUE` (`Code` ASC);
 
 UPDATE `instrument` SET `Code`='E-ADSD' WHERE `Isin`='DE000A1EWWW0';
 UPDATE `instrument` SET `Code`='E-ALVD' WHERE `Isin`='DE0008404005';
