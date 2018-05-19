@@ -98,24 +98,24 @@ public class CompoundLocalMaximumChallenge implements Challenge {
     }
     */
 
-        @Override
-        public ParameterTupleSource getParametersSource() {
-            return new LazyParameterTupleSource(Arrays.asList(
-                    this.getBuyTriggerLocalMaximumLookBehindPeriod(),
-                    this.getBuyTriggerMinDeclineFromLocalMaximumPercentage(),
-                    this.getSellTriggerTrailingStopLossMinDeclineFromMaximumAfterBuyingPercentage(),
-                    this.getActivateTrailingStopLossMinRaiseSinceBuyingPercentage(),
-                    this.getSellTriggerStopLossMinimumDeclineSinceBuyingPercentage(),
-                    this.getMaximumPercentage()
-            ));
-        }
+    @Override
+    public ParameterTupleSource getParametersSource() {
+        return new LazyParameterTupleSource(Arrays.asList(
+                this.getBuyTriggerLocalMaximumLookBehindPeriod(),
+                this.getBuyTriggerMinDeclineFromLocalMaximumPercentage(),
+                this.getSellTriggerTrailingStopLossMinDeclineFromMaximumAfterBuyingPercentage(),
+                this.getActivateTrailingStopLossMinRaiseSinceBuyingPercentage(),
+                this.getSellTriggerStopLossMinimumDeclineSinceBuyingPercentage(),
+                this.getMaximumPercentage()
+        ));
+    }
 
-        @Override
-        public SimulationDriverParameters buildSimulationDriverParametersForRun(Object[] runParameters) {
-            final int buyTriggerLocalMaximumLookBehindPeriod = (int) runParameters[0];
-            final double buyTriggerMinDeclineFromLocalMaximumPercentage = (double) runParameters[1];
-            final double sellTriggerTrailingStopLossMinDeclineFromMaximumAfterBuyingPercentage = (double) runParameters[2];
-            final double activateTrailingStopLossMinRaiseSinceBuyingPercentage = (double) runParameters[3];
+    @Override
+    public SimulationDriverParameters buildSimulationDriverParametersForRun(Object[] runParameters) {
+        final int buyTriggerLocalMaximumLookBehindPeriod = (int) runParameters[0];
+        final double buyTriggerMinDeclineFromLocalMaximumPercentage = (double) runParameters[1];
+        final double sellTriggerTrailingStopLossMinDeclineFromMaximumAfterBuyingPercentage = (double) runParameters[2];
+        final double activateTrailingStopLossMinRaiseSinceBuyingPercentage = (double) runParameters[3];
         final double sellTriggerStopLossMinimumDeclineSinceBuyingPercentage = (double) runParameters[4];
         final double maximumPercentage = (double) runParameters[5];
 
