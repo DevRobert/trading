@@ -37,4 +37,8 @@ public class MarketPriceSnapshot {
     public LocalDate getDate() {
         return this.date;
     }
+
+    public int size() {
+        return this.marketPrices.size();
+    }
 }

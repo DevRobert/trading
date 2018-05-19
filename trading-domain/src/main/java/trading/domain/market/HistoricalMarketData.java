@@ -6,16 +6,12 @@ import trading.domain.DomainException;
 import trading.domain.ISIN;
 
 import java.time.LocalDate;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 public class HistoricalMarketData {
     private final Map<ISIN, HistoricalStockData> historicalStockDataMap;
     private final ISIN singleISIN;
     private int durationNumDays;
-    private final Set<ISIN> isins;
     private MarketPriceSnapshot lastClosingMarketPrices;
     private final Map<LocalDate, Integer> dayIndexByDate;
     private final LocalDate historyBegin;
@@ -23,16 +19,14 @@ public class HistoricalMarketData {
     public HistoricalMarketData(MarketPriceSnapshot initialClosingMarketPrices) {
         this.historicalStockDataMap = new HashMap<>();
 
-        this.isins = initialClosingMarketPrices.getISINs();
-
-        for(ISIN isin: this.isins) {
+        for(ISIN isin: initialClosingMarketPrices.getISINs()) {
             Amount initialMarketPrice = initialClosingMarketPrices.getMarketPrice(isin);
             HistoricalStockData historicalStockData = new HistoricalStockData(initialMarketPrice);
             this.historicalStockDataMap.put(isin, historicalStockData);
         }
 
-        if(this.isins.size() == 1) {
-            singleISIN = isins.stream().findFirst().get();
+        if(initialClosingMarketPrices.size() == 1) {
+            singleISIN = initialClosingMarketPrices.getISINs().stream().findFirst().get();
         }
         else {
             singleISIN = null;
@@ -92,19 +86,27 @@ public class HistoricalMarketData {
             throw new DomainException("The specified date must not equal the date of the last registered market price snapshot.");
         }
 
-        for(ISIN isin: this.isins) {
-            HistoricalStockData historicalStockData = this.historicalStockDataMap.get(isin);
-
+        for(Map.Entry<ISIN, HistoricalStockData> entrySet: this.historicalStockDataMap.entrySet()) {
             Amount closingMarketPrice;
 
             try {
-                closingMarketPrice = closingMarketPrices.getMarketPrice(isin);
+                closingMarketPrice = closingMarketPrices.getMarketPrice(entrySet.getKey());
             }
             catch(UnknownStockException ex) {
                 throw new MissingDataException("The market price snapshot must contain prices for all registered stocks.");
             }
 
-            historicalStockData.registerClosedDay(closingMarketPrice);
+            entrySet.getValue().registerClosedDay(closingMarketPrice);
+        }
+
+        if(closingMarketPrices.size() != this.historicalStockDataMap.size()) {
+            for(ISIN isin: closingMarketPrices.getISINs()) {
+                if(this.historicalStockDataMap.containsKey(isin)) {
+                    continue;
+                }
+
+                this.historicalStockDataMap.put(isin, new HistoricalStockData(closingMarketPrices.getMarketPrice(isin)));
+            }
         }
 
         this.durationNumDays++;

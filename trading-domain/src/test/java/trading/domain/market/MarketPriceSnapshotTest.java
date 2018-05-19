@@ -79,4 +79,25 @@ public class MarketPriceSnapshotTest {
 
         Assert.assertSame(date, marketPriceSnapshot.getDate());
     }
+
+    @Test
+    public void sizeReturnsOne_forOneISIN() {
+        MarketPriceSnapshot marketPriceSnapshot = new MarketPriceSnapshotBuilder()
+                .setMarketPrice(ISIN.MunichRe, new Amount(100.0))
+                .setDate(LocalDate.now())
+                .build();
+
+        Assert.assertEquals(1, marketPriceSnapshot.size());
+    }
+
+    @Test
+    public void sizeReturnsTwo_forTwoISINs() {
+        MarketPriceSnapshot marketPriceSnapshot = new MarketPriceSnapshotBuilder()
+                .setMarketPrice(ISIN.MunichRe, new Amount(100.0))
+                .setMarketPrice(ISIN.Allianz, new Amount(50.0))
+                .setDate(LocalDate.now())
+                .build();
+
+        Assert.assertEquals(2, marketPriceSnapshot.size());
+    }
 }

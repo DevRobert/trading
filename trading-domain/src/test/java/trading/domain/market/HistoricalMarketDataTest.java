@@ -582,4 +582,26 @@ public class HistoricalMarketDataTest {
 
         Assert.fail("RuntimeException expected.");
     }
+
+    // Support new stocks
+
+    @Test
+    public void registerClosingPriceWithNewStockLeadsToNewStockData() {
+        MarketPriceSnapshot firstMarketPriceSnapshot = new MarketPriceSnapshotBuilder()
+                .setMarketPrice(ISIN.MunichRe, new Amount(1000.0))
+                .setDate(LocalDate.of(2000, 1, 1))
+                .build();
+
+        MarketPriceSnapshot secondMarketPriceSnapshot = new MarketPriceSnapshotBuilder()
+                .setMarketPrice(ISIN.MunichRe, new Amount(1200.0))
+                .setMarketPrice(ISIN.Allianz, new Amount(1300.0))
+                .setDate(LocalDate.of(2000, 1, 2))
+                .build();
+
+        HistoricalMarketData historicalMarketData = new HistoricalMarketData(firstMarketPriceSnapshot);
+        historicalMarketData.registerClosedDay(secondMarketPriceSnapshot);
+
+        Amount newStockClosingMarketPrice = historicalMarketData.getStockData(ISIN.Allianz).getLastClosingMarketPrice();
+        Assert.assertEquals(new Amount(1300.0), newStockClosingMarketPrice);
+    }
 }
