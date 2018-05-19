@@ -266,4 +266,19 @@ public class HistoricalStockDataTest {
 
         Assert.assertEquals(new Amount(900.0), maximumClosingPrice);
     }
+
+    // duration
+
+    @Test
+    public void getDuration_returnsOne_forOneDay() {
+        HistoricalStockData historicalStockData = new HistoricalStockData(new Amount(100.0));
+        Assert.assertEquals(new DayCount(1), historicalStockData.getDuration());
+    }
+
+    @Test
+    public void getDuration_returnsTwo_forTwoDays() {
+        HistoricalStockData historicalStockData = new HistoricalStockData(new Amount(100.0));
+        historicalStockData.registerClosedDay(new Amount(120.0));
+        Assert.assertEquals(new DayCount(2), historicalStockData.getDuration());
+    }
 }

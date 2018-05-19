@@ -109,4 +109,8 @@ public class HistoricalStockData {
 
         return maximumClosingMarketPrice;
     }
+
+    public DayCount getDuration() {
+        return new DayCount(this.closingMarketPrices.size());
+    }
 }

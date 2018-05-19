@@ -27,6 +27,10 @@ public class LocalMaximumBuyScoringStrategy implements ScoringStrategy {
     public Score calculateScore(HistoricalMarketData historicalMarketData, Account account, ISIN isin) {
         HistoricalStockData historicalStockData = historicalMarketData.getStockData(isin);
 
+        if(historicalStockData.getDuration().getValue() < this.buyTriggerLocalMaximumLookBehindPeriod.getValue()) {
+            return new Score(0.0, "Historical stock data history length not sufficient for scoring.");
+        }
+
         double lastClosingPrice = historicalStockData.getLastClosingMarketPrice().getValue();
         double localMaximum = historicalStockData.getMaximumClosingMarketPrice(this.buyTriggerLocalMaximumLookBehindPeriod).getValue();
         double maxBuyPrice = localMaximum * (1.0 - this.buyTriggerMinDeclineSinceMaximumPercentage);
