@@ -1,7 +1,10 @@
 package trading.application;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import trading.domain.account.Account;
+import trading.domain.broker.CommissionStrategy;
+import trading.domain.broker.DynamicCommissionStrategy;
 import trading.domain.broker.VirtualBroker;
 import trading.domain.market.HistoricalMarketData;
 import trading.domain.simulation.MultiStockMarketDataStore;
@@ -12,6 +15,9 @@ import trading.domain.strategy.compoundLocalMaximum.CompoundLocalMaximumTradingS
 
 @Component
 public class TradingServiceImpl implements TradingService {
+    @Autowired
+    private TradingConfigurationService tradingConfigurationService;
+
     private final MultiStockMarketDataStore multiStockMarketDataStore;
 
     public TradingServiceImpl(MultiStockMarketDataStore multiStockMarketDataStore) {
@@ -22,10 +28,11 @@ public class TradingServiceImpl implements TradingService {
     public TradeList calculateTrades(Account account) {
         HistoricalMarketData historicalMarketData = HistoricalMarketData.of(this.multiStockMarketDataStore.getAllClosingPrices());
 
-        VirtualBroker broker = new VirtualBroker(account, historicalMarketData, TradingConfiguration.getCommissionStrategy());
+        CommissionStrategy commissionStrategy = new DynamicCommissionStrategy(this.tradingConfigurationService.getCommissionStrategyParameters());
+        VirtualBroker broker = new VirtualBroker(account, historicalMarketData, commissionStrategy);
 
         TradingStrategyContext tradingStrategyContext = new TradingStrategyContext(account, broker, historicalMarketData);
-        TradingStrategy tradingStrategy = new CompoundLocalMaximumTradingStrategy(TradingConfiguration.getParameters(), tradingStrategyContext);
+        TradingStrategy tradingStrategy = new CompoundLocalMaximumTradingStrategy(this.tradingConfigurationService.getTradingStrategyParameters(), tradingStrategyContext);
 
         new SimulationBuilder()
                 .setHistoricalMarketData(historicalMarketData)

@@ -6,12 +6,13 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import trading.application.AccountService;
 import trading.application.TradeList;
-import trading.application.TradingConfiguration;
+import trading.application.TradingConfigurationService;
 import trading.application.TradingService;
 import trading.domain.Amount;
 import trading.domain.account.Account;
 import trading.domain.account.AccountId;
 import trading.domain.broker.CommissionStrategy;
+import trading.domain.broker.DynamicCommissionStrategy;
 import trading.domain.broker.OrderRequest;
 import trading.domain.broker.OrderType;
 import trading.domain.market.InstrumentNameProvider;
@@ -36,12 +37,15 @@ public class TradingController {
     @Autowired
     private MultiStockMarketDataStore multiStockMarketDataStore;
 
+    @Autowired
+    private TradingConfigurationService tradingConfigurationService;
+
     @RequestMapping("/api/trades/")
     public CalculateTradesResponse calculateTrades() {
         Account account = this.accountService.getAccount(new AccountId(1));
         TradeList tradeList = this.tradingService.calculateTrades(account);
         MarketPriceSnapshot lastClosingPrices = this.multiStockMarketDataStore.getLastClosingPrices();
-        CommissionStrategy commissionStrategy = TradingConfiguration.getCommissionStrategy();
+        CommissionStrategy commissionStrategy = new DynamicCommissionStrategy(this.tradingConfigurationService.getCommissionStrategyParameters());
 
         CalculateTradesResponse response = new CalculateTradesResponse();
 

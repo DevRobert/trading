@@ -4,6 +4,8 @@ import trading.domain.Amount;
 
 public class CommissionStrategies {
     private static CommissionStrategy zeroCommissionStrategy;
+    private static DynamicCommissionStrategyParameters consorsXetraCommissionStrategyParameters;
+    private static DynamicCommissionStrategyParameters degiroXetraCommissionStrategyParameters;
     private static CommissionStrategy consorsXetraCommissionStrategy;
     private static CommissionStrategy degiroXetraCommissionStrategy;
 
@@ -11,8 +13,16 @@ public class CommissionStrategies {
         return zeroCommissionStrategy;
     }
 
+    public static DynamicCommissionStrategyParameters getConsorsXetraCommissionStrategyParameters() {
+        return consorsXetraCommissionStrategyParameters;
+    }
+
     public static CommissionStrategy getConsorsXetraCommissionStrategy() {
         return consorsXetraCommissionStrategy;
+    }
+
+    public static DynamicCommissionStrategyParameters getDegiroXetraCommissionStrategyParameters() {
+        return degiroXetraCommissionStrategyParameters;
     }
 
     public static CommissionStrategy getDegiroXetraCommissionStrategy() {
@@ -30,24 +40,24 @@ public class CommissionStrategies {
     }
 
     private static void buildConsorsXetraCommissionStratgey() {
-        DynamicCommissionStrategyParametersBuilder parametersBuilder = new DynamicCommissionStrategyParametersBuilder();
+        consorsXetraCommissionStrategyParameters = new DynamicCommissionStrategyParametersBuilder()
+                .setFixedAmount(new Amount(4.95 + 1.50))
+                .setVariableAmountRate(0.0025)
+                .setMinimumVariableAmount(new Amount(9.95))
+                .setMaximumVariableAmount(new Amount(69.00))
+                .build();
 
-        parametersBuilder.setFixedAmount(new Amount(4.95 + 1.50));
-        parametersBuilder.setVariableAmountRate(0.0025);
-        parametersBuilder.setMinimumVariableAmount(new Amount(9.95));
-        parametersBuilder.setMaximumVariableAmount(new Amount(69.00));
-
-        consorsXetraCommissionStrategy = new DynamicCommissionStrategy(parametersBuilder.build());
+        consorsXetraCommissionStrategy = new DynamicCommissionStrategy(consorsXetraCommissionStrategyParameters);
     }
 
     private static void buildDegiroXetraCommissionStrategy() {
-        DynamicCommissionStrategyParametersBuilder parametersBuilder = new DynamicCommissionStrategyParametersBuilder();
+        degiroXetraCommissionStrategyParameters = new DynamicCommissionStrategyParametersBuilder()
+                .setFixedAmount(new Amount(2.0))
+                .setVariableAmountRate(0.00008)
+                .setMinimumVariableAmount(new Amount(0.0))
+                .setMaximumVariableAmount(new Amount(28.0))
+                .build();
 
-        parametersBuilder.setFixedAmount(new Amount(2.0));
-        parametersBuilder.setVariableAmountRate(0.00008);
-        parametersBuilder.setMinimumVariableAmount(new Amount(0.0));
-        parametersBuilder.setMaximumVariableAmount(new Amount(28.0));
-
-        degiroXetraCommissionStrategy = new DynamicCommissionStrategy(parametersBuilder.build());
+        degiroXetraCommissionStrategy = new DynamicCommissionStrategy(degiroXetraCommissionStrategyParameters);
     }
 }

@@ -8,20 +8,24 @@ public class DynamicCommissionStrategyParametersBuilder {
     private Amount minimumVariableAmount;
     private Amount maximumVariableAmount;
 
-    public void setFixedAmount(Amount fixedAmount) {
+    public DynamicCommissionStrategyParametersBuilder setFixedAmount(Amount fixedAmount) {
         this.fixedAmount = fixedAmount;
+        return this;
     }
 
-    public void setVariableAmountRate(double variableAmountRate) {
+    public DynamicCommissionStrategyParametersBuilder setVariableAmountRate(double variableAmountRate) {
         this.variableAmountRate = variableAmountRate;
+        return this;
     }
 
-    public void setMinimumVariableAmount(Amount minimumVariableAmount) {
+    public DynamicCommissionStrategyParametersBuilder setMinimumVariableAmount(Amount minimumVariableAmount) {
         this.minimumVariableAmount = minimumVariableAmount;
+        return this;
     }
 
-    public void setMaximumVariableAmount(Amount maximumVariableAmount) {
+    public DynamicCommissionStrategyParametersBuilder setMaximumVariableAmount(Amount maximumVariableAmount) {
         this.maximumVariableAmount = maximumVariableAmount;
+        return this;
     }
 
     public DynamicCommissionStrategyParameters build() {

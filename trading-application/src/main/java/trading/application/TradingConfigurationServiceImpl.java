@@ -1,12 +1,25 @@
 package trading.application;
 
+import org.springframework.stereotype.Component;
 import trading.domain.DayCount;
 import trading.domain.broker.CommissionStrategies;
 import trading.domain.broker.CommissionStrategy;
+import trading.domain.broker.DynamicCommissionStrategyParameters;
 import trading.domain.strategy.compoundLocalMaximum.CompoundLocalMaximumTradingStrategyParameters;
 
-public class TradingConfiguration {
-    public static CompoundLocalMaximumTradingStrategyParameters getParameters() {
+@Component
+public class TradingConfigurationServiceImpl implements TradingConfigurationService {
+    public static CommissionStrategy getCommissionStrategy() {
+        return CommissionStrategies.getDegiroXetraCommissionStrategy();
+    }
+
+    @Override
+    public DynamicCommissionStrategyParameters getCommissionStrategyParameters() {
+        return CommissionStrategies.getDegiroXetraCommissionStrategyParameters();
+    }
+
+    @Override
+    public CompoundLocalMaximumTradingStrategyParameters getTradingStrategyParameters() {
         DayCount buyTriggerLocalMaximumLookBehindPeriod = new DayCount(10);
         double buyTriggerMinDeclineFromLocalMaximumPercentage = 0.1;
         double sellTriggerTrailingStopLossMinDeclineFromMaximumAfterBuyingPercentage = 0.07;
@@ -22,9 +35,5 @@ public class TradingConfiguration {
                 sellTriggerStopLossMinimumDeclineSinceBuyingPercentage,
                 maximumPercentage
         );
-    }
-
-    public static CommissionStrategy getCommissionStrategy() {
-        return CommissionStrategies.getDegiroXetraCommissionStrategy();
     }
 }

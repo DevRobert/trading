@@ -21,13 +21,16 @@ public class ScoringServiceImpl implements ScoringService {
     @Autowired
     private MultiStockMarketDataStore multiStockMarketDataStore;
 
+    @Autowired
+    private TradingConfigurationService tradingConfigurationService;
+
     public ScoringServiceImpl(MultiStockMarketDataStore multiStockMarketDataStore) {
         this.multiStockMarketDataStore = multiStockMarketDataStore;
     }
 
     @Override
     public Scores calculateBuyScoring(Account account) {
-        CompoundLocalMaximumTradingStrategyParameters parameters = TradingConfiguration.getParameters();
+        CompoundLocalMaximumTradingStrategyParameters parameters = this.tradingConfigurationService.getTradingStrategyParameters();
 
         DayCount buyTriggerLocalMaximumLookBehindPeriod = parameters.getBuyTriggerLocalMaximumLookBehindPeriod();
         double buyTriggerMinDeclineFromLocalMaximumPercentage = parameters.getBuyTriggerMinDeclineFromLocalMaximumPercentage();
@@ -45,7 +48,7 @@ public class ScoringServiceImpl implements ScoringService {
 
     @Override
     public Scores calculateSellScoring(Account account) {
-        CompoundLocalMaximumTradingStrategyParameters parameters = TradingConfiguration.getParameters();
+        CompoundLocalMaximumTradingStrategyParameters parameters = this.tradingConfigurationService.getTradingStrategyParameters();
 
         double activateTrailingStopLossMinRaiseSinceBuyingPercentage = parameters.getActivateTrailingStopLossMinRaiseSinceBuyingPercentage();
         double sellTriggerStopLossMinimumDeclineSinceBuyingPercentage = parameters.getSellTriggerStopLossMinimumDeclineSinceBuyingPercentage();
