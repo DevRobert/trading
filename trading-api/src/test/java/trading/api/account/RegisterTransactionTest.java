@@ -26,7 +26,7 @@ public class RegisterTransactionTest extends AccountControllerTestBase {
     public void initializeRequestBody() throws JSONException {
         this.requestBody = new JSONObject()
                 .put("transactionType", "Buy")
-                .put("isin", "MyISIN")
+                .put("isin", "A")
                 .put("quantity", 5)
                 .put("totalPrice", 1000.0)
                 .put("commission", 20.0);
@@ -46,7 +46,7 @@ public class RegisterTransactionTest extends AccountControllerTestBase {
             Transaction transaction = invocation.getArgument(1);
 
             Assert.assertEquals(TransactionType.Buy, transaction.getTransactionType());
-            Assert.assertEquals("MyISIN", transaction.getIsin().getText());
+            Assert.assertEquals("A", transaction.getIsin().getText());
             Assert.assertEquals(new Quantity(5), transaction.getQuantity());
             Assert.assertEquals(new Amount(1000.0), transaction.getTotalPrice());
             Assert.assertEquals(new Amount(20.0), transaction.getCommission());
@@ -102,7 +102,16 @@ public class RegisterTransactionTest extends AccountControllerTestBase {
 
         this.performRequest()
                 .andExpect(status().is(HttpStatus.BAD_REQUEST.value()))
-                .andExpect(jsonPath("message", is("The ISIN text must not be empty.")));
+                .andExpect(jsonPath("message", is("The ISIN must be specified.")));
+    }
+
+    @Test
+    public void registerTransactionFails_ifIsinUnknown() throws Exception {
+        this.requestBody.put("isin", "UnknownISIN");
+
+        this.performRequest()
+                .andExpect(status().is(HttpStatus.BAD_REQUEST.value()))
+                .andExpect(jsonPath("message", is("The given ISIN is unknown.")));
     }
 
     @Test

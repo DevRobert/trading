@@ -149,7 +149,7 @@ public class AccountController {
                 transactionBuilder.setTransactionType(transactionType);
             }
 
-            if(request.getIsin() != null) {
+            if(request.getIsin() != null && !request.getIsin().isEmpty()) {
                 ISIN isin = new ISIN(request.getIsin());
                 transactionBuilder.setIsin(isin);
             }
@@ -172,6 +172,11 @@ public class AccountController {
             transactionBuilder.setDate(LocalDate.now());
 
             Transaction transaction = transactionBuilder.build();
+
+            if(this.instrumentNameProvider.getInstrumentName(transaction.getIsin()) == null) {
+                throw new ClientException("The given ISIN is unknown.");
+            }
+
             this.accountService.registerTransaction(this.accountId, transaction);
 
             RegisterTransactionResponse response = new RegisterTransactionResponse();
