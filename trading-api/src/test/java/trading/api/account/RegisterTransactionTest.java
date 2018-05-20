@@ -13,6 +13,8 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import trading.domain.*;
 import trading.domain.account.AccountId;
 
+import java.time.LocalDate;
+
 import static org.hamcrest.CoreMatchers.is;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doAnswer;
@@ -25,6 +27,7 @@ public class RegisterTransactionTest extends AccountControllerTestBase {
     @Before
     public void initializeRequestBody() throws JSONException {
         this.requestBody = new JSONObject()
+                .put("date", "2000-01-02")
                 .put("transactionType", "Buy")
                 .put("isin", "A")
                 .put("quantity", 5)
@@ -45,6 +48,7 @@ public class RegisterTransactionTest extends AccountControllerTestBase {
         doAnswer(invocation -> {
             Transaction transaction = invocation.getArgument(1);
 
+            Assert.assertEquals(LocalDate.of(2000, 1, 2), transaction.getDate());
             Assert.assertEquals(TransactionType.Buy, transaction.getTransactionType());
             Assert.assertEquals("A", transaction.getIsin().getText());
             Assert.assertEquals(new Quantity(5), transaction.getQuantity());
@@ -58,6 +62,24 @@ public class RegisterTransactionTest extends AccountControllerTestBase {
         this.performRequest()
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("transactionId", is(100)));
+    }
+
+    @Test
+    public void registerTransactionFails_ifDateNotSpecified() throws Exception {
+        this.requestBody.remove("date");
+
+        this.performRequest()
+                .andExpect(status().is(HttpStatus.BAD_REQUEST.value()))
+                .andExpect(jsonPath("message", is("The date must be specified.")));
+    }
+
+    @Test
+    public void registerTransactionFails_ifDateIsInvalid() throws Exception {
+        this.requestBody.put("date", "invalid date");
+
+        this.performRequest()
+                .andExpect(status().is(HttpStatus.BAD_REQUEST.value()))
+                .andExpect(jsonPath("message", is("The given date is invalid. The format must be YYYY-MM-DD, e.g. 2000-01-23.")));
     }
 
     @Test

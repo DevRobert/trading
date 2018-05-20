@@ -1,11 +1,22 @@
 package trading.api.account;
 
+import java.time.LocalDate;
+
 public class RegisterTransactionRequest {
+    private LocalDate date;
     private String transactionType;
     private String isin;
     private Integer quantity;
     private Double totalPrice;
     private Double commission;
+
+    public LocalDate getDate() {
+        return this.date;
+    }
+
+    public void setDate(LocalDate date) {
+        this.date = date;
+    }
 
     public String getTransactionType() {
         return this.transactionType;

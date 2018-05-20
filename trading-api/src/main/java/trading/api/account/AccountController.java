@@ -132,6 +132,10 @@ public class AccountController {
         try {
             TransactionBuilder transactionBuilder = new TransactionBuilder();
 
+            if(request.getDate() != null) {
+                transactionBuilder.setDate(request.getDate());
+            }
+
             if (request.getTransactionType() != null) {
                 if(request.getTransactionType().isEmpty()) {
                     throw new ClientException("The transaction type must not be empty.");
@@ -168,8 +172,6 @@ public class AccountController {
                 Amount commission = new Amount(request.getCommission());
                 transactionBuilder.setCommission(commission);
             }
-
-            transactionBuilder.setDate(LocalDate.now());
 
             Transaction transaction = transactionBuilder.build();
 
