@@ -5,18 +5,18 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 import java.time.LocalDate;
 
 public class AccountTransactionDto {
-    @JsonFormat(pattern = "yyyy-MM-dd")
     private LocalDate date;
     private String transactionType;
     private String isin;
     private String name;
-    private int quantity;
-    private double marketPrice;
-    private double totalPrice;
-    private double commission;
+    private Integer quantity;
+    private Double marketPrice;
+    private Double totalPrice;
+    private Double commission;
+    private Double amount;
 
     public LocalDate getDate() {
-        return date;
+        return this.date;
     }
 
     public void setDate(LocalDate date) {
@@ -24,7 +24,7 @@ public class AccountTransactionDto {
     }
 
     public String getTransactionType() {
-        return transactionType;
+        return this.transactionType;
     }
 
     public void setTransactionType(String transactionType) {
@@ -32,7 +32,7 @@ public class AccountTransactionDto {
     }
 
     public String getIsin() {
-        return isin;
+        return this.isin;
     }
 
     public void setIsin(String isin) {
@@ -40,42 +40,50 @@ public class AccountTransactionDto {
     }
 
     public String getName() {
-        return name;
+        return this.name;
     }
 
     public void setName(String name) {
         this.name = name;
     }
 
-    public int getQuantity() {
+    public Integer getQuantity() {
         return quantity;
     }
 
-    public void setQuantity(int quantity) {
+    public void setQuantity(Integer quantity) {
         this.quantity = quantity;
     }
 
-    public double getMarketPrice() {
-        return marketPrice;
+    public Double getMarketPrice() {
+        return this.marketPrice;
     }
 
-    public void setMarketPrice(double marketPrice) {
+    public void setMarketPrice(Double marketPrice) {
         this.marketPrice = marketPrice;
     }
 
-    public double getTotalPrice() {
-        return totalPrice;
+    public Double getTotalPrice() {
+        return this.totalPrice;
     }
 
-    public void setTotalPrice(double totalPrice) {
+    public void setTotalPrice(Double totalPrice) {
         this.totalPrice = totalPrice;
     }
 
-    public double getCommission() {
-        return commission;
+    public Double getCommission() {
+        return this.commission;
     }
 
-    public void setCommission(double commission) {
+    public void setCommission(Double commission) {
         this.commission = commission;
+    }
+
+    public Double getAmount() {
+        return this.amount;
+    }
+
+    public void setAmount(Double amount) {
+        this.amount = amount;
     }
 }

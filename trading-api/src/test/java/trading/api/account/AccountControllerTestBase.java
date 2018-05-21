@@ -5,10 +5,7 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import trading.api.ControllerTestBase;
 import trading.application.AccountService;
 import trading.domain.*;
-import trading.domain.account.Account;
-import trading.domain.account.AccountId;
-import trading.domain.account.MarketTransactionBuilder;
-import trading.domain.account.MarketTransactionType;
+import trading.domain.account.*;
 import trading.domain.market.InstrumentNameProvider;
 import trading.domain.market.MarketPriceSnapshot;
 import trading.domain.market.MarketPriceSnapshotBuilder;
@@ -34,21 +31,27 @@ public abstract class AccountControllerTestBase extends ControllerTestBase {
         Account account = new Account(seedCapital);
 
         account.registerTransaction(new MarketTransactionBuilder()
+                .setDate(LocalDate.of(2018, 4, 12))
                 .setTransactionType(MarketTransactionType.Buy)
                 .setIsin(new ISIN("A"))
                 .setQuantity(new Quantity(10))
                 .setTotalPrice(new Amount(1000.0))
                 .setCommission(new Amount(20.0))
-                .setDate(LocalDate.of(2018, 4, 12))
                 .build());
 
         account.registerTransaction(new MarketTransactionBuilder()
+                .setDate(LocalDate.of(2018, 4, 13))
                 .setTransactionType(MarketTransactionType.Buy)
                 .setIsin(new ISIN("B"))
                 .setQuantity(new Quantity(10))
                 .setTotalPrice(new Amount(1000.0))
                 .setCommission(new Amount(20.0))
-                .setDate(LocalDate.of(2018, 4, 13))
+                .build());
+
+        account.registerTransaction(new DividendTransactionBuilder()
+                .setDate(LocalDate.of(2018, 4, 14))
+                .setIsin(new ISIN("B"))
+                .setAmount(new Amount(100.0))
                 .build());
 
         given(this.accountService.getAccount(new AccountId(1))).willReturn(account);

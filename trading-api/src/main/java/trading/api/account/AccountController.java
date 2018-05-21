@@ -96,6 +96,9 @@ public class AccountController {
             if(transaction instanceof MarketTransaction) {
                 accountTransactionDto = this.buildAccountTransactionDto((MarketTransaction) transaction);
             }
+            else if(transaction instanceof DividendTransaction) {
+                accountTransactionDto = this.buildAccountTransactionDto((DividendTransaction) transaction);
+            }
             else {
                 throw new RuntimeException("Transaction type not supported.");
             }
@@ -121,16 +124,31 @@ public class AccountController {
 
         accountTransactionDto.setTotalPrice(transaction.getTotalPrice().getValue());
         accountTransactionDto.setCommission(transaction.getCommission().getValue());
+        accountTransactionDto.setName(this.getInstrumentName(transaction.getIsin()));
 
-        String instrumentName = this.instrumentNameProvider.getInstrumentName(transaction.getIsin());
+        return accountTransactionDto;
+    }
+
+    private AccountTransactionDto buildAccountTransactionDto(DividendTransaction transaction) {
+        AccountTransactionDto accountTransactionDto = new AccountTransactionDto();
+
+        accountTransactionDto.setDate(transaction.getDate());
+        accountTransactionDto.setTransactionType(TransactionType.Dividend.toString());
+        accountTransactionDto.setIsin(transaction.getIsin().getText());
+        accountTransactionDto.setName(this.getInstrumentName(transaction.getIsin()));
+        accountTransactionDto.setAmount(transaction.getAmount().getValue());
+
+        return accountTransactionDto;
+    }
+
+    private String getInstrumentName(ISIN isin) {
+        String instrumentName = this.instrumentNameProvider.getInstrumentName(isin);
 
         if(instrumentName == null) {
             instrumentName = "Unknown";
         }
 
-        accountTransactionDto.setName(instrumentName);
-
-        return accountTransactionDto;
+        return instrumentName;
     }
 
     @RequestMapping(value = "/api/account/transactions/{transactionId}", method = RequestMethod.GET)
@@ -157,7 +175,7 @@ public class AccountController {
                 try {
                     transactionType = (MarketTransactionType) TransactionType.ofName(request.getTransactionType());
                 }
-                catch(IllegalArgumentException illegalArgumentException) {
+                catch(RuntimeException e) {
                     throw new ClientException(String.format("The transaction type '%s' is invalid.", request.getTransactionType()));
                 }
 
