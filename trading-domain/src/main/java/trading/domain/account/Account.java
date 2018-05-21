@@ -17,8 +17,8 @@ public class Account {
     private HashMap<ISIN, Position> positions = new HashMap<>();
     private Amount commissions;
     private Amount balance;
-    private final List<Transaction> processedTransactions;
-    private final Map<ISIN, Transaction> lastTransactionByIsin;
+    private final List<MarketTransaction> processedTransactions;
+    private final Map<ISIN, MarketTransaction> lastTransactionByIsin;
 
     public Account(Amount availableMoney) {
         this.commissions = Amount.Zero;
@@ -54,7 +54,7 @@ public class Account {
         return this.positions.containsKey(isin);
     }
 
-    public List<Transaction> getProcessedTransactions() {
+    public List<MarketTransaction> getProcessedTransactions() {
         return processedTransactions;
     }
 
@@ -70,7 +70,7 @@ public class Account {
         this.id = accountId;
     }
 
-    public void registerTransaction(Transaction transaction) throws AccountStateException {
+    public void registerTransaction(MarketTransaction transaction) throws AccountStateException {
         this.ensureTransactionCanBePaid(transaction);
 
         Position position = this.getPositionOrCreatePending(transaction.getIsin());
@@ -106,7 +106,7 @@ public class Account {
         return position;
     }
 
-    private void ensureTransactionCanBePaid(Transaction transaction) throws AccountStateException {
+    private void ensureTransactionCanBePaid(MarketTransaction transaction) throws AccountStateException {
         Amount requiredAmount;
 
         if(transaction.getTransactionType() == TransactionType.Buy) {
@@ -116,7 +116,7 @@ public class Account {
             requiredAmount = Amount.Zero;
         }
         else {
-            throw new RuntimeException("Transaction type not supported: " + transaction.getTransactionType());
+            throw new RuntimeException("MarketTransaction type not supported: " + transaction.getTransactionType());
         }
 
         if(requiredAmount.getValue() > 0 && requiredAmount.getValue() > this.availableMoney.getValue()) {
@@ -124,7 +124,7 @@ public class Account {
         }
     }
 
-    private void updateBalances(Transaction transaction) {
+    private void updateBalances(MarketTransaction transaction) {
         this.commissions = this.commissions.add(transaction.getCommission());
 
         if(transaction.getTransactionType() == TransactionType.Buy) {
@@ -134,7 +134,7 @@ public class Account {
             this.availableMoney = this.availableMoney.add(transaction.getTotalPrice());
         }
         else {
-            throw new RuntimeException("Transaction type not supported: " + transaction.getTransactionType());
+            throw new RuntimeException("MarketTransaction type not supported: " + transaction.getTransactionType());
         }
 
         this.availableMoney = this.availableMoney.subtract(transaction.getCommission());
@@ -142,7 +142,7 @@ public class Account {
         this.balance = this.balance.subtract(transaction.getCommission());
     }
 
-    private void handleTransaction(Transaction transaction, Position position) throws AccountStateException {
+    private void handleTransaction(MarketTransaction transaction, Position position) throws AccountStateException {
         if(transaction.getTransactionType() == TransactionType.Buy) {
             this.handleBuyTransaction(transaction, position);
         }
@@ -150,11 +150,11 @@ public class Account {
             this.handleSellTransaction(transaction, position);
         }
         else {
-            throw new RuntimeException("Transaction type not supported: " + transaction.getTransactionType());
+            throw new RuntimeException("MarketTransaction type not supported: " + transaction.getTransactionType());
         }
     }
 
-    private void handleBuyTransaction(Transaction transaction, Position position) throws AccountStateException {
+    private void handleBuyTransaction(MarketTransaction transaction, Position position) throws AccountStateException {
         if(!position.getQuantity().isZero()) {
             throw new AccountStateException("Subsequent buy transactions for non-empty positions are not supported.");
         }
@@ -163,7 +163,7 @@ public class Account {
         position.setFullMarketPrice(transaction.getTotalPrice());
     }
 
-    private void handleSellTransaction(Transaction transaction, Position position) throws AccountStateException {
+    private void handleSellTransaction(MarketTransaction transaction, Position position) throws AccountStateException {
         if(position.isCreationPending()) {
             throw new AccountStateException("The sell transaction could not be processed because there was no respective position found.");
         }
@@ -179,13 +179,13 @@ public class Account {
         position.setFullMarketPrice(Amount.Zero);
     }
 
-    private void preventPartialSellTransactions(Transaction transaction, Position position) throws AccountStateException {
+    private void preventPartialSellTransactions(MarketTransaction transaction, Position position) throws AccountStateException {
         if(transaction.getQuantity().getValue() < position.getQuantity().getValue()) {
             throw new AccountStateException("Partial sell transactions are not supported.");
         }
     }
 
-    private void preventExceedingSellTransactions(Transaction transaction, Position position) throws AccountStateException {
+    private void preventExceedingSellTransactions(MarketTransaction transaction, Position position) throws AccountStateException {
         if(transaction.getQuantity().getValue() > position.getQuantity().getValue()) {
             throw new AccountStateException("The sell transaction states a higher quantity than the position has.");
         }
@@ -236,8 +236,8 @@ public class Account {
         return totalStocksQuantity;
     }
 
-    public Transaction getLastTransaction(ISIN isin) {
-        Transaction transaction = this.lastTransactionByIsin.get(isin);
+    public MarketTransaction getLastTransaction(ISIN isin) {
+        MarketTransaction transaction = this.lastTransactionByIsin.get(isin);
 
         if(transaction == null) {
             throw new RuntimeException("There was no transaction registered yet for the specified ISIN.");

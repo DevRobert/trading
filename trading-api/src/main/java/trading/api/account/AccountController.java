@@ -90,7 +90,7 @@ public class AccountController {
 
         List<AccountTransactionDto> accountTransactionDtos = new ArrayList<>();
 
-        for(Transaction transaction: account.getProcessedTransactions()) {
+        for(MarketTransaction transaction: account.getProcessedTransactions()) {
             AccountTransactionDto accountTransactionDto = new AccountTransactionDto();
             accountTransactionDto.setDate(transaction.getDate());
             accountTransactionDto.setTransactionType(transaction.getTransactionType().toString());
@@ -127,7 +127,7 @@ public class AccountController {
     @RequestMapping(value = "/api/account/transactions/", method = RequestMethod.POST)
     public RegisterTransactionResponse registerTransaction(@RequestBody RegisterTransactionRequest request) {
         try {
-            TransactionBuilder transactionBuilder = new TransactionBuilder();
+            MarketTransactionBuilder transactionBuilder = new MarketTransactionBuilder();
 
             if(request.getDate() != null) {
                 transactionBuilder.setDate(request.getDate());
@@ -170,7 +170,7 @@ public class AccountController {
                 transactionBuilder.setCommission(commission);
             }
 
-            Transaction transaction = transactionBuilder.build();
+            MarketTransaction transaction = transactionBuilder.build();
 
             if(this.instrumentNameProvider.getInstrumentName(transaction.getIsin()) == null) {
                 throw new ClientException("The given ISIN is unknown.");

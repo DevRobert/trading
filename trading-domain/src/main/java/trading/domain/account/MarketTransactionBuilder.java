@@ -6,7 +6,7 @@ import trading.domain.Quantity;
 
 import java.time.LocalDate;
 
-public class TransactionBuilder {
+public class MarketTransactionBuilder {
     private TransactionType transactionType;
     private ISIN isin;
     private Quantity quantity;
@@ -14,37 +14,37 @@ public class TransactionBuilder {
     private Amount commission;
     private LocalDate date;
 
-    public TransactionBuilder setTransactionType(TransactionType transactionType) {
+    public MarketTransactionBuilder setTransactionType(TransactionType transactionType) {
         this.transactionType = transactionType;
         return this;
     }
 
-    public TransactionBuilder setIsin(ISIN isin) {
+    public MarketTransactionBuilder setIsin(ISIN isin) {
         this.isin = isin;
         return this;
     }
 
-    public TransactionBuilder setQuantity(Quantity quantity) {
+    public MarketTransactionBuilder setQuantity(Quantity quantity) {
         this.quantity = quantity;
         return this;
     }
 
-    public TransactionBuilder setTotalPrice(Amount totalPrice) {
+    public MarketTransactionBuilder setTotalPrice(Amount totalPrice) {
         this.totalPrice = totalPrice;
         return this;
     }
 
-    public TransactionBuilder setCommission(Amount commission) {
+    public MarketTransactionBuilder setCommission(Amount commission) {
         this.commission = commission;
         return this;
     }
 
-    public TransactionBuilder setDate(LocalDate date) {
+    public MarketTransactionBuilder setDate(LocalDate date) {
         this.date = date;
         return this;
     }
 
-    public Transaction build() {
-        return new Transaction(this.transactionType, this.isin, this.quantity, this.totalPrice, this.commission, this.date);
+    public MarketTransaction build() {
+        return new MarketTransaction(this.transactionType, this.isin, this.quantity, this.totalPrice, this.commission, this.date);
     }
 }

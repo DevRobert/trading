@@ -30,7 +30,7 @@ public class BalanceTest extends AccountTestBase {
         Amount fullPrice = new Amount(5000.0);
         Amount commission = new Amount(10.0);
 
-        Transaction transaction = new TransactionBuilder()
+        MarketTransaction transaction = new MarketTransactionBuilder()
                 .setTransactionType(TransactionType.Sell)
                 .setIsin(ISIN.MunichRe)
                 .setQuantity(new Quantity(10))
@@ -55,7 +55,7 @@ public class BalanceTest extends AccountTestBase {
         Amount fullPrice = new Amount(6000.0);
         Amount commission = Amount.Zero;
 
-        Transaction transaction = new TransactionBuilder()
+        MarketTransaction transaction = new MarketTransactionBuilder()
                 .setTransactionType(TransactionType.Sell)
                 .setIsin(ISIN.MunichRe)
                 .setQuantity(new Quantity(10))
@@ -80,7 +80,7 @@ public class BalanceTest extends AccountTestBase {
         Amount fullPrice = new Amount(4000.0);
         Amount commission = Amount.Zero;
 
-        Transaction transaction = new TransactionBuilder()
+        MarketTransaction transaction = new MarketTransactionBuilder()
                 .setTransactionType(TransactionType.Sell)
                 .setIsin(ISIN.MunichRe)
                 .setQuantity(new Quantity(10))

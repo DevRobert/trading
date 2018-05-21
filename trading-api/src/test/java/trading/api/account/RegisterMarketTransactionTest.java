@@ -12,7 +12,7 @@ import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import trading.domain.*;
 import trading.domain.account.AccountId;
-import trading.domain.account.Transaction;
+import trading.domain.account.MarketTransaction;
 import trading.domain.account.TransactionId;
 import trading.domain.account.TransactionType;
 
@@ -24,7 +24,7 @@ import static org.mockito.Mockito.doAnswer;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-public class RegisterTransactionTest extends AccountControllerTestBase {
+public class RegisterMarketTransactionTest extends AccountControllerTestBase {
     private JSONObject requestBody;
 
     @Before
@@ -49,7 +49,7 @@ public class RegisterTransactionTest extends AccountControllerTestBase {
     @Test
     public void registerTransaction() throws Exception {
         doAnswer(invocation -> {
-            Transaction transaction = invocation.getArgument(1);
+            MarketTransaction transaction = invocation.getArgument(1);
 
             Assert.assertEquals(LocalDate.of(2000, 1, 2), transaction.getDate());
             Assert.assertEquals(TransactionType.Buy, transaction.getTransactionType());
@@ -60,7 +60,7 @@ public class RegisterTransactionTest extends AccountControllerTestBase {
 
             transaction.setId(new TransactionId(100));
             return null;
-        }).when(this.accountService).registerTransaction(ArgumentMatchers.eq(new AccountId(1)), any(Transaction.class));
+        }).when(this.accountService).registerTransaction(ArgumentMatchers.eq(new AccountId(1)), any(MarketTransaction.class));
 
         this.performRequest()
                 .andExpect(status().isOk())
@@ -170,7 +170,7 @@ public class RegisterTransactionTest extends AccountControllerTestBase {
     public void registerTransactionFails_ifDomainRuleViolated() throws Exception {
         doAnswer(invocation -> {
             throw new DomainException("Example for domain exception.");
-        }).when(this.accountService).registerTransaction(ArgumentMatchers.eq(new AccountId(1)), any(Transaction.class));
+        }).when(this.accountService).registerTransaction(ArgumentMatchers.eq(new AccountId(1)), any(MarketTransaction.class));
 
         this.performRequest()
                 .andExpect(status().is(HttpStatus.BAD_REQUEST.value()))

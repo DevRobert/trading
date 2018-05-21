@@ -21,7 +21,7 @@ public class AvailableMoneyTest extends AccountTestBase {
         Amount totalPrice = new Amount(1000.0);
         Amount commission = new Amount(10.0);
 
-        Transaction transaction = new TransactionBuilder()
+        MarketTransaction transaction = new MarketTransactionBuilder()
                 .setTransactionType(TransactionType.Buy)
                 .setIsin(ISIN.MunichRe)
                 .setQuantity(new Quantity(1))
@@ -44,7 +44,7 @@ public class AvailableMoneyTest extends AccountTestBase {
         Amount totalBuyPrice = new Amount(1000.0);
         Amount buyCommission = new Amount(10.0);
 
-        Transaction buyTransaction = new TransactionBuilder()
+        MarketTransaction buyTransaction = new MarketTransactionBuilder()
                 .setTransactionType(TransactionType.Buy)
                 .setIsin(ISIN.MunichRe)
                 .setQuantity(new Quantity(1))
@@ -60,7 +60,7 @@ public class AvailableMoneyTest extends AccountTestBase {
         Amount totalSellPrice = new Amount(2000.0);
         Amount sellCommission = new Amount(20.0);
 
-        Transaction sellTransaction = new TransactionBuilder()
+        MarketTransaction sellTransaction = new MarketTransactionBuilder()
                 .setTransactionType(TransactionType.Sell)
                 .setIsin(ISIN.MunichRe)
                 .setQuantity(new Quantity(1))
@@ -81,7 +81,7 @@ public class AvailableMoneyTest extends AccountTestBase {
         Amount buyTotalPrice = new Amount(11000.0);
         Amount buyCommission = new Amount(1000.0);
 
-        Transaction transaction = new TransactionBuilder()
+        MarketTransaction transaction = new MarketTransactionBuilder()
                 .setTransactionType(TransactionType.Buy)
                 .setIsin(ISIN.MunichRe)
                 .setQuantity(new Quantity(1))
@@ -105,7 +105,7 @@ public class AvailableMoneyTest extends AccountTestBase {
         Amount buyTotalPrice = new Amount(10000.0);
         Amount buyCommission = new Amount(1000.0);
 
-        Transaction transaction = new TransactionBuilder()
+        MarketTransaction transaction = new MarketTransactionBuilder()
                 .setTransactionType(TransactionType.Buy)
                 .setIsin(ISIN.MunichRe)
                 .setQuantity(new Quantity(1))
@@ -124,7 +124,7 @@ public class AvailableMoneyTest extends AccountTestBase {
         Amount buyTotalPrice = new Amount(9000.0);
         Amount buyCommission = new Amount(1000.0);
 
-        Transaction transaction = new TransactionBuilder()
+        MarketTransaction transaction = new MarketTransactionBuilder()
                 .setTransactionType(TransactionType.Buy)
                 .setIsin(ISIN.MunichRe)
                 .setQuantity(new Quantity(1))
@@ -143,7 +143,7 @@ public class AvailableMoneyTest extends AccountTestBase {
         Amount buyTotalPrice = new Amount(8000.0);
         Amount buyCommission = new Amount(1000.0);
 
-        Transaction transaction = new TransactionBuilder()
+        MarketTransaction transaction = new MarketTransactionBuilder()
                 .setTransactionType(TransactionType.Buy)
                 .setIsin(ISIN.MunichRe)
                 .setQuantity(new Quantity(1))
@@ -162,7 +162,7 @@ public class AvailableMoneyTest extends AccountTestBase {
         Amount buyTotalPrice = new Amount(9000.0);
         Amount buyCommission = new Amount(1000.0);
 
-        Transaction buyTransaction = new TransactionBuilder()
+        MarketTransaction buyTransaction = new MarketTransactionBuilder()
                 .setTransactionType(TransactionType.Buy)
                 .setIsin(ISIN.MunichRe)
                 .setQuantity(new Quantity(1))
@@ -178,7 +178,7 @@ public class AvailableMoneyTest extends AccountTestBase {
         Amount sellTotalPrice = new Amount(5.0);
         Amount sellCommission = new Amount(10.0);
 
-        Transaction sellTransaction = new TransactionBuilder()
+        MarketTransaction sellTransaction = new MarketTransactionBuilder()
                 .setTransactionType(TransactionType.Sell)
                 .setIsin(ISIN.MunichRe)
                 .setQuantity(new Quantity(1))
@@ -199,7 +199,7 @@ public class AvailableMoneyTest extends AccountTestBase {
         Amount buyTotalPrice1 = new Amount(8000.0);
         Amount buyCommission1 = new Amount(0.0);
 
-        Transaction buyTransaction1 = new TransactionBuilder()
+        MarketTransaction buyTransaction1 = new MarketTransactionBuilder()
                 .setTransactionType(TransactionType.Buy)
                 .setIsin(ISIN.MunichRe)
                 .setQuantity(new Quantity(1))
@@ -215,7 +215,7 @@ public class AvailableMoneyTest extends AccountTestBase {
         Amount buyTotalPrice2 = new Amount(2000.0);
         Amount buyCommission2 = new Amount(0.0);
 
-        Transaction buyTransaction2 = new TransactionBuilder()
+        MarketTransaction buyTransaction2 = new MarketTransactionBuilder()
                 .setTransactionType(TransactionType.Buy)
                 .setIsin(ISIN.Allianz)
                 .setQuantity(new Quantity(1))
@@ -231,7 +231,7 @@ public class AvailableMoneyTest extends AccountTestBase {
         Amount sellTotalPrice1 = new Amount(5.0);
         Amount sellCommission1 = new Amount(10.0);
 
-        Transaction sellTransaction1 = new TransactionBuilder()
+        MarketTransaction sellTransaction1 = new MarketTransactionBuilder()
                 .setTransactionType(TransactionType.Sell)
                 .setIsin(ISIN.MunichRe)
                 .setQuantity(new Quantity(1))
@@ -247,7 +247,7 @@ public class AvailableMoneyTest extends AccountTestBase {
         Amount sellTotalPrice2 = new Amount(5.0);
         Amount sellCommission2 = new Amount(10.0);
 
-        Transaction sellTransaction2 = new TransactionBuilder()
+        MarketTransaction sellTransaction2 = new MarketTransactionBuilder()
                 .setTransactionType(TransactionType.Sell)
                 .setIsin(ISIN.Allianz)
                 .setQuantity(new Quantity(1))

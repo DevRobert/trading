@@ -8,12 +8,12 @@ import trading.domain.Quantity;
 
 import java.time.LocalDate;
 
-public class TransactionBuilderTest {
+public class MarketMarketTransactionBuilderTest {
     @Test
     public void buildTransaction() {
         LocalDate date = LocalDate.now();
 
-        Transaction transaction = new TransactionBuilder()
+        MarketTransaction transaction = new MarketTransactionBuilder()
                 .setTransactionType(TransactionType.Buy)
                 .setIsin(ISIN.MunichRe)
                 .setQuantity(new Quantity(10))

@@ -4,8 +4,8 @@ import trading.domain.Amount;
 import trading.domain.DomainException;
 import trading.domain.ISIN;
 import trading.domain.account.Account;
-import trading.domain.account.Transaction;
-import trading.domain.account.TransactionBuilder;
+import trading.domain.account.MarketTransaction;
+import trading.domain.account.MarketTransactionBuilder;
 import trading.domain.account.TransactionType;
 import trading.domain.market.HistoricalMarketData;
 
@@ -83,7 +83,7 @@ public class VirtualBroker implements Broker {
             throw new DomainException("The order request cannot be processed as it requires more money than available.");
         }
 
-        Transaction transaction = new TransactionBuilder()
+        MarketTransaction transaction = new MarketTransactionBuilder()
                 .setTransactionType(TransactionType.Buy)
                 .setIsin(isin)
                 .setQuantity(orderRequest.getQuantity())
@@ -101,7 +101,7 @@ public class VirtualBroker implements Broker {
         Amount totalPrice = lastMarketPrice.multiply(orderRequest.getQuantity());
         Amount commission = this.commissionStrategy.calculateCommission(totalPrice);
 
-        Transaction transaction = new TransactionBuilder()
+        MarketTransaction transaction = new MarketTransactionBuilder()
                 .setTransactionType(TransactionType.Sell)
                 .setIsin(isin)
                 .setQuantity(orderRequest.getQuantity())

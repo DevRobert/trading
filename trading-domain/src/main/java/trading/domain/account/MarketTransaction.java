@@ -7,7 +7,7 @@ import trading.domain.Quantity;
 
 import java.time.LocalDate;
 
-public class Transaction {
+public class MarketTransaction {
     private TransactionId id;
     private TransactionType transactionType;
     private ISIN isin;
@@ -16,7 +16,7 @@ public class Transaction {
     private Amount commission;
     private LocalDate date;
 
-    public Transaction(TransactionType transactionType, ISIN isin, Quantity quantity, Amount totalPrice, Amount commission, LocalDate date) {
+    public MarketTransaction(TransactionType transactionType, ISIN isin, Quantity quantity, Amount totalPrice, Amount commission, LocalDate date) {
         if(transactionType == null) {
             throw new DomainException("The transaction type must be specified.");
         }

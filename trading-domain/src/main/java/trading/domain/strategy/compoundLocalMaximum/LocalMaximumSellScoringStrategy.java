@@ -4,7 +4,7 @@ import trading.domain.Amount;
 import trading.domain.DayCount;
 import trading.domain.ISIN;
 import trading.domain.account.Account;
-import trading.domain.account.Transaction;
+import trading.domain.account.MarketTransaction;
 import trading.domain.account.TransactionType;
 import trading.domain.market.HistoricalMarketData;
 import trading.domain.market.HistoricalStockData;
@@ -54,7 +54,7 @@ public class LocalMaximumSellScoringStrategy implements ScoringStrategy {
     public boolean sellStock(HistoricalMarketData historicalMarketData, Account account, ISIN isin, StringBuilder commentBuilder) {
         HistoricalStockData historicalStockData = historicalMarketData.getStockData(isin);
         Amount closingMarketPrice = historicalStockData.getLastClosingMarketPrice();
-        Transaction buyTransaction = this.getLastBuyTransaction(account, isin);
+        MarketTransaction buyTransaction = this.getLastBuyTransaction(account, isin);
         Amount buyPrice = new Amount(buyTransaction.getTotalPrice().getValue() / buyTransaction.getQuantity().getValue());
         DayCount daysPassedAfterBuyingDate = historicalMarketData.countDaysAfter(buyTransaction.getDate());
         DayCount lookBehindPeriod = new DayCount(daysPassedAfterBuyingDate.getValue() + 1);
@@ -79,8 +79,8 @@ public class LocalMaximumSellScoringStrategy implements ScoringStrategy {
         return this.trailingStopLoss(closingMarketPrice, maximumMarketPriceSinceBuying, commentBuilder);
     }
 
-    private Transaction getLastBuyTransaction(Account account, ISIN isin) {
-        Transaction transaction = account.getLastTransaction(isin);
+    private MarketTransaction getLastBuyTransaction(Account account, ISIN isin) {
+        MarketTransaction transaction = account.getLastTransaction(isin);
 
         if(transaction.getTransactionType() != TransactionType.Buy) {
             throw new RuntimeException("Buy transaction expected.");

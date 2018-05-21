@@ -2,7 +2,7 @@ package trading.application;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import trading.domain.account.Transaction;
+import trading.domain.account.MarketTransaction;
 import trading.domain.account.Account;
 import trading.domain.account.AccountId;
 import trading.domain.account.AccountRepository;
@@ -22,7 +22,7 @@ public class AccountServiceImpl implements AccountService {
     }
 
     @Override
-    public void registerTransaction(AccountId accountId, Transaction transaction) {
+    public void registerTransaction(AccountId accountId, MarketTransaction transaction) {
         Account account = this.accountRepository.getAccount(accountId);
         account.registerTransaction(transaction);
         this.accountRepository.saveAccount(account);

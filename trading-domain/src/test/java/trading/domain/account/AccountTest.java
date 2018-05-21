@@ -31,7 +31,7 @@ public class AccountTest extends AccountTestBase {
         Amount fullPrice = new Amount(2000.0);
         Amount commission = new Amount(20.0);
 
-        Transaction transaction = new TransactionBuilder()
+        MarketTransaction transaction = new MarketTransactionBuilder()
                 .setTransactionType(TransactionType.Buy)
                 .setIsin(isin)
                 .setQuantity(quantity)
@@ -54,7 +54,7 @@ public class AccountTest extends AccountTestBase {
         Amount fullPrice = new Amount(1000.0);
         Amount commission = new Amount(10.0);
 
-        Transaction transaction = new TransactionBuilder()
+        MarketTransaction transaction = new MarketTransactionBuilder()
                 .setTransactionType(TransactionType.Buy)
                 .setIsin(ISIN.MunichRe)
                 .setQuantity(new Quantity(1))
@@ -78,7 +78,7 @@ public class AccountTest extends AccountTestBase {
         Amount buyCommission = new Amount(10.0);
         Amount sellCommission = new Amount(10.0);
 
-        Transaction buyTransaction = new TransactionBuilder()
+        MarketTransaction buyTransaction = new MarketTransactionBuilder()
                 .setTransactionType(TransactionType.Buy)
                 .setIsin(isin)
                 .setQuantity(quantity)
@@ -87,7 +87,7 @@ public class AccountTest extends AccountTestBase {
                 .setDate(LocalDate.of(2000, 1, 1))
                 .build();
 
-        Transaction sellTransaction = new TransactionBuilder()
+        MarketTransaction sellTransaction = new MarketTransactionBuilder()
                 .setTransactionType(TransactionType.Sell)
                 .setIsin(isin)
                 .setQuantity(quantity)
@@ -111,7 +111,7 @@ public class AccountTest extends AccountTestBase {
         Amount totalPrice = new Amount(1000.0);
         Amount commission = new Amount(10.0);
 
-        Transaction transaction = new TransactionBuilder()
+        MarketTransaction transaction = new MarketTransactionBuilder()
                 .setTransactionType(TransactionType.Sell)
                 .setIsin(isin)
                 .setQuantity(quantity)
@@ -139,7 +139,7 @@ public class AccountTest extends AccountTestBase {
         Amount buyCommission = new Amount(10.0);
         Amount sellCommission = new Amount(10.0);
 
-        Transaction buyTransaction = new TransactionBuilder()
+        MarketTransaction buyTransaction = new MarketTransactionBuilder()
                 .setTransactionType(TransactionType.Buy)
                 .setIsin(isin)
                 .setQuantity(new Quantity(2))
@@ -148,7 +148,7 @@ public class AccountTest extends AccountTestBase {
                 .setDate(LocalDate.of(2000, 1, 1))
                 .build();
 
-        Transaction sellTransaction = new TransactionBuilder()
+        MarketTransaction sellTransaction = new MarketTransactionBuilder()
                 .setTransactionType(TransactionType.Sell)
                 .setIsin(isin)
                 .setQuantity(new Quantity(1))
@@ -178,7 +178,7 @@ public class AccountTest extends AccountTestBase {
         Amount buyCommission = new Amount(10.0);
         Amount sellCommission = new Amount(10.0);
 
-        Transaction buyTransaction = new TransactionBuilder()
+        MarketTransaction buyTransaction = new MarketTransactionBuilder()
                 .setTransactionType(TransactionType.Buy)
                 .setIsin(isin)
                 .setQuantity(new Quantity(1))
@@ -187,7 +187,7 @@ public class AccountTest extends AccountTestBase {
                 .setDate(LocalDate.of(2000, 1, 1))
                 .build();
 
-        Transaction sellTransaction = new TransactionBuilder()
+        MarketTransaction sellTransaction = new MarketTransactionBuilder()
                 .setTransactionType(TransactionType.Sell)
                 .setIsin(isin)
                 .setQuantity(new Quantity(2))
@@ -215,7 +215,7 @@ public class AccountTest extends AccountTestBase {
         Amount fullBuyPrice = new Amount(1000.0);
         Amount buyCommission = new Amount(10.0);
 
-        Transaction buyTransaction = new TransactionBuilder()
+        MarketTransaction buyTransaction = new MarketTransactionBuilder()
                 .setTransactionType(TransactionType.Buy)
                 .setIsin(isin)
                 .setQuantity(new Quantity(2))
@@ -224,7 +224,7 @@ public class AccountTest extends AccountTestBase {
                 .setDate(LocalDate.of(2000, 1, 1))
                 .build();
 
-        Transaction furtherBuyTransaction = new TransactionBuilder()
+        MarketTransaction furtherBuyTransaction = new MarketTransactionBuilder()
                 .setTransactionType(TransactionType.Buy)
                 .setIsin(isin)
                 .setQuantity(new Quantity(2))
@@ -255,7 +255,7 @@ public class AccountTest extends AccountTestBase {
         Amount buyCommission = new Amount(10.0);
         Amount sellCommission = new Amount(10.0);
 
-        Transaction buyTransaction = new TransactionBuilder()
+        MarketTransaction buyTransaction = new MarketTransactionBuilder()
                 .setTransactionType(TransactionType.Buy)
                 .setIsin(isin)
                 .setQuantity(new Quantity(2))
@@ -264,7 +264,7 @@ public class AccountTest extends AccountTestBase {
                 .setDate(LocalDate.of(2000, 1, 1))
                 .build();
 
-        Transaction sellTransaction = new TransactionBuilder()
+        MarketTransaction sellTransaction = new MarketTransactionBuilder()
                 .setTransactionType(TransactionType.Sell)
                 .setIsin(isin)
                 .setQuantity(new Quantity(2))
@@ -273,7 +273,7 @@ public class AccountTest extends AccountTestBase {
                 .setDate(LocalDate.of(2000, 1, 2))
                 .build();
 
-        Transaction furtherBuyTransaction = new TransactionBuilder()
+        MarketTransaction furtherBuyTransaction = new MarketTransactionBuilder()
                 .setTransactionType(TransactionType.Buy)
                 .setIsin(isin)
                 .setQuantity(new Quantity(5))
@@ -296,7 +296,7 @@ public class AccountTest extends AccountTestBase {
         Amount fullPrice = new Amount(20000.0);
         Amount commission = new Amount(10.0);
 
-        Transaction transaction = new TransactionBuilder()
+        MarketTransaction transaction = new MarketTransactionBuilder()
                 .setTransactionType(TransactionType.Sell)
                 .setIsin(ISIN.MunichRe)
                 .setQuantity(new Quantity(1))
@@ -331,7 +331,7 @@ public class AccountTest extends AccountTestBase {
     @Test
     public void returnsInitiallyEmptyTransactionLists() {
         Account account = new Account(new Amount(50000.0));
-        List<Transaction> transaction = account.getProcessedTransactions();
+        List<MarketTransaction> transaction = account.getProcessedTransactions();
         Assert.assertEquals(0, transaction.size());
     }
 
@@ -339,7 +339,7 @@ public class AccountTest extends AccountTestBase {
     public void returnsRegisteredTransactions() {
         Account account = new Account(new Amount(50000.0));
 
-        Transaction firstTransaction = new TransactionBuilder()
+        MarketTransaction firstTransaction = new MarketTransactionBuilder()
                 .setTransactionType(TransactionType.Buy)
                 .setIsin(ISIN.MunichRe)
                 .setQuantity(new Quantity(1))
@@ -348,7 +348,7 @@ public class AccountTest extends AccountTestBase {
                 .setDate(LocalDate.of(2000, 1, 1))
                 .build();
 
-        Transaction secondTransaction = new TransactionBuilder()
+        MarketTransaction secondTransaction = new MarketTransactionBuilder()
                 .setTransactionType(TransactionType.Sell)
                 .setIsin(ISIN.MunichRe)
                 .setQuantity(new Quantity(1))
@@ -369,7 +369,7 @@ public class AccountTest extends AccountTestBase {
     public void returnsCurrentStocks() {
         Account account = new Account(new Amount(50000.0));
 
-        Transaction firstTransaction = new TransactionBuilder()
+        MarketTransaction firstTransaction = new MarketTransactionBuilder()
                 .setTransactionType(TransactionType.Buy)
                 .setIsin(ISIN.MunichRe)
                 .setQuantity(new Quantity(1))
@@ -378,7 +378,7 @@ public class AccountTest extends AccountTestBase {
                 .setDate(LocalDate.of(2000, 1, 1))
                 .build();
 
-        Transaction secondTransaction = new TransactionBuilder()
+        MarketTransaction secondTransaction = new MarketTransactionBuilder()
                 .setTransactionType(TransactionType.Buy)
                 .setIsin(ISIN.Allianz)
                 .setQuantity(new Quantity(2))
@@ -401,7 +401,7 @@ public class AccountTest extends AccountTestBase {
     public void returnsCurrentStocksWithoutEmptyPositions() {
         Account account = new Account(new Amount(10000.0));
 
-        account.registerTransaction(new TransactionBuilder()
+        account.registerTransaction(new MarketTransactionBuilder()
                 .setTransactionType(TransactionType.Buy)
                 .setIsin(ISIN.MunichRe)
                 .setQuantity(new Quantity(10))
@@ -410,7 +410,7 @@ public class AccountTest extends AccountTestBase {
                 .setDate(LocalDate.of(2000, 1, 1))
                 .build());
 
-        account.registerTransaction(new TransactionBuilder()
+        account.registerTransaction(new MarketTransactionBuilder()
                 .setTransactionType(TransactionType.Buy)
                 .setIsin(ISIN.Allianz)
                 .setQuantity(new Quantity(10))
@@ -419,7 +419,7 @@ public class AccountTest extends AccountTestBase {
                 .setDate(LocalDate.of(2000, 1, 2))
                 .build());
 
-        account.registerTransaction(new TransactionBuilder()
+        account.registerTransaction(new MarketTransactionBuilder()
                 .setTransactionType(TransactionType.Sell)
                 .setIsin(ISIN.MunichRe)
                 .setQuantity(new Quantity(10))
@@ -438,7 +438,7 @@ public class AccountTest extends AccountTestBase {
     public void returnsTotalMarketPrice() {
         Account account = new Account(new Amount(50000.0));
 
-        Transaction firstTransaction = new TransactionBuilder()
+        MarketTransaction firstTransaction = new MarketTransactionBuilder()
                 .setTransactionType(TransactionType.Buy)
                 .setIsin(ISIN.MunichRe)
                 .setQuantity(new Quantity(1))
@@ -447,7 +447,7 @@ public class AccountTest extends AccountTestBase {
                 .setDate(LocalDate.of(2000, 1, 1))
                 .build();
 
-        Transaction secondTransaction = new TransactionBuilder()
+        MarketTransaction secondTransaction = new MarketTransactionBuilder()
                 .setTransactionType(TransactionType.Buy)
                 .setIsin(ISIN.Allianz)
                 .setQuantity(new Quantity(2))
@@ -466,7 +466,7 @@ public class AccountTest extends AccountTestBase {
     public void returnsTotalStockQuantity() {
         Account account = new Account(new Amount(50000.0));
 
-        Transaction firstTransaction = new TransactionBuilder()
+        MarketTransaction firstTransaction = new MarketTransactionBuilder()
                 .setTransactionType(TransactionType.Buy)
                 .setIsin(ISIN.MunichRe)
                 .setQuantity(new Quantity(1))
@@ -475,7 +475,7 @@ public class AccountTest extends AccountTestBase {
                 .setDate(LocalDate.of(2000, 1, 1))
                 .build();
 
-        Transaction secondTransaction = new TransactionBuilder()
+        MarketTransaction secondTransaction = new MarketTransactionBuilder()
                 .setTransactionType(TransactionType.Buy)
                 .setIsin(ISIN.Allianz)
                 .setQuantity(new Quantity(2))
@@ -484,7 +484,7 @@ public class AccountTest extends AccountTestBase {
                 .setDate(LocalDate.of(2000, 1, 2))
                 .build();
 
-        Transaction thirdTransaction = new TransactionBuilder()
+        MarketTransaction thirdTransaction = new MarketTransactionBuilder()
                 .setTransactionType(TransactionType.Buy)
                 .setIsin(ISIN.DeutscheBank)
                 .setQuantity(new Quantity(3))
@@ -502,7 +502,7 @@ public class AccountTest extends AccountTestBase {
 
     @Test
     public void returnsLastTransaction() {
-        Transaction firstBuyTransaction = new TransactionBuilder()
+        MarketTransaction firstBuyTransaction = new MarketTransactionBuilder()
                 .setTransactionType(TransactionType.Buy)
                 .setIsin(ISIN.MunichRe)
                 .setQuantity(new Quantity(1))
@@ -511,7 +511,7 @@ public class AccountTest extends AccountTestBase {
                 .setDate(LocalDate.of(2000, 1, 1))
                 .build();
 
-        Transaction sellTransaction = new TransactionBuilder()
+        MarketTransaction sellTransaction = new MarketTransactionBuilder()
                 .setTransactionType(TransactionType.Sell)
                 .setIsin(ISIN.MunichRe)
                 .setQuantity(new Quantity(1))
@@ -520,7 +520,7 @@ public class AccountTest extends AccountTestBase {
                 .setDate(LocalDate.of(2000, 1, 2))
                 .build();
 
-        Transaction secondBuyTransaction = new TransactionBuilder()
+        MarketTransaction secondBuyTransaction = new MarketTransactionBuilder()
                 .setTransactionType(TransactionType.Buy)
                 .setIsin(ISIN.MunichRe)
                 .setQuantity(new Quantity(2))
@@ -529,7 +529,7 @@ public class AccountTest extends AccountTestBase {
                 .setDate(LocalDate.of(2000, 1, 3))
                 .build();
 
-        Transaction otherBuyTransaction = new TransactionBuilder()
+        MarketTransaction otherBuyTransaction = new MarketTransactionBuilder()
                 .setTransactionType(TransactionType.Buy)
                 .setIsin(ISIN.Allianz)
                 .setQuantity(new Quantity(1))
@@ -543,14 +543,14 @@ public class AccountTest extends AccountTestBase {
         this.account.registerTransaction(secondBuyTransaction);
         this.account.registerTransaction(otherBuyTransaction);
 
-        Transaction lastTransaction = this.account.getLastTransaction(ISIN.MunichRe);
+        MarketTransaction lastTransaction = this.account.getLastTransaction(ISIN.MunichRe);
 
         Assert.assertSame(lastTransaction, secondBuyTransaction);
     }
 
     @Test
     public void getLastTransactionFails_ifNoBuyTransactionAvailable() {
-        Transaction otherBuyTransaction = new TransactionBuilder()
+        MarketTransaction otherBuyTransaction = new MarketTransactionBuilder()
                 .setTransactionType(TransactionType.Buy)
                 .setIsin(ISIN.Allianz)
                 .setQuantity(new Quantity(1))

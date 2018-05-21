@@ -73,10 +73,10 @@ public class MySqlAccountRepositoryTest {
     public void getAccountTransactions() {
         Account account = this.accountRepository.getAccount(new AccountId(2));
 
-        List<Transaction> transactions = account.getProcessedTransactions();
+        List<MarketTransaction> transactions = account.getProcessedTransactions();
         Assert.assertEquals(2, transactions.size());
 
-        Transaction buyTransaction = transactions.get(0);
+        MarketTransaction buyTransaction = transactions.get(0);
 
         Assert.assertEquals(TransactionType.Buy, buyTransaction.getTransactionType());
         Assert.assertEquals(new Quantity(10), buyTransaction.getQuantity());
@@ -85,7 +85,7 @@ public class MySqlAccountRepositoryTest {
         Assert.assertEquals(new Amount(10.0), buyTransaction.getCommission());
         Assert.assertNotNull(buyTransaction.getId());
 
-        Transaction sellTransaction = transactions.get(1);
+        MarketTransaction sellTransaction = transactions.get(1);
 
         Assert.assertEquals(TransactionType.Sell, sellTransaction.getTransactionType());
         Assert.assertEquals(new Quantity(10), sellTransaction.getQuantity());
@@ -116,7 +116,7 @@ public class MySqlAccountRepositoryTest {
         ISIN isin = new ISIN("DE0008430026");
         Quantity quantity = new Quantity(10);
 
-        Transaction buyTransaction = new TransactionBuilder()
+        MarketTransaction buyTransaction = new MarketTransactionBuilder()
                 .setTransactionType(TransactionType.Buy)
                 .setIsin(isin)
                 .setQuantity(quantity)
@@ -125,7 +125,7 @@ public class MySqlAccountRepositoryTest {
                 .setDate(LocalDate.of(2018, 4, 27))
                 .build();
 
-        Transaction sellTransaction = new TransactionBuilder()
+        MarketTransaction sellTransaction = new MarketTransactionBuilder()
                 .setTransactionType(TransactionType.Sell)
                 .setIsin(isin)
                 .setQuantity(quantity)
@@ -143,11 +143,11 @@ public class MySqlAccountRepositoryTest {
 
         Account accountFromDatabase = this.accountRepository.getAccount(account.getId());
 
-        List<Transaction> transactionsFromDatabase = accountFromDatabase.getProcessedTransactions();
+        List<MarketTransaction> transactionsFromDatabase = accountFromDatabase.getProcessedTransactions();
 
         Assert.assertEquals(2, transactionsFromDatabase.size());
 
-        Transaction buyTransactionFromDatabase = transactionsFromDatabase.get(0);
+        MarketTransaction buyTransactionFromDatabase = transactionsFromDatabase.get(0);
         Assert.assertEquals(buyTransaction.getTransactionType(), buyTransactionFromDatabase.getTransactionType());
         Assert.assertEquals(buyTransaction.getIsin(), buyTransactionFromDatabase.getIsin());
         Assert.assertEquals(buyTransaction.getQuantity(), buyTransactionFromDatabase.getQuantity());
@@ -155,7 +155,7 @@ public class MySqlAccountRepositoryTest {
         Assert.assertEquals(buyTransaction.getCommission(), buyTransactionFromDatabase.getCommission());
         Assert.assertEquals(buyTransaction.getDate(), buyTransactionFromDatabase.getDate());
 
-        Transaction sellTransactionFromDatabase = transactionsFromDatabase.get(1);
+        MarketTransaction sellTransactionFromDatabase = transactionsFromDatabase.get(1);
         Assert.assertEquals(sellTransaction.getTransactionType(), sellTransactionFromDatabase.getTransactionType());
         Assert.assertEquals(sellTransaction.getIsin(), sellTransactionFromDatabase.getIsin());
         Assert.assertEquals(sellTransaction.getQuantity(), sellTransactionFromDatabase.getQuantity());
@@ -170,7 +170,7 @@ public class MySqlAccountRepositoryTest {
 
         Account account = this.accountRepository.createAccount(new ClientId(1), new Amount(10000.0));
 
-        account.registerTransaction(new TransactionBuilder()
+        account.registerTransaction(new MarketTransactionBuilder()
                 .setTransactionType(TransactionType.Buy)
                 .setIsin(ISIN.MunichRe)
                 .setQuantity(new Quantity(1))
@@ -183,7 +183,7 @@ public class MySqlAccountRepositoryTest {
 
         // Register second transaction
 
-        account.registerTransaction(new TransactionBuilder()
+        account.registerTransaction(new MarketTransactionBuilder()
                 .setTransactionType(TransactionType.Sell)
                 .setIsin(ISIN.MunichRe)
                 .setQuantity(new Quantity(1))
@@ -198,7 +198,7 @@ public class MySqlAccountRepositoryTest {
 
         Account accountFromDatabase = this.accountRepository.getAccount(account.getId());
 
-        List<Transaction> transactionsFromDatabase = accountFromDatabase.getProcessedTransactions();
+        List<MarketTransaction> transactionsFromDatabase = accountFromDatabase.getProcessedTransactions();
         Assert.assertEquals(2, transactionsFromDatabase.size());
     }
 }
