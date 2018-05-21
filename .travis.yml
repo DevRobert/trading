@@ -15,5 +15,6 @@ script:
   - echo "USE mysql;\nCREATE DATABASE trading_test;\nUPDATE user SET password=PASSWORD('testtest') WHERE user='root';\nFLUSH PRIVILEGES;\n" | mysql -u root
   - mysql -uroot -ptesttest --default-character-set=utf8 trading_test < trading-persistence/src/main/resources/mysql/20180421-00-Initial-Account.sql
   - mysql -uroot -ptesttest --default-character-set=utf8 trading_test < trading-persistence/src/main/resources/mysql/20180512-00-Instrument-Updates.sql
+  - mysql -uroot -ptesttest --default-character-set=utf8 trading_test < trading-persistence/src/main/resources/mysql/20180521-00-Dividend-Transactions.sql
   - docker ps
   - ./gradlew build
