@@ -24,6 +24,8 @@ public class AccountTest extends AccountTestBase {
         Assert.fail("PositionNotFoundException expected.");
     }
 
+    // Process buy transaction
+
     @Test
     public void buyTransactionLeadsToNewPosition() throws AccountStateException {
         ISIN isin = ISIN.MunichRe;
@@ -68,6 +70,127 @@ public class AccountTest extends AccountTestBase {
         Position position = account.getPosition(ISIN.MunichRe);
         Assert.assertFalse(position.isCreationPending());
     }
+
+    @Test
+    public void buyTransactionForNonEmptyPositionFails() throws AccountStateException {
+        ISIN isin = ISIN.MunichRe;
+        Amount fullBuyPrice = new Amount(1000.0);
+        Amount buyCommission = new Amount(10.0);
+
+        MarketTransaction buyTransaction = new MarketTransactionBuilder()
+                .setTransactionType(TransactionType.Buy)
+                .setIsin(isin)
+                .setQuantity(new Quantity(2))
+                .setTotalPrice(fullBuyPrice)
+                .setCommission(buyCommission)
+                .setDate(LocalDate.of(2000, 1, 1))
+                .build();
+
+        MarketTransaction furtherBuyTransaction = new MarketTransactionBuilder()
+                .setTransactionType(TransactionType.Buy)
+                .setIsin(isin)
+                .setQuantity(new Quantity(2))
+                .setTotalPrice(fullBuyPrice)
+                .setCommission(buyCommission)
+                .setDate(LocalDate.of(2000, 1, 2))
+                .build();
+
+        account.registerTransaction(buyTransaction);
+
+        try {
+            account.registerTransaction(furtherBuyTransaction);
+        }
+        catch(AccountStateException ex) {
+            Assert.assertEquals("Subsequent buy transactions for non-empty positions are not supported.", ex.getMessage());
+            return;
+        }
+
+        Assert.fail("AccountStateException expected.");
+    }
+
+    @Test
+    public void buyTransactionForCompensatedPositionPasses() throws AccountStateException {
+        ISIN isin = ISIN.MunichRe;
+        Amount fullBuyPrice = new Amount(1000.0);
+        Amount fullSellPrice = new Amount(2000.0);
+        Amount furtherBuyPrice = new Amount(3000.0);
+        Amount buyCommission = new Amount(10.0);
+        Amount sellCommission = new Amount(10.0);
+
+        MarketTransaction buyTransaction = new MarketTransactionBuilder()
+                .setTransactionType(TransactionType.Buy)
+                .setIsin(isin)
+                .setQuantity(new Quantity(2))
+                .setTotalPrice(fullBuyPrice)
+                .setCommission(buyCommission)
+                .setDate(LocalDate.of(2000, 1, 1))
+                .build();
+
+        MarketTransaction sellTransaction = new MarketTransactionBuilder()
+                .setTransactionType(TransactionType.Sell)
+                .setIsin(isin)
+                .setQuantity(new Quantity(2))
+                .setTotalPrice(fullSellPrice)
+                .setCommission(sellCommission)
+                .setDate(LocalDate.of(2000, 1, 2))
+                .build();
+
+        MarketTransaction furtherBuyTransaction = new MarketTransactionBuilder()
+                .setTransactionType(TransactionType.Buy)
+                .setIsin(isin)
+                .setQuantity(new Quantity(5))
+                .setTotalPrice(furtherBuyPrice)
+                .setCommission(buyCommission)
+                .setDate(LocalDate.of(2000, 1, 3))
+                .build();
+
+        account.registerTransaction(buyTransaction);
+        account.registerTransaction(sellTransaction);
+        account.registerTransaction(furtherBuyTransaction);
+
+        Position position = account.getPosition(isin);
+        Assert.assertEquals(furtherBuyPrice, position.getFullMarketPrice());
+        Assert.assertEquals(new Quantity(5), position.getQuantity());
+    }
+
+    @Test
+    public void noEmptyPositionIsCreatedForFailedTransaction() {
+        Amount fullPrice = new Amount(20000.0);
+        Amount commission = new Amount(10.0);
+
+        MarketTransaction transaction = new MarketTransactionBuilder()
+                .setTransactionType(TransactionType.Sell)
+                .setIsin(ISIN.MunichRe)
+                .setQuantity(new Quantity(1))
+                .setTotalPrice(fullPrice)
+                .setCommission(commission)
+                .setDate(LocalDate.of(2000, 1, 1))
+                .build();
+
+        boolean registrationFailed = false;
+
+        try {
+            account.registerTransaction(transaction);
+        }
+        catch(AccountStateException ex) {
+            registrationFailed = true;
+        }
+
+        if(!registrationFailed) {
+            Assert.fail("AccountStateException expected.");
+        }
+
+        try {
+            account.getPosition(ISIN.MunichRe);
+        }
+        catch(PositionNotFoundException ex) {
+            return;
+        }
+
+        Assert.fail("PositionNotFoundException expected.");
+    }
+
+    // Process sell transaction
 
     @Test
     public void sellTransactionCompensatesExistingPosition() throws AccountStateException {
@@ -209,129 +332,209 @@ public class AccountTest extends AccountTestBase {
         Assert.fail("AccountStateException expected.");
     }
 
+    // Process dividend transaction
+
     @Test
-    public void buyTransactionForNonEmptyPositionFails() throws AccountStateException {
-        ISIN isin = ISIN.MunichRe;
-        Amount fullBuyPrice = new Amount(1000.0);
-        Amount buyCommission = new Amount(10.0);
+    public void dividendTransactionIncreasesAvailableMoneyAndBalance() {
+        // Seed capital: 10,000
+        // Buy Transaction: 2,000
+        // Dividend: 1,000
+        // Available money: 10,000 - 2,000 + 1,000 = 9,000
+        // Balance: 10,000 + 1,000
 
         MarketTransaction buyTransaction = new MarketTransactionBuilder()
-                .setTransactionType(TransactionType.Buy)
-                .setIsin(isin)
-                .setQuantity(new Quantity(2))
-                .setTotalPrice(fullBuyPrice)
-                .setCommission(buyCommission)
                 .setDate(LocalDate.of(2000, 1, 1))
-                .build();
-
-        MarketTransaction furtherBuyTransaction = new MarketTransactionBuilder()
                 .setTransactionType(TransactionType.Buy)
-                .setIsin(isin)
+                .setIsin(ISIN.MunichRe)
                 .setQuantity(new Quantity(2))
-                .setTotalPrice(fullBuyPrice)
-                .setCommission(buyCommission)
-                .setDate(LocalDate.of(2000, 1, 2))
+                .setTotalPrice(new Amount(2000.0))
+                .setCommission(Amount.Zero)
                 .build();
 
-        account.registerTransaction(buyTransaction);
+        DividendTransaction dividendTransaction = new DividendTransactionBuilder()
+                .setDate(LocalDate.of(2000, 1, 2))
+                .setAmount(new Amount(1000.0))
+                .setIsin(ISIN.MunichRe)
+                .build();
 
-        try {
-            account.registerTransaction(furtherBuyTransaction);
-        }
-        catch(AccountStateException ex) {
-            Assert.assertEquals("Subsequent buy transactions for non-empty positions are not supported.", ex.getMessage());
-            return;
-        }
+        this.account.registerTransaction(buyTransaction);
+        this.account.registerTransaction(dividendTransaction);
 
-        Assert.fail("AccountStateException expected.");
+        Assert.assertEquals(new Amount(9000.0), account.getAvailableMoney());
+        Assert.assertEquals(new Amount(11000.0), account.getBalance());
     }
 
     @Test
-    public void buyTransactionForCompensatedPositionPasses() throws AccountStateException {
-        ISIN isin = ISIN.MunichRe;
-        Amount fullBuyPrice = new Amount(1000.0);
-        Amount fullSellPrice = new Amount(2000.0);
-        Amount furtherBuyPrice = new Amount(3000.0);
-        Amount buyCommission = new Amount(10.0);
-        Amount sellCommission = new Amount(10.0);
+    public void dividendTransactionFailsIfStocksHaveNeverBeenBought() {
+        DividendTransaction dividendTransaction = new DividendTransactionBuilder()
+                .setDate(LocalDate.now())
+                .setAmount(new Amount(1000.0))
+                .setIsin(ISIN.Allianz)
+                .build();
 
+        try {
+            this.account.registerTransaction(dividendTransaction);
+        }
+        catch(DomainException e) {
+            Assert.assertEquals("The dividend transaction cannot be registered as there was no respective position found for the given ISIN.", e.getMessage());
+            return;
+        }
+
+        Assert.fail("DomainException expected.");
+    }
+
+    @Test
+    public void dividendTransactionFailsIfStocksSoldExactly32DaysBeforeDividendDate() {
         MarketTransaction buyTransaction = new MarketTransactionBuilder()
+                .setDate(LocalDate.of(2018, 1, 1))
                 .setTransactionType(TransactionType.Buy)
-                .setIsin(isin)
+                .setIsin(ISIN.MunichRe)
                 .setQuantity(new Quantity(2))
-                .setTotalPrice(fullBuyPrice)
-                .setCommission(buyCommission)
-                .setDate(LocalDate.of(2000, 1, 1))
+                .setTotalPrice(new Amount(2000.0))
+                .setCommission(Amount.Zero)
                 .build();
 
         MarketTransaction sellTransaction = new MarketTransactionBuilder()
-                .setTransactionType(TransactionType.Sell)
-                .setIsin(isin)
-                .setQuantity(new Quantity(2))
-                .setTotalPrice(fullSellPrice)
-                .setCommission(sellCommission)
-                .setDate(LocalDate.of(2000, 1, 2))
-                .build();
-
-        MarketTransaction furtherBuyTransaction = new MarketTransactionBuilder()
-                .setTransactionType(TransactionType.Buy)
-                .setIsin(isin)
-                .setQuantity(new Quantity(5))
-                .setTotalPrice(furtherBuyPrice)
-                .setCommission(buyCommission)
-                .setDate(LocalDate.of(2000, 1, 3))
-                .build();
-
-        account.registerTransaction(buyTransaction);
-        account.registerTransaction(sellTransaction);
-        account.registerTransaction(furtherBuyTransaction);
-
-        Position position = account.getPosition(isin);
-        Assert.assertEquals(furtherBuyPrice, position.getFullMarketPrice());
-        Assert.assertEquals(new Quantity(5), position.getQuantity());
-    }
-
-    @Test
-    public void noEmptyPositionIsCreatedForFailedTransaction() {
-        Amount fullPrice = new Amount(20000.0);
-        Amount commission = new Amount(10.0);
-
-        MarketTransaction transaction = new MarketTransactionBuilder()
+                .setDate(LocalDate.of(2018, 3, 1))
                 .setTransactionType(TransactionType.Sell)
                 .setIsin(ISIN.MunichRe)
-                .setQuantity(new Quantity(1))
-                .setTotalPrice(fullPrice)
-                .setCommission(commission)
-                .setDate(LocalDate.of(2000, 1, 1))
+                .setQuantity(new Quantity(2))
+                .setTotalPrice(new Amount(2000.0))
+                .setCommission(Amount.Zero)
                 .build();
 
-        boolean registrationFailed = false;
+        DividendTransaction dividendTransaction = new DividendTransactionBuilder()
+                .setDate(LocalDate.of(2018, 4, 3))
+                .setAmount(new Amount(1000.0))
+                .setIsin(ISIN.MunichRe)
+                .build();
+
+        this.account.registerTransaction(buyTransaction);
+        this.account.registerTransaction(sellTransaction);
 
         try {
-            account.registerTransaction(transaction);
+            this.account.registerTransaction(dividendTransaction);
         }
-        catch(AccountStateException ex) {
-            registrationFailed = true;
-        }
-
-        if(!registrationFailed) {
-            Assert.fail("AccountStateException expected.");
-        }
-
-        try {
-            account.getPosition(ISIN.MunichRe);
-        }
-        catch(PositionNotFoundException ex) {
+        catch(DomainException e) {
+            Assert.assertEquals("The dividend transaction cannot be registered as the dividend date (2018-04-03) lies more than 30 days after the close date of the respective position (2018-03-01).", e.getMessage());
             return;
         }
 
-        Assert.fail("PositionNotFoundException expected.");
+        Assert.fail("DomainException expected.");
     }
+
+    @Test
+    public void dividendTransactionFailsIfStocksSoldExactly31DaysBeforeDividendDate() {
+        MarketTransaction buyTransaction = new MarketTransactionBuilder()
+                .setDate(LocalDate.of(2018, 1, 1))
+                .setTransactionType(TransactionType.Buy)
+                .setIsin(ISIN.MunichRe)
+                .setQuantity(new Quantity(2))
+                .setTotalPrice(new Amount(2000.0))
+                .setCommission(Amount.Zero)
+                .build();
+
+        MarketTransaction sellTransaction = new MarketTransactionBuilder()
+                .setDate(LocalDate.of(2018, 3, 1))
+                .setTransactionType(TransactionType.Sell)
+                .setIsin(ISIN.MunichRe)
+                .setQuantity(new Quantity(2))
+                .setTotalPrice(new Amount(2000.0))
+                .setCommission(Amount.Zero)
+                .build();
+
+        DividendTransaction dividendTransaction = new DividendTransactionBuilder()
+                .setDate(LocalDate.of(2018, 4, 2))
+                .setAmount(new Amount(1000.0))
+                .setIsin(ISIN.MunichRe)
+                .build();
+
+        this.account.registerTransaction(buyTransaction);
+        this.account.registerTransaction(sellTransaction);
+
+        try {
+            this.account.registerTransaction(dividendTransaction);
+        }
+        catch(DomainException e) {
+            Assert.assertEquals("The dividend transaction cannot be registered as the dividend date (2018-04-02) lies more than 30 days after the close date of the respective position (2018-03-01).", e.getMessage());
+            return;
+        }
+
+        Assert.fail("DomainException expected.");
+    }
+
+    @Test
+    public void dividendTransactionPassesIfStocksSoldExactly30DaysBeforeDividendDate() {
+        MarketTransaction buyTransaction = new MarketTransactionBuilder()
+                .setDate(LocalDate.of(2018, 1, 1))
+                .setTransactionType(TransactionType.Buy)
+                .setIsin(ISIN.MunichRe)
+                .setQuantity(new Quantity(2))
+                .setTotalPrice(new Amount(2000.0))
+                .setCommission(Amount.Zero)
+                .build();
+
+        MarketTransaction sellTransaction = new MarketTransactionBuilder()
+                .setDate(LocalDate.of(2018, 3, 1))
+                .setTransactionType(TransactionType.Sell)
+                .setIsin(ISIN.MunichRe)
+                .setQuantity(new Quantity(2))
+                .setTotalPrice(new Amount(2000.0))
+                .setCommission(Amount.Zero)
+                .build();
+
+        DividendTransaction dividendTransaction = new DividendTransactionBuilder()
+                .setDate(LocalDate.of(2018, 3, 31))
+                .setAmount(new Amount(1000.0))
+                .setIsin(ISIN.MunichRe)
+                .build();
+
+        this.account.registerTransaction(buyTransaction);
+        this.account.registerTransaction(sellTransaction);
+        this.account.registerTransaction(dividendTransaction);
+
+        Assert.assertTrue(this.account.getProcessedTransactions().contains(dividendTransaction));
+    }
+
+    @Test
+    public void dividendTransactionPassesIfStocksSoldExactly29DaysBeforeDividendDate() {
+        MarketTransaction buyTransaction = new MarketTransactionBuilder()
+                .setDate(LocalDate.of(2018, 1, 1))
+                .setTransactionType(TransactionType.Buy)
+                .setIsin(ISIN.MunichRe)
+                .setQuantity(new Quantity(2))
+                .setTotalPrice(new Amount(2000.0))
+                .setCommission(Amount.Zero)
+                .build();
+
+        MarketTransaction sellTransaction = new MarketTransactionBuilder()
+                .setDate(LocalDate.of(2018, 3, 1))
+                .setTransactionType(TransactionType.Sell)
+                .setIsin(ISIN.MunichRe)
+                .setQuantity(new Quantity(2))
+                .setTotalPrice(new Amount(2000.0))
+                .setCommission(Amount.Zero)
+                .build();
+
+        DividendTransaction dividendTransaction = new DividendTransactionBuilder()
+                .setDate(LocalDate.of(2018, 3, 30))
+                .setAmount(new Amount(1000.0))
+                .setIsin(ISIN.MunichRe)
+                .build();
+
+        this.account.registerTransaction(buyTransaction);
+        this.account.registerTransaction(sellTransaction);
+        this.account.registerTransaction(dividendTransaction);
+
+        Assert.assertTrue(this.account.getProcessedTransactions().contains(dividendTransaction));
+    }
+
+    // Transaction list
 
     @Test
     public void returnsInitiallyEmptyTransactionLists() {
         Account account = new Account(new Amount(50000.0));
-        List<MarketTransaction> transaction = account.getProcessedTransactions();
+        List<Transaction> transaction = account.getProcessedTransactions();
         Assert.assertEquals(0, transaction.size());
     }
 
@@ -357,13 +560,95 @@ public class AccountTest extends AccountTestBase {
                 .setDate(LocalDate.of(2000, 1, 2))
                 .build();
 
+        DividendTransaction thirdTransaction = new DividendTransactionBuilder()
+                .setDate(LocalDate.of(2000, 1, 3))
+                .setIsin(ISIN.MunichRe)
+                .setAmount(new Amount(10.0))
+                .build();
+
         account.registerTransaction(firstTransaction);
         account.registerTransaction(secondTransaction);
+        account.registerTransaction(thirdTransaction);
 
-        Assert.assertEquals(2, account.getProcessedTransactions().size());
-        Assert.assertTrue(account.getProcessedTransactions().contains(firstTransaction));
-        Assert.assertTrue(account.getProcessedTransactions().contains(secondTransaction));
+        Assert.assertEquals(3, account.getProcessedTransactions().size());
+        Assert.assertSame(firstTransaction, account.getProcessedTransactions().get(0));
+        Assert.assertSame(secondTransaction, account.getProcessedTransactions().get(1));
+        Assert.assertSame(thirdTransaction, account.getProcessedTransactions().get(2));
     }
+
+    @Test
+    public void returnsLastTransaction() {
+        MarketTransaction firstBuyTransaction = new MarketTransactionBuilder()
+                .setTransactionType(TransactionType.Buy)
+                .setIsin(ISIN.MunichRe)
+                .setQuantity(new Quantity(1))
+                .setTotalPrice(new Amount(100.0))
+                .setCommission(Amount.Zero)
+                .setDate(LocalDate.of(2000, 1, 1))
+                .build();
+
+        MarketTransaction sellTransaction = new MarketTransactionBuilder()
+                .setTransactionType(TransactionType.Sell)
+                .setIsin(ISIN.MunichRe)
+                .setQuantity(new Quantity(1))
+                .setTotalPrice(new Amount(150.0))
+                .setCommission(Amount.Zero)
+                .setDate(LocalDate.of(2000, 1, 2))
+                .build();
+
+        MarketTransaction secondBuyTransaction = new MarketTransactionBuilder()
+                .setTransactionType(TransactionType.Buy)
+                .setIsin(ISIN.MunichRe)
+                .setQuantity(new Quantity(2))
+                .setTotalPrice(new Amount(120.0))
+                .setCommission(new Amount(0))
+                .setDate(LocalDate.of(2000, 1, 3))
+                .build();
+
+        MarketTransaction otherBuyTransaction = new MarketTransactionBuilder()
+                .setTransactionType(TransactionType.Buy)
+                .setIsin(ISIN.Allianz)
+                .setQuantity(new Quantity(1))
+                .setTotalPrice(new Amount(100.0))
+                .setCommission(new Amount(0))
+                .setDate(LocalDate.of(2000, 1, 4))
+                .build();
+
+        this.account.registerTransaction(firstBuyTransaction);
+        this.account.registerTransaction(sellTransaction);
+        this.account.registerTransaction(secondBuyTransaction);
+        this.account.registerTransaction(otherBuyTransaction);
+
+        MarketTransaction lastTransaction = this.account.getLastMarketTransaction(ISIN.MunichRe);
+
+        Assert.assertSame(lastTransaction, secondBuyTransaction);
+    }
+
+    @Test
+    public void getLastTransactionFails_ifNoBuyTransactionAvailable() {
+        MarketTransaction otherBuyTransaction = new MarketTransactionBuilder()
+                .setTransactionType(TransactionType.Buy)
+                .setIsin(ISIN.Allianz)
+                .setQuantity(new Quantity(1))
+                .setTotalPrice(new Amount(100.0))
+                .setCommission(new Amount(0))
+                .setDate(LocalDate.of(2000, 1, 1))
+                .build();
+
+        this.account.registerTransaction(otherBuyTransaction);
+
+        try {
+            this.account.getLastMarketTransaction(ISIN.MunichRe);
+        }
+        catch(RuntimeException e) {
+            Assert.assertEquals("There was no transaction registered yet for the specified ISIN.", e.getMessage());
+            return;
+        }
+
+        Assert.fail("RuntimeException expected.");
+    }
+
+    // Current stocks
 
     @Test
     public void returnsCurrentStocks() {
@@ -434,6 +719,8 @@ public class AccountTest extends AccountTestBase {
         Assert.assertTrue(currentStocks.containsKey(ISIN.Allianz));
     }
 
+    // Statistics
+
     @Test
     public void returnsTotalMarketPrice() {
         Account account = new Account(new Amount(50000.0));
@@ -500,77 +787,6 @@ public class AccountTest extends AccountTestBase {
         Assert.assertEquals(new Quantity(6), account.getTotalStocksQuantity());
     }
 
-    @Test
-    public void returnsLastTransaction() {
-        MarketTransaction firstBuyTransaction = new MarketTransactionBuilder()
-                .setTransactionType(TransactionType.Buy)
-                .setIsin(ISIN.MunichRe)
-                .setQuantity(new Quantity(1))
-                .setTotalPrice(new Amount(100.0))
-                .setCommission(Amount.Zero)
-                .setDate(LocalDate.of(2000, 1, 1))
-                .build();
-
-        MarketTransaction sellTransaction = new MarketTransactionBuilder()
-                .setTransactionType(TransactionType.Sell)
-                .setIsin(ISIN.MunichRe)
-                .setQuantity(new Quantity(1))
-                .setTotalPrice(new Amount(150.0))
-                .setCommission(Amount.Zero)
-                .setDate(LocalDate.of(2000, 1, 2))
-                .build();
-
-        MarketTransaction secondBuyTransaction = new MarketTransactionBuilder()
-                .setTransactionType(TransactionType.Buy)
-                .setIsin(ISIN.MunichRe)
-                .setQuantity(new Quantity(2))
-                .setTotalPrice(new Amount(120.0))
-                .setCommission(new Amount(0))
-                .setDate(LocalDate.of(2000, 1, 3))
-                .build();
-
-        MarketTransaction otherBuyTransaction = new MarketTransactionBuilder()
-                .setTransactionType(TransactionType.Buy)
-                .setIsin(ISIN.Allianz)
-                .setQuantity(new Quantity(1))
-                .setTotalPrice(new Amount(100.0))
-                .setCommission(new Amount(0))
-                .setDate(LocalDate.of(2000, 1, 4))
-                .build();
-
-        this.account.registerTransaction(firstBuyTransaction);
-        this.account.registerTransaction(sellTransaction);
-        this.account.registerTransaction(secondBuyTransaction);
-        this.account.registerTransaction(otherBuyTransaction);
-
-        MarketTransaction lastTransaction = this.account.getLastTransaction(ISIN.MunichRe);
-
-        Assert.assertSame(lastTransaction, secondBuyTransaction);
-    }
-
-    @Test
-    public void getLastTransactionFails_ifNoBuyTransactionAvailable() {
-        MarketTransaction otherBuyTransaction = new MarketTransactionBuilder()
-                .setTransactionType(TransactionType.Buy)
-                .setIsin(ISIN.Allianz)
-                .setQuantity(new Quantity(1))
-                .setTotalPrice(new Amount(100.0))
-                .setCommission(new Amount(0))
-                .setDate(LocalDate.of(2000, 1, 1))
-                .build();
-
-        this.account.registerTransaction(otherBuyTransaction);
-
-        try {
-            this.account.getLastTransaction(ISIN.MunichRe);
-        }
-        catch(RuntimeException e) {
-            Assert.assertEquals("There was no transaction registered yet for the specified ISIN.", e.getMessage());
-            return;
-        }
-
-        Assert.fail("RuntimeException expected.");
-    }
 
     // AccountId
 
@@ -600,3 +816,5 @@ public class AccountTest extends AccountTestBase {
         Assert.fail("DomainException expected.");
     }
 }
+
+// TODO Test Transactions must be registered in a row (regarding date)

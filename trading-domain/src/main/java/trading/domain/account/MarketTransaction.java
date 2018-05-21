@@ -7,16 +7,16 @@ import trading.domain.Quantity;
 
 import java.time.LocalDate;
 
-public class MarketTransaction {
-    private TransactionId id;
+public class MarketTransaction extends Transaction {
     private TransactionType transactionType;
     private ISIN isin;
     private Quantity quantity;
     private Amount totalPrice;
     private Amount commission;
-    private LocalDate date;
 
     MarketTransaction(TransactionType transactionType, ISIN isin, Quantity quantity, Amount totalPrice, Amount commission, LocalDate date) {
+        super(date);
+
         if(transactionType == null) {
             throw new DomainException("The transaction type must be specified.");
         }
@@ -57,14 +57,6 @@ public class MarketTransaction {
         this.date = date;
     }
 
-    public TransactionId getId() {
-        return id;
-    }
-
-    public void setId(TransactionId id) {
-        this.id = id;
-    }
-
     public TransactionType getTransactionType() {
         return transactionType;
     }
@@ -83,10 +75,6 @@ public class MarketTransaction {
 
     public Amount getCommission() {
         return commission;
-    }
-
-    public LocalDate getDate() {
-        return this.date;
     }
 
     @Override

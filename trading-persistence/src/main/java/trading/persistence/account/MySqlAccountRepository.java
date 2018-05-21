@@ -52,7 +52,7 @@ public class MySqlAccountRepository extends MySqlRepository implements AccountRe
         Connection connection = this.openNewConnection();
 
         try {
-            for(MarketTransaction transaction: account.getProcessedTransactions()) {
+            for(Transaction transaction: account.getProcessedTransactions()) {
                 if(transaction.getId() == null) {
                     this.saveTransaction(connection, account.getId(), transaction);
                 }
@@ -66,14 +66,19 @@ public class MySqlAccountRepository extends MySqlRepository implements AccountRe
         }
     }
 
-    private void saveTransaction(Connection connection, AccountId accountId, MarketTransaction transaction) throws SQLException {
-        if(transaction.getDate() == null) {
-            throw new RuntimeException("The transaction date has to be set so that it can be persisted.");
+    private void saveTransaction(Connection connection, AccountId accountId, Transaction transaction) throws SQLException {
+        if(transaction instanceof MarketTransaction) {
+            this.saveMarketTransaction(connection, accountId, (MarketTransaction) transaction);
         }
+        else {
+            throw new RuntimeException("Transaction type not supported.");
+        }
+    }
 
+    private void saveMarketTransaction(Connection connection, AccountId accountId, MarketTransaction transaction) throws SQLException {
         PreparedStatement preparedStatement = connection.prepareStatement(
                 "insert into transaction (Id, AccountId, TransactionTypeId, Quantity, TotalPrice, Commission, Isin, `Date`, Created) " +
-                        "values (default, ?, ?, ?, ?, ?, ?, ?, now())", Statement.RETURN_GENERATED_KEYS);
+                    "values (default, ?, ?, ?, ?, ?, ?, ?, now())", Statement.RETURN_GENERATED_KEYS);
 
         preparedStatement.setInt(1, accountId.getValue());
         preparedStatement.setInt(2, transaction.getTransactionType().ordinal());

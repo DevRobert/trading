@@ -80,7 +80,7 @@ public class LocalMaximumSellScoringStrategy implements ScoringStrategy {
     }
 
     private MarketTransaction getLastBuyTransaction(Account account, ISIN isin) {
-        MarketTransaction transaction = account.getLastTransaction(isin);
+        MarketTransaction transaction = account.getLastMarketTransaction(isin);
 
         if(transaction.getTransactionType() != TransactionType.Buy) {
             throw new RuntimeException("Buy transaction expected.");

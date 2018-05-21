@@ -1,19 +1,19 @@
 package trading.domain.simulation;
 
 import trading.domain.Amount;
-import trading.domain.account.MarketTransaction;
+import trading.domain.account.Transaction;
 
 import java.util.List;
 
 public class SimulationReport {
     private final Amount initialAccountBalance;
     private final Amount finalAccountBalance;
-    private final List<MarketTransaction> transactions;
+    private final List<Transaction> transactions;
     private final double averageMarketRateOfReturn;
     private final double realizedRateOfReturn;
     private final List<SimulationDayReport> dayReports;
 
-    public SimulationReport(Amount initialAccountBalance, Amount finalAccountBalance, List<MarketTransaction> transactions, double averageMarketRateOfReturn, double realizedRateOfReturn, List<SimulationDayReport> dayReports) {
+    public SimulationReport(Amount initialAccountBalance, Amount finalAccountBalance, List<Transaction> transactions, double averageMarketRateOfReturn, double realizedRateOfReturn, List<SimulationDayReport> dayReports) {
         this.initialAccountBalance = initialAccountBalance;
         this.finalAccountBalance = finalAccountBalance;
         this.transactions = transactions;
@@ -30,7 +30,7 @@ public class SimulationReport {
         return this.finalAccountBalance;
     }
 
-    public List<MarketTransaction> getTransactions() {
+    public List<Transaction> getTransactions() {
         return this.transactions;
     }
 

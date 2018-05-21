@@ -90,26 +90,15 @@ public class AccountController {
 
         List<AccountTransactionDto> accountTransactionDtos = new ArrayList<>();
 
-        for(MarketTransaction transaction: account.getProcessedTransactions()) {
-            AccountTransactionDto accountTransactionDto = new AccountTransactionDto();
-            accountTransactionDto.setDate(transaction.getDate());
-            accountTransactionDto.setTransactionType(transaction.getTransactionType().toString());
-            accountTransactionDto.setIsin(transaction.getIsin().getText());
-            accountTransactionDto.setQuantity(transaction.getQuantity().getValue());
+        for(Transaction transaction: account.getProcessedTransactions()) {
+            AccountTransactionDto accountTransactionDto = null;
 
-            double marketPrice = transaction.getTotalPrice().getValue() / transaction.getQuantity().getValue();
-            accountTransactionDto.setMarketPrice(marketPrice);
-
-            accountTransactionDto.setTotalPrice(transaction.getTotalPrice().getValue());
-            accountTransactionDto.setCommission(transaction.getCommission().getValue());
-
-            String instrumentName = this.instrumentNameProvider.getInstrumentName(transaction.getIsin());
-
-            if(instrumentName == null) {
-                instrumentName = "Unknown";
+            if(transaction instanceof MarketTransaction) {
+                accountTransactionDto = this.buildAccountTransactionDto((MarketTransaction) transaction);
             }
-
-            accountTransactionDto.setName(instrumentName);
+            else {
+                throw new RuntimeException("Transaction type not supported.");
+            }
 
             accountTransactionDtos.add(accountTransactionDto);
         }
@@ -117,6 +106,31 @@ public class AccountController {
         response.setTransactions(accountTransactionDtos);
 
         return response;
+    }
+
+    private AccountTransactionDto buildAccountTransactionDto(MarketTransaction transaction) {
+        AccountTransactionDto accountTransactionDto = new AccountTransactionDto();
+
+        accountTransactionDto.setDate(transaction.getDate());
+        accountTransactionDto.setTransactionType(transaction.getTransactionType().toString());
+        accountTransactionDto.setIsin(transaction.getIsin().getText());
+        accountTransactionDto.setQuantity(transaction.getQuantity().getValue());
+
+        double marketPrice = transaction.getTotalPrice().getValue() / transaction.getQuantity().getValue();
+        accountTransactionDto.setMarketPrice(marketPrice);
+
+        accountTransactionDto.setTotalPrice(transaction.getTotalPrice().getValue());
+        accountTransactionDto.setCommission(transaction.getCommission().getValue());
+
+        String instrumentName = this.instrumentNameProvider.getInstrumentName(transaction.getIsin());
+
+        if(instrumentName == null) {
+            instrumentName = "Unknown";
+        }
+
+        accountTransactionDto.setName(instrumentName);
+
+        return accountTransactionDto;
     }
 
     @RequestMapping(value = "/api/account/transactions/{transactionId}", method = RequestMethod.GET)

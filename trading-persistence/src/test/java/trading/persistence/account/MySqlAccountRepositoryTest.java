@@ -73,10 +73,10 @@ public class MySqlAccountRepositoryTest {
     public void getAccountTransactions() {
         Account account = this.accountRepository.getAccount(new AccountId(2));
 
-        List<MarketTransaction> transactions = account.getProcessedTransactions();
+        List<Transaction> transactions = account.getProcessedTransactions();
         Assert.assertEquals(2, transactions.size());
 
-        MarketTransaction buyTransaction = transactions.get(0);
+        MarketTransaction buyTransaction = (MarketTransaction) transactions.get(0);
 
         Assert.assertEquals(TransactionType.Buy, buyTransaction.getTransactionType());
         Assert.assertEquals(new Quantity(10), buyTransaction.getQuantity());
@@ -85,7 +85,7 @@ public class MySqlAccountRepositoryTest {
         Assert.assertEquals(new Amount(10.0), buyTransaction.getCommission());
         Assert.assertNotNull(buyTransaction.getId());
 
-        MarketTransaction sellTransaction = transactions.get(1);
+        MarketTransaction sellTransaction = (MarketTransaction) transactions.get(1);
 
         Assert.assertEquals(TransactionType.Sell, sellTransaction.getTransactionType());
         Assert.assertEquals(new Quantity(10), sellTransaction.getQuantity());
@@ -93,6 +93,8 @@ public class MySqlAccountRepositoryTest {
         Assert.assertEquals(new Amount(5500.0), sellTransaction.getTotalPrice());
         Assert.assertEquals(new Amount(10.0), sellTransaction.getCommission());
         Assert.assertNotNull(sellTransaction.getId());
+
+        // TODO add dividend transaction to test
     }
 
     @Test
@@ -143,11 +145,11 @@ public class MySqlAccountRepositoryTest {
 
         Account accountFromDatabase = this.accountRepository.getAccount(account.getId());
 
-        List<MarketTransaction> transactionsFromDatabase = accountFromDatabase.getProcessedTransactions();
+        List<Transaction> transactionsFromDatabase = accountFromDatabase.getProcessedTransactions();
 
         Assert.assertEquals(2, transactionsFromDatabase.size());
 
-        MarketTransaction buyTransactionFromDatabase = transactionsFromDatabase.get(0);
+        MarketTransaction buyTransactionFromDatabase = (MarketTransaction) transactionsFromDatabase.get(0);
         Assert.assertEquals(buyTransaction.getTransactionType(), buyTransactionFromDatabase.getTransactionType());
         Assert.assertEquals(buyTransaction.getIsin(), buyTransactionFromDatabase.getIsin());
         Assert.assertEquals(buyTransaction.getQuantity(), buyTransactionFromDatabase.getQuantity());
@@ -155,13 +157,15 @@ public class MySqlAccountRepositoryTest {
         Assert.assertEquals(buyTransaction.getCommission(), buyTransactionFromDatabase.getCommission());
         Assert.assertEquals(buyTransaction.getDate(), buyTransactionFromDatabase.getDate());
 
-        MarketTransaction sellTransactionFromDatabase = transactionsFromDatabase.get(1);
+        MarketTransaction sellTransactionFromDatabase = (MarketTransaction) transactionsFromDatabase.get(1);
         Assert.assertEquals(sellTransaction.getTransactionType(), sellTransactionFromDatabase.getTransactionType());
         Assert.assertEquals(sellTransaction.getIsin(), sellTransactionFromDatabase.getIsin());
         Assert.assertEquals(sellTransaction.getQuantity(), sellTransactionFromDatabase.getQuantity());
         Assert.assertEquals(sellTransaction.getTotalPrice(), sellTransactionFromDatabase.getTotalPrice());
         Assert.assertEquals(sellTransaction.getCommission(), sellTransactionFromDatabase.getCommission());
         Assert.assertEquals(sellTransaction.getDate(), sellTransaction.getDate());
+
+        // TODO add dividend transaction to test
     }
 
     @Test
@@ -198,7 +202,9 @@ public class MySqlAccountRepositoryTest {
 
         Account accountFromDatabase = this.accountRepository.getAccount(account.getId());
 
-        List<MarketTransaction> transactionsFromDatabase = accountFromDatabase.getProcessedTransactions();
+        List<Transaction> transactionsFromDatabase = accountFromDatabase.getProcessedTransactions();
         Assert.assertEquals(2, transactionsFromDatabase.size());
+
+        // TODO add dividend transaction to test
     }
 }

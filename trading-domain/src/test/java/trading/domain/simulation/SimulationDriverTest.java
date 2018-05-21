@@ -4,6 +4,7 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import trading.domain.*;
+import trading.domain.account.MarketTransaction;
 import trading.domain.account.TransactionType;
 import trading.domain.broker.CommissionStrategy;
 import trading.domain.broker.OrderRequest;
@@ -449,9 +450,12 @@ public class SimulationDriverTest {
         SimulationReport simulationReport = simulationDriver.runSimulation();
 
         Assert.assertEquals(1, simulationReport.getTransactions().size());
-        Assert.assertEquals(ISIN.MunichRe, simulationReport.getTransactions().get(0).getIsin());
-        Assert.assertEquals(new Quantity(1), simulationReport.getTransactions().get(0).getQuantity());
-        Assert.assertEquals(TransactionType.Buy, simulationReport.getTransactions().get(0).getTransactionType());
+
+        MarketTransaction marketTransaction = (MarketTransaction) simulationReport.getTransactions().get(0);
+
+        Assert.assertEquals(ISIN.MunichRe, marketTransaction.getIsin());
+        Assert.assertEquals(new Quantity(1), marketTransaction.getQuantity());
+        Assert.assertEquals(TransactionType.Buy, marketTransaction.getTransactionType());
     }
 
     // Average market rate of return

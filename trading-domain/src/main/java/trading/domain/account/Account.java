@@ -17,15 +17,15 @@ public class Account {
     private HashMap<ISIN, Position> positions = new HashMap<>();
     private Amount commissions;
     private Amount balance;
-    private final List<MarketTransaction> processedTransactions;
-    private final Map<ISIN, MarketTransaction> lastTransactionByIsin;
+    private final List<Transaction> processedTransactions;
+    private final Map<ISIN, MarketTransaction> lastMarketTransactionByIsin;
 
     public Account(Amount availableMoney) {
         this.commissions = Amount.Zero;
         this.availableMoney = availableMoney;
         this.balance = availableMoney;
         this.processedTransactions = new ArrayList<>();
-        this.lastTransactionByIsin = new HashMap<>();
+        this.lastMarketTransactionByIsin = new HashMap<>();
     }
 
     public Amount getCommissions() {
@@ -54,7 +54,7 @@ public class Account {
         return this.positions.containsKey(isin);
     }
 
-    public List<MarketTransaction> getProcessedTransactions() {
+    public List<Transaction> getProcessedTransactions() {
         return processedTransactions;
     }
 
@@ -93,7 +93,39 @@ public class Account {
         this.updateBalances(transaction);
 
         this.processedTransactions.add(transaction);
-        this.lastTransactionByIsin.put(transaction.getIsin(), transaction);
+        this.lastMarketTransactionByIsin.put(transaction.getIsin(), transaction);
+    }
+
+    public void registerTransaction(DividendTransaction transaction) {
+        this.ensureDividendTransactionRelatesToRespectivePosition(transaction);
+
+        this.availableMoney = this.availableMoney.add(transaction.getAmount());
+        this.balance = this.balance.add(transaction.getAmount());
+        this.processedTransactions.add(transaction);
+    }
+
+    private void ensureDividendTransactionRelatesToRespectivePosition(DividendTransaction transaction) {
+        if(!this.hasPosition(transaction.getIsin())) {
+            throw new DomainException("The dividend transaction cannot be registered as there was no respective position found for the given ISIN.");
+        }
+
+        Position position = this .getPosition(transaction.getIsin());
+
+        if(position.getQuantity().isZero()) {
+            MarketTransaction sellTransaction = this.getLastMarketTransaction(transaction.getIsin());
+
+            if(sellTransaction.getTransactionType() != TransactionType.Sell) {
+                throw new RuntimeException("Sell transaction expected.");
+            }
+
+            if (transaction.getDate().minusDays(30).isAfter(sellTransaction.getDate())) {
+                throw new DomainException(String.format(
+                        "The dividend transaction cannot be registered as the dividend date (%s) lies more " +
+                        "than 30 days after the close date of the respective position (%s).",
+                        transaction.getDate().toString(),
+                        sellTransaction.getDate().toString()));
+            }
+        }
     }
 
     private Position getPositionOrCreatePending(ISIN isin) {
@@ -236,8 +268,8 @@ public class Account {
         return totalStocksQuantity;
     }
 
-    public MarketTransaction getLastTransaction(ISIN isin) {
-        MarketTransaction transaction = this.lastTransactionByIsin.get(isin);
+    public MarketTransaction getLastMarketTransaction(ISIN isin) {
+        MarketTransaction transaction = this.lastMarketTransactionByIsin.get(isin);
 
         if(transaction == null) {
             throw new RuntimeException("There was no transaction registered yet for the specified ISIN.");

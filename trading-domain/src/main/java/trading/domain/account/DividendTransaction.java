@@ -6,12 +6,12 @@ import trading.domain.ISIN;
 
 import java.time.LocalDate;
 
-public class DividendTransaction {
-    private LocalDate date;
+public class DividendTransaction extends Transaction {
     private ISIN isin;
     private Amount amount;
 
     DividendTransaction(LocalDate date, ISIN isin, Amount amount) {
+        super(date);
         if(date == null) {
             throw new DomainException("The date must be specified.");
         }
@@ -24,13 +24,8 @@ public class DividendTransaction {
             throw new DomainException("The amount must be specified.");
         }
 
-        this.date = date;
         this.isin = isin;
         this.amount = amount;
-    }
-
-    public LocalDate getDate() {
-        return this.date;
     }
 
     public ISIN getIsin() {
