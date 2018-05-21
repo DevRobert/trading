@@ -529,6 +529,96 @@ public class AccountTest extends AccountTestBase {
         Assert.assertTrue(this.account.getProcessedTransactions().contains(dividendTransaction));
     }
 
+    // Transaction order
+
+    @Test
+    public void registerTransactionPasses_ifDateEqualsLastRegisteredTransaction() {
+        MarketTransaction firstTransaction = new MarketTransactionBuilder()
+                .setDate(LocalDate.of(2000, 2, 10))
+                .setTransactionType(TransactionType.Buy)
+                .setIsin(ISIN.MunichRe)
+                .setQuantity(new Quantity(1))
+                .setTotalPrice(new Amount(1000.0))
+                .setCommission(Amount.Zero)
+                .build();
+
+        MarketTransaction secondTransaction = new MarketTransactionBuilder()
+                .setDate(LocalDate.of(2000, 2, 10))
+                .setTransactionType(TransactionType.Sell)
+                .setIsin(ISIN.MunichRe)
+                .setQuantity(new Quantity(1))
+                .setTotalPrice(new Amount(1000.0))
+                .setCommission(Amount.Zero)
+                .build();
+
+        this.account.registerTransaction(firstTransaction);
+        this.account.registerTransaction(secondTransaction);
+
+        Assert.assertTrue(this.account.getProcessedTransactions().contains(secondTransaction));
+    }
+
+    @Test
+    public void registerTransactionPasses_ifDateAfterLastRegisteredTransaction() {
+        MarketTransaction firstTransaction = new MarketTransactionBuilder()
+                .setDate(LocalDate.of(2000, 2, 10))
+                .setTransactionType(TransactionType.Buy)
+                .setIsin(ISIN.MunichRe)
+                .setQuantity(new Quantity(1))
+                .setTotalPrice(new Amount(1000.0))
+                .setCommission(Amount.Zero)
+                .build();
+
+        MarketTransaction secondTransaction = new MarketTransactionBuilder()
+                .setDate(LocalDate.of(2000, 2, 11))
+                .setTransactionType(TransactionType.Sell)
+                .setIsin(ISIN.MunichRe)
+                .setQuantity(new Quantity(1))
+                .setTotalPrice(new Amount(1000.0))
+                .setCommission(Amount.Zero)
+                .build();
+
+        this.account.registerTransaction(firstTransaction);
+        this.account.registerTransaction(secondTransaction);
+
+        Assert.assertTrue(this.account.getProcessedTransactions().contains(secondTransaction));
+    }
+
+    @Test
+    public void registerTransactionFails_ifDateBeforeLastRegisteredTransaction() {
+        MarketTransaction firstTransaction = new MarketTransactionBuilder()
+                .setDate(LocalDate.of(2000, 2, 10))
+                .setTransactionType(TransactionType.Buy)
+                .setIsin(ISIN.MunichRe)
+                .setQuantity(new Quantity(1))
+                .setTotalPrice(new Amount(1000.0))
+                .setCommission(Amount.Zero)
+                .build();
+
+        MarketTransaction secondTransaction = new MarketTransactionBuilder()
+                .setDate(LocalDate.of(2000, 2, 9))
+                .setTransactionType(TransactionType.Sell)
+                .setIsin(ISIN.MunichRe)
+                .setQuantity(new Quantity(1))
+                .setTotalPrice(new Amount(1000.0))
+                .setCommission(Amount.Zero)
+                .build();
+
+        this.account.registerTransaction(firstTransaction);
+
+        try {
+            this.account.registerTransaction(secondTransaction);
+        }
+        catch(DomainException e) {
+            Assert.assertEquals("The transaction cannot be registered as its date (2000-02-09) " +
+                    "lies before the date of the last registered transaction (2000-02-10).",
+                    e.getMessage());
+
+            return;
+        }
+
+        Assert.fail("DomainException expected.");
+    }
+
     // Transaction list
 
     @Test
@@ -816,5 +906,3 @@ public class AccountTest extends AccountTestBase {
         Assert.fail("DomainException expected.");
     }
 }
-
-// TODO Test Transactions must be registered in a row (regarding date)

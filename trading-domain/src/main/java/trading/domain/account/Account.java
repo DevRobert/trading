@@ -70,7 +70,32 @@ public class Account {
         this.id = accountId;
     }
 
-    public void registerTransaction(MarketTransaction transaction) throws AccountStateException {
+    public void registerTransaction(Transaction transaction) {
+        if(this.processedTransactions.size() > 0) {
+            Transaction lastProcessedTransaction = this.processedTransactions.get(this.processedTransactions.size() - 1);
+
+            if(transaction.getDate().isBefore(lastProcessedTransaction.getDate())) {
+                throw new DomainException(String.format(
+                        "The transaction cannot be registered as its date (%s) lies before the date of the last registered transaction (%s).",
+                        transaction.getDate().toString(),
+                        lastProcessedTransaction.getDate().toString()));
+            }
+        }
+
+        if(transaction instanceof MarketTransaction) {
+            this.registerMarketTransaction((MarketTransaction) transaction);
+        }
+        else if(transaction instanceof DividendTransaction) {
+            this.registerDividendTransaction((DividendTransaction) transaction);
+        }
+        else {
+            throw new RuntimeException("Unknown transaction type.");
+        }
+
+        this.processedTransactions.add(transaction);
+    }
+
+    private void registerMarketTransaction(MarketTransaction transaction) throws AccountStateException {
         this.ensureTransactionCanBePaid(transaction);
 
         Position position = this.getPositionOrCreatePending(transaction.getIsin());
@@ -92,16 +117,14 @@ public class Account {
 
         this.updateBalances(transaction);
 
-        this.processedTransactions.add(transaction);
         this.lastMarketTransactionByIsin.put(transaction.getIsin(), transaction);
     }
 
-    public void registerTransaction(DividendTransaction transaction) {
+    private void registerDividendTransaction(DividendTransaction transaction) {
         this.ensureDividendTransactionRelatesToRespectivePosition(transaction);
 
         this.availableMoney = this.availableMoney.add(transaction.getAmount());
         this.balance = this.balance.add(transaction.getAmount());
-        this.processedTransactions.add(transaction);
     }
 
     private void ensureDividendTransactionRelatesToRespectivePosition(DividendTransaction transaction) {
