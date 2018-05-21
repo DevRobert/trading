@@ -8,7 +8,7 @@ import trading.domain.Quantity;
 
 import java.time.LocalDate;
 
-public class MarketMarketTransactionBuilderTest {
+public class MarketTransactionBuilderTest {
     @Test
     public void buildTransaction() {
         LocalDate date = LocalDate.now();
