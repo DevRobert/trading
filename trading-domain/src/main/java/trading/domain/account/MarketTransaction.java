@@ -16,7 +16,7 @@ public class MarketTransaction {
     private Amount commission;
     private LocalDate date;
 
-    public MarketTransaction(TransactionType transactionType, ISIN isin, Quantity quantity, Amount totalPrice, Amount commission, LocalDate date) {
+    MarketTransaction(TransactionType transactionType, ISIN isin, Quantity quantity, Amount totalPrice, Amount commission, LocalDate date) {
         if(transactionType == null) {
             throw new DomainException("The transaction type must be specified.");
         }
