@@ -12,7 +12,6 @@ import trading.domain.market.MarketPriceSnapshot;
 import trading.domain.strategy.TradingStrategy;
 import trading.domain.strategy.TradingStrategyContext;
 
-import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 

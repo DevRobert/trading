@@ -2,7 +2,7 @@ package trading.application;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import trading.domain.Transaction;
+import trading.domain.account.Transaction;
 import trading.domain.account.Account;
 import trading.domain.account.AccountId;
 import trading.domain.account.AccountRepository;

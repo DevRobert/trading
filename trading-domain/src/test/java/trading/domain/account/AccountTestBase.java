@@ -1,7 +1,9 @@
 package trading.domain.account;
 
 import org.junit.Before;
-import trading.domain.*;
+import trading.domain.Amount;
+import trading.domain.ISIN;
+import trading.domain.Quantity;
 
 import java.time.LocalDate;
 

@@ -1,7 +1,7 @@
 package trading.domain.simulation;
 
 import trading.domain.Amount;
-import trading.domain.Transaction;
+import trading.domain.account.Transaction;
 
 import java.util.List;
 

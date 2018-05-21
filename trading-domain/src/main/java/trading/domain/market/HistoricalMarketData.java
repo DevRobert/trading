@@ -6,7 +6,10 @@ import trading.domain.DomainException;
 import trading.domain.ISIN;
 
 import java.time.LocalDate;
-import java.util.*;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 public class HistoricalMarketData {
     private final Map<ISIN, HistoricalStockData> historicalStockDataMap;

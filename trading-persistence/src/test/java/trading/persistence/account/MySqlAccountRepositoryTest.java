@@ -4,10 +4,7 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import trading.domain.*;
-import trading.domain.account.Account;
-import trading.domain.account.AccountId;
-import trading.domain.account.AccountNotFoundException;
-import trading.domain.account.AccountRepository;
+import trading.domain.account.*;
 import trading.persistence.MySqlRepositoryParameters;
 import trading.persistence.MySqlRepositoryParametersBuilder;
 

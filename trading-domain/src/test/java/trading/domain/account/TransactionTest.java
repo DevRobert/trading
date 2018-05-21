@@ -1,7 +1,11 @@
-package trading.domain;
+package trading.domain.account;
 
 import org.junit.Assert;
 import org.junit.Test;
+import trading.domain.Amount;
+import trading.domain.DomainException;
+import trading.domain.ISIN;
+import trading.domain.Quantity;
 
 import java.time.LocalDate;
 

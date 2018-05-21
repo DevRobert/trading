@@ -3,9 +3,7 @@ package trading.application;
 import org.junit.Assert;
 import org.junit.Test;
 import trading.domain.*;
-import trading.domain.account.Account;
-import trading.domain.account.AccountId;
-import trading.domain.account.AccountRepository;
+import trading.domain.account.*;
 
 import java.time.LocalDate;
 

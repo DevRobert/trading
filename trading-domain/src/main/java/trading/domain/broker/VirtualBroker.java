@@ -1,7 +1,12 @@
 package trading.domain.broker;
 
-import trading.domain.*;
+import trading.domain.Amount;
+import trading.domain.DomainException;
+import trading.domain.ISIN;
 import trading.domain.account.Account;
+import trading.domain.account.Transaction;
+import trading.domain.account.TransactionBuilder;
+import trading.domain.account.TransactionType;
 import trading.domain.market.HistoricalMarketData;
 
 import java.time.LocalDate;

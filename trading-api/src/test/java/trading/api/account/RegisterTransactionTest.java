@@ -12,6 +12,9 @@ import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import trading.domain.*;
 import trading.domain.account.AccountId;
+import trading.domain.account.Transaction;
+import trading.domain.account.TransactionId;
+import trading.domain.account.TransactionType;
 
 import java.time.LocalDate;
 

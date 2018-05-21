@@ -4,6 +4,7 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import trading.domain.*;
+import trading.domain.account.TransactionType;
 import trading.domain.broker.CommissionStrategy;
 import trading.domain.broker.OrderRequest;
 import trading.domain.broker.OrderType;

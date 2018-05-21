@@ -1,4 +1,4 @@
-package trading.domain;
+package trading.domain.account;
 
 public enum TransactionType {
     Buy,

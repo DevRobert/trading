@@ -1,7 +1,11 @@
 package trading.domain.strategy.compoundLocalMaximum;
 
-import trading.domain.*;
+import trading.domain.Amount;
+import trading.domain.DayCount;
+import trading.domain.ISIN;
 import trading.domain.account.Account;
+import trading.domain.account.Transaction;
+import trading.domain.account.TransactionType;
 import trading.domain.market.HistoricalMarketData;
 import trading.domain.market.HistoricalStockData;
 import trading.domain.strategy.compound.Score;

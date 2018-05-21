@@ -7,6 +7,8 @@ import trading.application.AccountService;
 import trading.domain.*;
 import trading.domain.account.Account;
 import trading.domain.account.AccountId;
+import trading.domain.account.TransactionBuilder;
+import trading.domain.account.TransactionType;
 import trading.domain.market.InstrumentNameProvider;
 import trading.domain.market.MarketPriceSnapshot;
 import trading.domain.market.MarketPriceSnapshotBuilder;
