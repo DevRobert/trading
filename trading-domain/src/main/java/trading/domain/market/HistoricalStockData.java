@@ -74,9 +74,6 @@ public class HistoricalStockData {
     }
 
     public Amount getMaximumClosingMarketPrice(DayCount lookBehindPeriod) {
-        // TODO Potential refactoring: add method "extractHistory(maxDays)" and remove param lookBehindPeriod from this method
-        // should be conducted if more indicators are going to be limited to a certain look behind period
-
         if(lookBehindPeriod == null) {
             throw new RuntimeException("The look behind period must be specified.");
         }
