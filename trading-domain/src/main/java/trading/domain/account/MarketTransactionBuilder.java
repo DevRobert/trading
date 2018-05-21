@@ -7,14 +7,14 @@ import trading.domain.Quantity;
 import java.time.LocalDate;
 
 public class MarketTransactionBuilder {
-    private TransactionType transactionType;
+    private MarketTransactionType transactionType;
     private ISIN isin;
     private Quantity quantity;
     private Amount totalPrice;
     private Amount commission;
     private LocalDate date;
 
-    public MarketTransactionBuilder setTransactionType(TransactionType transactionType) {
+    public MarketTransactionBuilder setTransactionType(MarketTransactionType transactionType) {
         this.transactionType = transactionType;
         return this;
     }

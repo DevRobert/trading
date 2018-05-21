@@ -24,7 +24,7 @@ public abstract class AccountTestBase {
         Amount commission = new Amount(10.0);
 
         MarketTransaction transaction = new MarketTransactionBuilder()
-                .setTransactionType(TransactionType.Buy)
+                .setTransactionType(MarketTransactionType.Buy)
                 .setIsin(ISIN.MunichRe)
                 .setQuantity(new Quantity(10))
                 .setTotalPrice(fullPrice)

@@ -8,7 +8,7 @@ import trading.domain.*;
 import trading.domain.account.Account;
 import trading.domain.account.AccountId;
 import trading.domain.account.MarketTransactionBuilder;
-import trading.domain.account.TransactionType;
+import trading.domain.account.MarketTransactionType;
 import trading.domain.market.InstrumentNameProvider;
 import trading.domain.market.MarketPriceSnapshot;
 import trading.domain.market.MarketPriceSnapshotBuilder;
@@ -34,7 +34,7 @@ public abstract class AccountControllerTestBase extends ControllerTestBase {
         Account account = new Account(seedCapital);
 
         account.registerTransaction(new MarketTransactionBuilder()
-                .setTransactionType(TransactionType.Buy)
+                .setTransactionType(MarketTransactionType.Buy)
                 .setIsin(new ISIN("A"))
                 .setQuantity(new Quantity(10))
                 .setTotalPrice(new Amount(1000.0))
@@ -43,7 +43,7 @@ public abstract class AccountControllerTestBase extends ControllerTestBase {
                 .build());
 
         account.registerTransaction(new MarketTransactionBuilder()
-                .setTransactionType(TransactionType.Buy)
+                .setTransactionType(MarketTransactionType.Buy)
                 .setIsin(new ISIN("B"))
                 .setQuantity(new Quantity(10))
                 .setTotalPrice(new Amount(1000.0))

@@ -137,7 +137,7 @@ public class Account {
         if(position.getQuantity().isZero()) {
             MarketTransaction sellTransaction = this.getLastMarketTransaction(transaction.getIsin());
 
-            if(sellTransaction.getTransactionType() != TransactionType.Sell) {
+            if(sellTransaction.getTransactionType() != MarketTransactionType.Sell) {
                 throw new RuntimeException("Sell transaction expected.");
             }
 
@@ -164,10 +164,10 @@ public class Account {
     private void ensureTransactionCanBePaid(MarketTransaction transaction) throws AccountStateException {
         Amount requiredAmount;
 
-        if(transaction.getTransactionType() == TransactionType.Buy) {
+        if(transaction.getTransactionType() == MarketTransactionType.Buy) {
             requiredAmount = transaction.getTotalPrice();
         }
-        else if(transaction.getTransactionType() == TransactionType.Sell) {
+        else if(transaction.getTransactionType() == MarketTransactionType.Sell) {
             requiredAmount = Amount.Zero;
         }
         else {
@@ -182,10 +182,10 @@ public class Account {
     private void updateBalances(MarketTransaction transaction) {
         this.commissions = this.commissions.add(transaction.getCommission());
 
-        if(transaction.getTransactionType() == TransactionType.Buy) {
+        if(transaction.getTransactionType() == MarketTransactionType.Buy) {
             this.availableMoney = this.availableMoney.subtract(transaction.getTotalPrice());
         }
-        else if(transaction.getTransactionType() == TransactionType.Sell) {
+        else if(transaction.getTransactionType() == MarketTransactionType.Sell) {
             this.availableMoney = this.availableMoney.add(transaction.getTotalPrice());
         }
         else {
@@ -198,10 +198,10 @@ public class Account {
     }
 
     private void handleTransaction(MarketTransaction transaction, Position position) throws AccountStateException {
-        if(transaction.getTransactionType() == TransactionType.Buy) {
+        if(transaction.getTransactionType() == MarketTransactionType.Buy) {
             this.handleBuyTransaction(transaction, position);
         }
-        else if(transaction.getTransactionType() == TransactionType.Sell) {
+        else if(transaction.getTransactionType() == MarketTransactionType.Sell) {
             this.handleSellTransaction(transaction, position);
         }
         else {

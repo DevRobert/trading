@@ -152,10 +152,10 @@ public class AccountController {
                     throw new ClientException("The transaction type must not be empty.");
                 }
 
-                TransactionType transactionType;
+                MarketTransactionType transactionType;
 
                 try {
-                    transactionType = TransactionType.valueOf(request.getTransactionType());
+                    transactionType = (MarketTransactionType) TransactionType.ofName(request.getTransactionType());
                 }
                 catch(IllegalArgumentException illegalArgumentException) {
                     throw new ClientException(String.format("The transaction type '%s' is invalid.", request.getTransactionType()));

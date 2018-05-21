@@ -6,7 +6,7 @@ import trading.domain.ISIN;
 import trading.domain.account.Account;
 import trading.domain.account.MarketTransaction;
 import trading.domain.account.MarketTransactionBuilder;
-import trading.domain.account.TransactionType;
+import trading.domain.account.MarketTransactionType;
 import trading.domain.market.HistoricalMarketData;
 
 import java.time.LocalDate;
@@ -84,7 +84,7 @@ public class VirtualBroker implements Broker {
         }
 
         MarketTransaction transaction = new MarketTransactionBuilder()
-                .setTransactionType(TransactionType.Buy)
+                .setTransactionType(MarketTransactionType.Buy)
                 .setIsin(isin)
                 .setQuantity(orderRequest.getQuantity())
                 .setTotalPrice(totalPrice)
@@ -102,7 +102,7 @@ public class VirtualBroker implements Broker {
         Amount commission = this.commissionStrategy.calculateCommission(totalPrice);
 
         MarketTransaction transaction = new MarketTransactionBuilder()
-                .setTransactionType(TransactionType.Sell)
+                .setTransactionType(MarketTransactionType.Sell)
                 .setIsin(isin)
                 .setQuantity(orderRequest.getQuantity())
                 .setTotalPrice(totalPrice)

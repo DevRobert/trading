@@ -33,7 +33,7 @@ public class AccountServiceTest {
         Account account = new Account(new Amount(10000.0));
 
         MarketTransaction transaction = new MarketTransactionBuilder()
-                .setTransactionType(TransactionType.Buy)
+                .setTransactionType(MarketTransactionType.Buy)
                 .setIsin(ISIN.MunichRe)
                 .setQuantity(new Quantity(1))
                 .setTotalPrice(new Amount(100.0))

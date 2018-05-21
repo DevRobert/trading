@@ -20,7 +20,7 @@ public class CommissionTest extends AccountTestBase {
         Amount commission = new Amount(20.0);
 
         MarketTransaction transaction = new MarketTransactionBuilder()
-                .setTransactionType(TransactionType.Buy)
+                .setTransactionType(MarketTransactionType.Buy)
                 .setIsin(ISIN.MunichRe)
                 .setQuantity(new Quantity(1))
                 .setTotalPrice(fullPrice)
@@ -43,7 +43,7 @@ public class CommissionTest extends AccountTestBase {
         Amount sellCommission = new Amount(10.0);
 
         MarketTransaction buyTransaction = new MarketTransactionBuilder()
-                .setTransactionType(TransactionType.Buy)
+                .setTransactionType(MarketTransactionType.Buy)
                 .setIsin(isin)
                 .setQuantity(quantity)
                 .setTotalPrice(fullBuyPrice)
@@ -52,7 +52,7 @@ public class CommissionTest extends AccountTestBase {
                 .build();
 
         MarketTransaction sellTransaction = new MarketTransactionBuilder()
-                .setTransactionType(TransactionType.Sell)
+                .setTransactionType(MarketTransactionType.Sell)
                 .setIsin(isin)
                 .setQuantity(quantity)
                 .setTotalPrice(fullSellPrice)

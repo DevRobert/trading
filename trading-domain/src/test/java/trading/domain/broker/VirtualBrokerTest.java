@@ -9,7 +9,7 @@ import trading.domain.Quantity;
 import trading.domain.account.Account;
 import trading.domain.account.Position;
 import trading.domain.account.MarketTransactionBuilder;
-import trading.domain.account.TransactionType;
+import trading.domain.account.MarketTransactionType;
 import trading.domain.market.HistoricalMarketData;
 import trading.domain.market.MarketPriceSnapshot;
 import trading.domain.market.MarketPriceSnapshotBuilder;
@@ -126,7 +126,7 @@ public class VirtualBrokerTest {
         Amount buyCommission = new Amount(0.0);
 
         account.registerTransaction(new MarketTransactionBuilder()
-                .setTransactionType(TransactionType.Buy)
+                .setTransactionType(MarketTransactionType.Buy)
                 .setIsin(ISIN.MunichRe)
                 .setQuantity(quantity)
                 .setTotalPrice(buyTotalPrice)
@@ -168,7 +168,7 @@ public class VirtualBrokerTest {
         Amount buyCommission = new Amount(0.0);
 
         this.account.registerTransaction(new MarketTransactionBuilder()
-                .setTransactionType(TransactionType.Buy)
+                .setTransactionType(MarketTransactionType.Buy)
                 .setIsin(ISIN.MunichRe)
                 .setQuantity(quantity)
                 .setTotalPrice(buyTotalPrice)
@@ -240,7 +240,7 @@ public class VirtualBrokerTest {
         Amount buyCommission = new Amount(0.0);
 
         account.registerTransaction(new MarketTransactionBuilder()
-                .setTransactionType(TransactionType.Buy)
+                .setTransactionType(MarketTransactionType.Buy)
                 .setIsin(ISIN.MunichRe)
                 .setQuantity(quantity)
                 .setTotalPrice(buyTotalPrice)

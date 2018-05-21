@@ -70,6 +70,9 @@ public class MySqlAccountRepository extends MySqlRepository implements AccountRe
         if(transaction instanceof MarketTransaction) {
             this.saveMarketTransaction(connection, accountId, (MarketTransaction) transaction);
         }
+        else if(transaction instanceof DividendTransaction) {
+            this.saveDividendTransaction(connection, accountId, (DividendTransaction) transaction);
+        }
         else {
             throw new RuntimeException("Transaction type not supported.");
         }
@@ -81,7 +84,7 @@ public class MySqlAccountRepository extends MySqlRepository implements AccountRe
                     "values (default, ?, ?, ?, ?, ?, ?, ?, now())", Statement.RETURN_GENERATED_KEYS);
 
         preparedStatement.setInt(1, accountId.getValue());
-        preparedStatement.setInt(2, transaction.getTransactionType().ordinal());
+        preparedStatement.setInt(2, transaction.getTransactionType().getIndex());
         preparedStatement.setInt(3, transaction.getQuantity().getValue());
         preparedStatement.setDouble(4, transaction.getTotalPrice().getValue());
         preparedStatement.setDouble(5, transaction.getCommission().getValue());
@@ -90,6 +93,26 @@ public class MySqlAccountRepository extends MySqlRepository implements AccountRe
 
         preparedStatement.executeUpdate();
 
+        this.applyGeneratedIdToTransaction(transaction, preparedStatement);
+    }
+
+    private void saveDividendTransaction(Connection connection, AccountId accountId, DividendTransaction transaction) throws SQLException {
+        PreparedStatement preparedStatement = connection.prepareStatement(
+                "insert into transaction (Id, AccountId, TransactionTypeId, Amount, Isin, `Date`, Created) " +
+                        "values (default, ?, ?, ?, ?, ?, now())", Statement.RETURN_GENERATED_KEYS);
+
+        preparedStatement.setInt(1, accountId.getValue());
+        preparedStatement.setInt(2, 2);
+        preparedStatement.setDouble(3, transaction.getAmount().getValue());
+        preparedStatement.setString(4, transaction.getIsin().getText());
+        preparedStatement.setString(5, transaction.getDate().toString());
+
+        preparedStatement.executeUpdate();
+
+        this.applyGeneratedIdToTransaction(transaction, preparedStatement);
+    }
+
+    private void applyGeneratedIdToTransaction(Transaction transaction, PreparedStatement preparedStatement) throws SQLException {
         ResultSet resultSet = preparedStatement.getGeneratedKeys();
         resultSet.next();
         int transactionId = resultSet.getInt(1);
@@ -115,9 +138,9 @@ public class MySqlAccountRepository extends MySqlRepository implements AccountRe
             Account account = new Account(new Amount(seedCapital));
             account.setId(accountId);
 
-            List<MarketTransaction> transactions = this.getAccountTransactions(connection, accountId);
+            List<Transaction> transactions = this.getAccountTransactions(connection, accountId);
 
-            for(MarketTransaction transaction: transactions) {
+            for(Transaction transaction: transactions) {
                 account.registerTransaction(transaction);
             }
 
@@ -131,33 +154,49 @@ public class MySqlAccountRepository extends MySqlRepository implements AccountRe
         }
     }
 
-    private List<MarketTransaction> getAccountTransactions(Connection connection, AccountId accountId) throws SQLException {
-        PreparedStatement preparedStatement = connection.prepareStatement("select Id, AccountId, TransactionTypeId, Quantity, TotalPrice, Commission, Isin, Date, Created from transaction where AccountId = ?");
+    private List<Transaction> getAccountTransactions(Connection connection, AccountId accountId) throws SQLException {
+        PreparedStatement preparedStatement = connection.prepareStatement("select Id, AccountId, TransactionTypeId, Quantity, TotalPrice, Commission, Amount, Isin, Date, Created from transaction where AccountId = ?");
         preparedStatement.setInt(1, accountId.getValue());
 
         ResultSet resultSet = preparedStatement.executeQuery();
-        List<MarketTransaction> transactions = new ArrayList<>();
+        List<Transaction> transactions = new ArrayList<>();
 
         while(resultSet.next()) {
             int transactionId = resultSet.getInt(1);
-            int transactionType = resultSet.getInt(3);
+            int transactionTypeIndex = resultSet.getInt(3);
             int quantity = resultSet.getInt(4);
             double totalPrice = resultSet.getDouble(5);
             double commission = resultSet.getDouble(6);
-            String isin = resultSet.getString(7);
-            LocalDate date = LocalDate.parse(resultSet.getString(8));
+            double amount = resultSet.getDouble(7);
+            String isin = resultSet.getString(8);
+            LocalDate date = LocalDate.parse(resultSet.getString(9));
 
-            MarketTransaction transaction = new MarketTransactionBuilder()
-                    .setTransactionType(TransactionType.values()[transactionType])
-                    .setIsin(new ISIN(isin))
-                    .setQuantity(new Quantity(quantity))
-                    .setTotalPrice(new Amount(totalPrice))
-                    .setCommission(new Amount(commission))
-                    .setDate(date)
-                    .build();
+            TransactionType transactionType = TransactionType.ofIndex(transactionTypeIndex);
+
+            Transaction transaction;
+
+            if(transactionType instanceof MarketTransactionType) {
+                transaction = new MarketTransactionBuilder()
+                        .setTransactionType((MarketTransactionType) transactionType)
+                        .setIsin(new ISIN(isin))
+                        .setQuantity(new Quantity(quantity))
+                        .setTotalPrice(new Amount(totalPrice))
+                        .setCommission(new Amount(commission))
+                        .setDate(date)
+                        .build();
+            }
+            else if(transactionType == TransactionType.Dividend) {
+                transaction = new DividendTransactionBuilder()
+                        .setIsin(new ISIN(isin))
+                        .setAmount(new Amount(amount))
+                        .setDate(date)
+                        .build();
+            }
+            else {
+                throw new RuntimeException("Transaction type not supported.");
+            }
 
             transaction.setId(new TransactionId(transactionId));
-
             transactions.add(transaction);
         }
 

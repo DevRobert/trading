@@ -9,7 +9,7 @@ import trading.domain.ISIN;
 import trading.domain.Quantity;
 import trading.domain.account.Account;
 import trading.domain.account.MarketTransactionBuilder;
-import trading.domain.account.TransactionType;
+import trading.domain.account.MarketTransactionType;
 import trading.domain.broker.*;
 import trading.domain.market.HistoricalMarketData;
 import trading.domain.market.MarketPriceSnapshot;
@@ -377,7 +377,7 @@ public class SimulationTest {
         Amount buyStocksComission = new Amount(0.0);
 
         account.registerTransaction(new MarketTransactionBuilder()
-                .setTransactionType(TransactionType.Buy)
+                .setTransactionType(MarketTransactionType.Buy)
                 .setIsin(ISIN.MunichRe)
                 .setQuantity(new Quantity(2))
                 .setTotalPrice(buyStocksTotalPrice)

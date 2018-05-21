@@ -5,7 +5,7 @@ import trading.domain.DayCount;
 import trading.domain.ISIN;
 import trading.domain.account.Account;
 import trading.domain.account.MarketTransaction;
-import trading.domain.account.TransactionType;
+import trading.domain.account.MarketTransactionType;
 import trading.domain.market.HistoricalMarketData;
 import trading.domain.market.HistoricalStockData;
 import trading.domain.strategy.compound.Score;
@@ -82,7 +82,7 @@ public class LocalMaximumSellScoringStrategy implements ScoringStrategy {
     private MarketTransaction getLastBuyTransaction(Account account, ISIN isin) {
         MarketTransaction transaction = account.getLastMarketTransaction(isin);
 
-        if(transaction.getTransactionType() != TransactionType.Buy) {
+        if(transaction.getTransactionType() != MarketTransactionType.Buy) {
             throw new RuntimeException("Buy transaction expected.");
         }
 

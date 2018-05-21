@@ -74,27 +74,33 @@ public class MySqlAccountRepositoryTest {
         Account account = this.accountRepository.getAccount(new AccountId(2));
 
         List<Transaction> transactions = account.getProcessedTransactions();
-        Assert.assertEquals(2, transactions.size());
+        Assert.assertEquals(3, transactions.size());
 
         MarketTransaction buyTransaction = (MarketTransaction) transactions.get(0);
 
-        Assert.assertEquals(TransactionType.Buy, buyTransaction.getTransactionType());
-        Assert.assertEquals(new Quantity(10), buyTransaction.getQuantity());
+        Assert.assertEquals(LocalDate.of(2018, 4, 16), buyTransaction.getDate());
+        Assert.assertEquals(MarketTransactionType.Buy, buyTransaction.getTransactionType());
         Assert.assertEquals(new ISIN("DE0008430026"), buyTransaction.getIsin());
+        Assert.assertEquals(new Quantity(10), buyTransaction.getQuantity());
         Assert.assertEquals(new Amount(5000.0), buyTransaction.getTotalPrice());
         Assert.assertEquals(new Amount(10.0), buyTransaction.getCommission());
         Assert.assertNotNull(buyTransaction.getId());
 
         MarketTransaction sellTransaction = (MarketTransaction) transactions.get(1);
 
-        Assert.assertEquals(TransactionType.Sell, sellTransaction.getTransactionType());
+        Assert.assertEquals(LocalDate.of(2018, 4, 17), sellTransaction.getDate());
+        Assert.assertEquals(MarketTransactionType.Sell, sellTransaction.getTransactionType());
         Assert.assertEquals(new Quantity(10), sellTransaction.getQuantity());
         Assert.assertEquals(new ISIN("DE0008430026"), sellTransaction.getIsin());
         Assert.assertEquals(new Amount(5500.0), sellTransaction.getTotalPrice());
         Assert.assertEquals(new Amount(10.0), sellTransaction.getCommission());
         Assert.assertNotNull(sellTransaction.getId());
 
-        // TODO add dividend transaction to test
+        DividendTransaction dividendTransaction = (DividendTransaction) transactions.get(2);
+
+        Assert.assertEquals(LocalDate.of(2018, 4, 18), dividendTransaction.getDate());
+        Assert.assertEquals(new Amount(50.0), dividendTransaction.getAmount());
+        Assert.assertEquals(new ISIN("DE0008430026"), dividendTransaction.getIsin());
     }
 
     @Test
@@ -119,25 +125,32 @@ public class MySqlAccountRepositoryTest {
         Quantity quantity = new Quantity(10);
 
         MarketTransaction buyTransaction = new MarketTransactionBuilder()
-                .setTransactionType(TransactionType.Buy)
+                .setDate(LocalDate.of(2018, 4, 27))
+                .setTransactionType(MarketTransactionType.Buy)
                 .setIsin(isin)
                 .setQuantity(quantity)
                 .setTotalPrice(new Amount(10000.0))
                 .setCommission(new Amount(10.0))
-                .setDate(LocalDate.of(2018, 4, 27))
                 .build();
 
         MarketTransaction sellTransaction = new MarketTransactionBuilder()
-                .setTransactionType(TransactionType.Sell)
+                .setDate(LocalDate.of(2018, 4, 30))
+                .setTransactionType(MarketTransactionType.Sell)
                 .setIsin(isin)
                 .setQuantity(quantity)
                 .setTotalPrice(new Amount(11000.0))
                 .setCommission(new Amount(10.0))
-                .setDate(LocalDate.of(2018, 4, 30))
+                .build();
+
+        DividendTransaction dividendTransaction = new DividendTransactionBuilder()
+                .setDate(LocalDate.of(2018, 5, 1))
+                .setIsin(isin)
+                .setAmount(new Amount(100.0))
                 .build();
 
         account.registerTransaction(buyTransaction);
         account.registerTransaction(sellTransaction);
+        account.registerTransaction(dividendTransaction);
 
         this.accountRepository.saveAccount(account);
 
@@ -147,25 +160,28 @@ public class MySqlAccountRepositoryTest {
 
         List<Transaction> transactionsFromDatabase = accountFromDatabase.getProcessedTransactions();
 
-        Assert.assertEquals(2, transactionsFromDatabase.size());
+        Assert.assertEquals(3, transactionsFromDatabase.size());
 
         MarketTransaction buyTransactionFromDatabase = (MarketTransaction) transactionsFromDatabase.get(0);
+        Assert.assertEquals(buyTransaction.getDate(), buyTransactionFromDatabase.getDate());
         Assert.assertEquals(buyTransaction.getTransactionType(), buyTransactionFromDatabase.getTransactionType());
         Assert.assertEquals(buyTransaction.getIsin(), buyTransactionFromDatabase.getIsin());
         Assert.assertEquals(buyTransaction.getQuantity(), buyTransactionFromDatabase.getQuantity());
         Assert.assertEquals(buyTransaction.getTotalPrice(), buyTransactionFromDatabase.getTotalPrice());
         Assert.assertEquals(buyTransaction.getCommission(), buyTransactionFromDatabase.getCommission());
-        Assert.assertEquals(buyTransaction.getDate(), buyTransactionFromDatabase.getDate());
 
         MarketTransaction sellTransactionFromDatabase = (MarketTransaction) transactionsFromDatabase.get(1);
+        Assert.assertEquals(sellTransaction.getDate(), sellTransaction.getDate());
         Assert.assertEquals(sellTransaction.getTransactionType(), sellTransactionFromDatabase.getTransactionType());
         Assert.assertEquals(sellTransaction.getIsin(), sellTransactionFromDatabase.getIsin());
         Assert.assertEquals(sellTransaction.getQuantity(), sellTransactionFromDatabase.getQuantity());
         Assert.assertEquals(sellTransaction.getTotalPrice(), sellTransactionFromDatabase.getTotalPrice());
         Assert.assertEquals(sellTransaction.getCommission(), sellTransactionFromDatabase.getCommission());
-        Assert.assertEquals(sellTransaction.getDate(), sellTransaction.getDate());
 
-        // TODO add dividend transaction to test
+        DividendTransaction dividendTransactionFromDatabase = (DividendTransaction) transactionsFromDatabase.get(2);
+        Assert.assertEquals(dividendTransaction.getDate(), dividendTransactionFromDatabase.getDate());
+        Assert.assertEquals(dividendTransaction.getIsin(), dividendTransactionFromDatabase.getIsin());
+        Assert.assertEquals(dividendTransaction.getAmount(), dividendTransactionFromDatabase.getAmount());
     }
 
     @Test
@@ -175,7 +191,7 @@ public class MySqlAccountRepositoryTest {
         Account account = this.accountRepository.createAccount(new ClientId(1), new Amount(10000.0));
 
         account.registerTransaction(new MarketTransactionBuilder()
-                .setTransactionType(TransactionType.Buy)
+                .setTransactionType(MarketTransactionType.Buy)
                 .setIsin(ISIN.MunichRe)
                 .setQuantity(new Quantity(1))
                 .setTotalPrice(new Amount(100.0))
@@ -188,7 +204,7 @@ public class MySqlAccountRepositoryTest {
         // Register second transaction
 
         account.registerTransaction(new MarketTransactionBuilder()
-                .setTransactionType(TransactionType.Sell)
+                .setTransactionType(MarketTransactionType.Sell)
                 .setIsin(ISIN.MunichRe)
                 .setQuantity(new Quantity(1))
                 .setTotalPrice(new Amount(110.0))
@@ -204,7 +220,5 @@ public class MySqlAccountRepositoryTest {
 
         List<Transaction> transactionsFromDatabase = accountFromDatabase.getProcessedTransactions();
         Assert.assertEquals(2, transactionsFromDatabase.size());
-
-        // TODO add dividend transaction to test
     }
 }

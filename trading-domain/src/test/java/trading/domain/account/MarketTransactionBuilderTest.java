@@ -14,7 +14,7 @@ public class MarketTransactionBuilderTest {
         LocalDate date = LocalDate.now();
 
         MarketTransaction transaction = new MarketTransactionBuilder()
-                .setTransactionType(TransactionType.Buy)
+                .setTransactionType(MarketTransactionType.Buy)
                 .setIsin(ISIN.MunichRe)
                 .setQuantity(new Quantity(10))
                 .setTotalPrice(new Amount(1000.0))
@@ -23,7 +23,7 @@ public class MarketTransactionBuilderTest {
                 .build();
 
         Assert.assertNotNull(transaction);
-        Assert.assertEquals(TransactionType.Buy, transaction.getTransactionType());
+        Assert.assertEquals(MarketTransactionType.Buy, transaction.getTransactionType());
         Assert.assertEquals(ISIN.MunichRe, transaction.getIsin());
         Assert.assertEquals(new Quantity(10), transaction.getQuantity());
         Assert.assertEquals(new Amount(1000.0), transaction.getTotalPrice());

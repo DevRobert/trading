@@ -8,13 +8,13 @@ import trading.domain.Quantity;
 import java.time.LocalDate;
 
 public class MarketTransaction extends Transaction {
-    private TransactionType transactionType;
+    private MarketTransactionType transactionType;
     private ISIN isin;
     private Quantity quantity;
     private Amount totalPrice;
     private Amount commission;
 
-    MarketTransaction(TransactionType transactionType, ISIN isin, Quantity quantity, Amount totalPrice, Amount commission, LocalDate date) {
+    MarketTransaction(MarketTransactionType transactionType, ISIN isin, Quantity quantity, Amount totalPrice, Amount commission, LocalDate date) {
         super(date);
 
         if(transactionType == null) {
@@ -57,7 +57,7 @@ public class MarketTransaction extends Transaction {
         this.date = date;
     }
 
-    public TransactionType getTransactionType() {
+    public MarketTransactionType getTransactionType() {
         return transactionType;
     }
 

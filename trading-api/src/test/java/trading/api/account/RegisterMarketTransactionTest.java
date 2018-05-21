@@ -14,7 +14,7 @@ import trading.domain.*;
 import trading.domain.account.AccountId;
 import trading.domain.account.MarketTransaction;
 import trading.domain.account.TransactionId;
-import trading.domain.account.TransactionType;
+import trading.domain.account.MarketTransactionType;
 
 import java.time.LocalDate;
 
@@ -52,7 +52,7 @@ public class RegisterMarketTransactionTest extends AccountControllerTestBase {
             MarketTransaction transaction = invocation.getArgument(1);
 
             Assert.assertEquals(LocalDate.of(2000, 1, 2), transaction.getDate());
-            Assert.assertEquals(TransactionType.Buy, transaction.getTransactionType());
+            Assert.assertEquals(MarketTransactionType.Buy, transaction.getTransactionType());
             Assert.assertEquals("A", transaction.getIsin().getText());
             Assert.assertEquals(new Quantity(5), transaction.getQuantity());
             Assert.assertEquals(new Amount(1000.0), transaction.getTotalPrice());
