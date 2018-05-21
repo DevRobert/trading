@@ -158,54 +158,34 @@ public class AccountController {
 
     @RequestMapping(value = "/api/account/transactions/", method = RequestMethod.POST)
     public RegisterTransactionResponse registerTransaction(@RequestBody RegisterTransactionRequest request) {
+        if(request.getTransactionType() == null) {
+            throw new ClientException("The transaction type must be specified.");
+        }
+
+        if(request.getTransactionType().isEmpty()) {
+            throw new ClientException("The transaction type must not be empty.");
+        }
+
+        TransactionType transactionType;
+
         try {
-            MarketTransactionBuilder transactionBuilder = new MarketTransactionBuilder();
+            transactionType = TransactionType.ofName(request.getTransactionType());
+        }
+        catch(RuntimeException e) {
+            throw new ClientException(String.format("The transaction type '%s' is invalid.", request.getTransactionType()));
+        }
 
-            if(request.getDate() != null) {
-                transactionBuilder.setDate(request.getDate());
+        try {
+            Transaction transaction;
+
+            if(transactionType instanceof MarketTransactionType) {
+                transaction = this.registerMarketTransaction(request, (MarketTransactionType) transactionType);
             }
-
-            if (request.getTransactionType() != null) {
-                if(request.getTransactionType().isEmpty()) {
-                    throw new ClientException("The transaction type must not be empty.");
-                }
-
-                MarketTransactionType transactionType;
-
-                try {
-                    transactionType = (MarketTransactionType) TransactionType.ofName(request.getTransactionType());
-                }
-                catch(RuntimeException e) {
-                    throw new ClientException(String.format("The transaction type '%s' is invalid.", request.getTransactionType()));
-                }
-
-                transactionBuilder.setTransactionType(transactionType);
+            else if(transactionType == TransactionType.Dividend) {
+                transaction = this.registerDividendTransaction(request);
             }
-
-            if(request.getIsin() != null && !request.getIsin().isEmpty()) {
-                ISIN isin = new ISIN(request.getIsin());
-                transactionBuilder.setIsin(isin);
-            }
-
-            if(request.getQuantity() != null) {
-                Quantity quantity = new Quantity(request.getQuantity());
-                transactionBuilder.setQuantity(quantity);
-            }
-
-            if(request.getTotalPrice() != null) {
-                Amount totalPrice = new Amount(request.getTotalPrice());
-                transactionBuilder.setTotalPrice(totalPrice);
-            }
-
-            if(request.getCommission() != null) {
-                Amount commission = new Amount(request.getCommission());
-                transactionBuilder.setCommission(commission);
-            }
-
-            MarketTransaction transaction = transactionBuilder.build();
-
-            if(this.instrumentNameProvider.getInstrumentName(transaction.getIsin()) == null) {
-                throw new ClientException("The given ISIN is unknown.");
+            else {
+                throw new RuntimeException("Unknown transaction type.");
             }
 
             this.accountService.registerTransaction(this.accountId, transaction);
@@ -217,5 +197,65 @@ public class AccountController {
         catch(DomainException domainException) {
             throw new ClientException(domainException);
         }
+    }
+
+    private ISIN parseAndValidateISIN(String isinText) {
+        ISIN isin = new ISIN(isinText);
+
+        if(this.instrumentNameProvider.getInstrumentName(isin) == null) {
+            throw new ClientException("The given ISIN is unknown.");
+        }
+
+        return isin;
+    }
+
+    private Transaction registerMarketTransaction(RegisterTransactionRequest request, MarketTransactionType transactionType) {
+        MarketTransactionBuilder transactionBuilder = new MarketTransactionBuilder();
+
+        transactionBuilder.setTransactionType(transactionType);
+
+        if(request.getDate() != null) {
+            transactionBuilder.setDate(request.getDate());
+        }
+
+        if(request.getIsin() != null && !request.getIsin().isEmpty()) {
+            transactionBuilder.setIsin(this.parseAndValidateISIN(request.getIsin()));
+        }
+
+        if(request.getQuantity() != null) {
+            Quantity quantity = new Quantity(request.getQuantity());
+            transactionBuilder.setQuantity(quantity);
+        }
+
+        if(request.getTotalPrice() != null) {
+            Amount totalPrice = new Amount(request.getTotalPrice());
+            transactionBuilder.setTotalPrice(totalPrice);
+        }
+
+        if(request.getCommission() != null) {
+            Amount commission = new Amount(request.getCommission());
+            transactionBuilder.setCommission(commission);
+        }
+
+        return transactionBuilder.build();
+    }
+
+    private Transaction registerDividendTransaction(RegisterTransactionRequest request) {
+        DividendTransactionBuilder transactionBuilder = new DividendTransactionBuilder();
+
+        if(request.getDate() != null) {
+            transactionBuilder.setDate(request.getDate());
+        }
+
+        if(request.getIsin() != null && !request.getIsin().isEmpty()) {
+            transactionBuilder.setIsin(this.parseAndValidateISIN(request.getIsin()));
+        }
+
+        if(request.getAmount() != null) {
+            Amount amount = new Amount(request.getAmount());
+            transactionBuilder.setAmount(amount);
+        }
+
+        return transactionBuilder.build();
     }
 }

@@ -9,6 +9,7 @@ public class RegisterTransactionRequest {
     private Integer quantity;
     private Double totalPrice;
     private Double commission;
+    private Double amount;
 
     public LocalDate getDate() {
         return this.date;
@@ -56,5 +57,13 @@ public class RegisterTransactionRequest {
 
     public void setCommission(Double commission) {
         this.commission = commission;
+    }
+
+    public Double getAmount() {
+        return this.amount;
+    }
+
+    public void setAmount(Double amount) {
+        this.amount = amount;
     }
 }

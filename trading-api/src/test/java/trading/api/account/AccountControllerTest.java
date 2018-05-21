@@ -17,7 +17,8 @@ public class AccountControllerTest extends AccountControllerTestBase {
         // 10,000
         // - 1,000 - 20 (A)
         // - 1,000 - 20 (B)
-        // = 7960
+        // + 100 (Dividend)
+        // = 8060
         this.mvc.perform(MockMvcRequestBuilders
                 .get("/api/account/positions/")
                 .accept(MediaType.APPLICATION_JSON))
@@ -35,8 +36,8 @@ public class AccountControllerTest extends AccountControllerTestBase {
                 .andExpect(jsonPath("positions[1].totalMarketPrice", is(3000.0)))
                 .andExpect(jsonPath("summary.totalStocksQuantity", is(20)))
                 .andExpect(jsonPath("summary.totalStocksMarketPrice", is(5000.0)))
-                .andExpect(jsonPath("summary.availableMoney", is(7960.0)))
-                .andExpect(jsonPath("summary.totalBalance", is(12960.0)))
+                .andExpect(jsonPath("summary.availableMoney", is(8060.0)))
+                .andExpect(jsonPath("summary.totalBalance", is(13060.0)))
                 .andExpect(jsonPath("marketPricesDate", is("2018-05-09")));
     }
 

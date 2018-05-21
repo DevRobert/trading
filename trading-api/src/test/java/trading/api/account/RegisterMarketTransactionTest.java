@@ -24,9 +24,7 @@ import static org.mockito.Mockito.doAnswer;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-public class RegisterMarketTransactionTest extends AccountControllerTestBase {
-    private JSONObject requestBody;
-
+public class RegisterMarketTransactionTest extends RegisterTransactionTestBase {
     @Before
     public void initializeRequestBody() throws JSONException {
         this.requestBody = new JSONObject()
@@ -36,14 +34,6 @@ public class RegisterMarketTransactionTest extends AccountControllerTestBase {
                 .put("quantity", 5)
                 .put("totalPrice", 1000.0)
                 .put("commission", 20.0);
-    }
-
-    private ResultActions performRequest() throws Exception {
-        return this.mvc.perform(MockMvcRequestBuilders
-                .post("/api/account/transactions/")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(requestBody.toString())
-                .accept(MediaType.APPLICATION_JSON));
     }
 
     @Test

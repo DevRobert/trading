@@ -154,6 +154,10 @@ public class MySqlAccountRepositoryTest {
 
         this.accountRepository.saveAccount(account);
 
+        Assert.assertNotNull(buyTransaction.getId());
+        Assert.assertNotNull(sellTransaction.getId());
+        Assert.assertNotNull(dividendTransaction.getId());
+
         // Read account and transactions from database
 
         Account accountFromDatabase = this.accountRepository.getAccount(account.getId());
