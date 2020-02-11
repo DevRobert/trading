@@ -33,22 +33,27 @@ public class MySqlAccountRepositoryTest {
         ClientId clientId = new ClientId(1);
         Amount seedCapital = new Amount(10000.0);
 
-        Account account = this.accountRepository.createAccount(clientId, seedCapital);
+        Account account = this.accountRepository.createAccount(clientId, seedCapital, TaxStrategies.getNoTaxesStrategy());
 
         Assert.assertNotNull(account.getId());
         Assert.assertTrue(account.getId().getValue() > 0);
         Assert.assertEquals(seedCapital, account.getAvailableMoney());
+        Assert.assertSame(TaxStrategies.getNoTaxesStrategy(), account.getTaxStrategy());
 
         // Get account
 
-        Account accountFromDatabase = this.accountRepository.getAccount(account.getId());
+        Account accountFromDatabase = this.accountRepository.getAccount(account.getId(), TaxStrategies.getNoTaxesStrategy());
         Assert.assertEquals(account.getId().getValue(), accountFromDatabase.getId().getValue());
         Assert.assertEquals(seedCapital, accountFromDatabase.getAvailableMoney());
+        Assert.assertSame(TaxStrategies.getNoTaxesStrategy(), account.getTaxStrategy());
     }
 
     @Test
     public void createAccountFails_ifAccountIdNotSet() {
-        Account account = new Account(new Amount(10000.0));
+        Account account = new AccountBuilder()
+                .setAvailableMoney(new Amount(10000.0))
+                .setTaxStrategy(TaxStrategies.getNoTaxesStrategy())
+                .build();
 
         try {
             this.accountRepository.saveAccount(account);
@@ -63,15 +68,16 @@ public class MySqlAccountRepositoryTest {
 
     @Test
     public void getAccount() {
-        Account account = this.accountRepository.getAccount(new AccountId(1));
+        Account account = this.accountRepository.getAccount(new AccountId(1), TaxStrategies.getNoTaxesStrategy());
 
         Assert.assertNotNull(account);
         Assert.assertEquals(new Amount(10000.0), account.getAvailableMoney());
+        Assert.assertSame(TaxStrategies.getNoTaxesStrategy(), account.getTaxStrategy());
     }
 
     @Test
     public void getAccountTransactions() {
-        Account account = this.accountRepository.getAccount(new AccountId(2));
+        Account account = this.accountRepository.getAccount(new AccountId(2), TaxStrategies.getNoTaxesStrategy());
 
         List<Transaction> transactions = account.getProcessedTransactions();
         Assert.assertEquals(3, transactions.size());
@@ -106,7 +112,7 @@ public class MySqlAccountRepositoryTest {
     @Test
     public void getAccount_fails_forUnknownAccountId() {
         try {
-            this.accountRepository.getAccount(new AccountId(Integer.MAX_VALUE));
+            this.accountRepository.getAccount(new AccountId(Integer.MAX_VALUE), TaxStrategies.getNoTaxesStrategy());
         }
         catch(AccountNotFoundException ex) {
             return;
@@ -119,7 +125,7 @@ public class MySqlAccountRepositoryTest {
     public void registerTransactions() {
         // Create account and register transactions
 
-        Account account = this.accountRepository.createAccount(new ClientId(1), new Amount(10000.0));
+        Account account = this.accountRepository.createAccount(new ClientId(1), new Amount(10000.0), TaxStrategies.getNoTaxesStrategy());
 
         ISIN isin = new ISIN("DE0008430026");
         Quantity quantity = new Quantity(10);
@@ -160,7 +166,7 @@ public class MySqlAccountRepositoryTest {
 
         // Read account and transactions from database
 
-        Account accountFromDatabase = this.accountRepository.getAccount(account.getId());
+        Account accountFromDatabase = this.accountRepository.getAccount(account.getId(), TaxStrategies.getNoTaxesStrategy());
 
         List<Transaction> transactionsFromDatabase = accountFromDatabase.getProcessedTransactions();
 
@@ -192,7 +198,7 @@ public class MySqlAccountRepositoryTest {
     public void appendTransactions() {
         // Create account with first transaction
 
-        Account account = this.accountRepository.createAccount(new ClientId(1), new Amount(10000.0));
+        Account account = this.accountRepository.createAccount(new ClientId(1), new Amount(10000.0), TaxStrategies.getNoTaxesStrategy());
 
         account.registerTransaction(new MarketTransactionBuilder()
                 .setTransactionType(MarketTransactionType.Buy)
@@ -220,7 +226,7 @@ public class MySqlAccountRepositoryTest {
 
         // Get account from database
 
-        Account accountFromDatabase = this.accountRepository.getAccount(account.getId());
+        Account accountFromDatabase = this.accountRepository.getAccount(account.getId(), TaxStrategies.getNoTaxesStrategy());
 
         List<Transaction> transactionsFromDatabase = accountFromDatabase.getProcessedTransactions();
         Assert.assertEquals(2, transactionsFromDatabase.size());

@@ -3,6 +3,7 @@ package trading.domain.simulation;
 import trading.domain.Amount;
 import trading.domain.ISIN;
 import trading.domain.account.Account;
+import trading.domain.account.AccountBuilder;
 import trading.domain.broker.Broker;
 import trading.domain.broker.VirtualBroker;
 import trading.domain.market.HistoricalMarketData;
@@ -27,8 +28,12 @@ public class SimulationDriver {
     }
 
     public SimulationReport runSimulation() {
+        Account account = new AccountBuilder()
+                .setAvailableMoney(this.parameters.getSeedCapital())
+                .setTaxStrategy(this.parameters.getTaxStrategy())
+                .build();
+
         HistoricalMarketData historicalMarketData = this.buildHistoricalMarketData();
-        Account account = new Account(this.parameters.getSeedCapital());
         Broker broker = new VirtualBroker(account, historicalMarketData, this.parameters.getCommissionStrategy());
 
         TradingStrategyContext tradingStrategyContext = new TradingStrategyContext(account, broker, historicalMarketData);

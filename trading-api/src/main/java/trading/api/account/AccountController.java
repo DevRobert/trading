@@ -15,32 +15,32 @@ import java.util.List;
 
 @RestController
 @CrossOrigin("http://localhost:3001")
-public class AccountController {
-    @Autowired
-    private AccountService accountService;
+        public class AccountController {
+            @Autowired
+            private AccountService accountService;
 
-    @Autowired
-    private InstrumentNameProvider instrumentNameProvider;
+            @Autowired
+            private InstrumentNameProvider instrumentNameProvider;
 
-    @Autowired
-    private MultiStockMarketDataStore multiStockMarketDataStore;
+            @Autowired
+            private MultiStockMarketDataStore multiStockMarketDataStore;
 
-    // TODO get account id from JWT
-    private AccountId accountId = new AccountId(1);
+            // TODO get account id from JWT
+            private AccountId accountId = new AccountId(1);
 
-    private Account getAccount() {
-        return this.accountService.getAccount(this.accountId);
-    }
+            private Account getAccount() {
+                return this.accountService.getAccount(this.accountId);
+            }
 
-    @RequestMapping(value = "/api/account/positions/", method = RequestMethod.GET)
-    public GetAccountPositionsResponse getAccountPositions() {
-        GetAccountPositionsResponse response = new GetAccountPositionsResponse();
+            @RequestMapping(value = "/api/account/positions/", method = RequestMethod.GET)
+            public GetAccountPositionsResponse getAccountPositions() {
+                GetAccountPositionsResponse response = new GetAccountPositionsResponse();
 
-        Account account = this.getAccount();
-        List<AccountPositionDto> accountPositionDtos = new ArrayList<>();
+                Account account = this.getAccount();
+                List<AccountPositionDto> accountPositionDtos = new ArrayList<>();
 
-        MarketPriceSnapshot lastClosingPrices = this.multiStockMarketDataStore.getLastClosingPrices();
-        account.reportMarketPrices(lastClosingPrices);
+                MarketPriceSnapshot lastClosingPrices = this.multiStockMarketDataStore.getLastClosingPrices();
+                account.reportMarketPrices(lastClosingPrices);
 
         for(ISIN isin: account.getCurrentStocks().keySet()) {
             Position position = account.getPosition(isin);
@@ -94,10 +94,10 @@ public class AccountController {
             AccountTransactionDto accountTransactionDto = null;
 
             if(transaction instanceof MarketTransaction) {
-                accountTransactionDto = this.buildAccountTransactionDto((MarketTransaction) transaction);
+                accountTransactionDto = this.buildAccountTransactionDto(account, (MarketTransaction) transaction);
             }
             else if(transaction instanceof DividendTransaction) {
-                accountTransactionDto = this.buildAccountTransactionDto((DividendTransaction) transaction);
+                accountTransactionDto = this.buildAccountTransactionDto(account, (DividendTransaction) transaction);
             }
             else {
                 throw new RuntimeException("Transaction type not supported.");
@@ -111,7 +111,7 @@ public class AccountController {
         return response;
     }
 
-    private AccountTransactionDto buildAccountTransactionDto(MarketTransaction transaction) {
+    private AccountTransactionDto buildAccountTransactionDto(Account account, MarketTransaction transaction) {
         AccountTransactionDto accountTransactionDto = new AccountTransactionDto();
 
         accountTransactionDto.setDate(transaction.getDate());
@@ -125,11 +125,12 @@ public class AccountController {
         accountTransactionDto.setTotalPrice(transaction.getTotalPrice().getValue());
         accountTransactionDto.setCommission(transaction.getCommission().getValue());
         accountTransactionDto.setName(this.getInstrumentName(transaction.getIsin()));
+        accountTransactionDto.setTaxImpact(account.getTaxImpact(transaction).getValue());
 
         return accountTransactionDto;
     }
 
-    private AccountTransactionDto buildAccountTransactionDto(DividendTransaction transaction) {
+    private AccountTransactionDto buildAccountTransactionDto(Account account, DividendTransaction transaction) {
         AccountTransactionDto accountTransactionDto = new AccountTransactionDto();
 
         accountTransactionDto.setDate(transaction.getDate());
@@ -137,6 +138,7 @@ public class AccountController {
         accountTransactionDto.setIsin(transaction.getIsin().getText());
         accountTransactionDto.setName(this.getInstrumentName(transaction.getIsin()));
         accountTransactionDto.setAmount(transaction.getAmount().getValue());
+        accountTransactionDto.setTaxImpact(account.getTaxImpact(transaction).getValue());
 
         return accountTransactionDto;
     }

@@ -27,8 +27,10 @@ public abstract class AccountControllerTestBase extends ControllerTestBase {
 
     @Before
     public void before() {
-        Amount seedCapital = new Amount(10000.0);
-        Account account = new Account(seedCapital);
+        Account account = new AccountBuilder()
+                .setAvailableMoney(new Amount(10000.0))
+                .setTaxStrategy(new TaxStrategyImpl(0.1))
+                .build();
 
         account.registerTransaction(new MarketTransactionBuilder()
                 .setDate(LocalDate.of(2018, 4, 12))

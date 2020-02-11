@@ -6,8 +6,9 @@ import trading.domain.Amount;
 import trading.domain.DayCount;
 import trading.domain.ISIN;
 import trading.domain.Quantity;
-import trading.domain.account.Account;
+import trading.domain.account.AccountBuilder;
 import trading.domain.account.Position;
+import trading.domain.account.TaxStrategies;
 import trading.domain.strategy.AlwaysFiresTrigger;
 import trading.domain.strategy.WaitFixedPeriodTrigger;
 
@@ -111,8 +112,10 @@ public class ProgressiveTradingStrategyTest extends ProgressiveTradingStrategyTe
 
     @Test
     public void noBuyOrderIsSetIfNoMoneyAvailable() {
-        Amount availableMoney = new Amount(-10000.0);
-        this.account = new Account(availableMoney);
+        this.account = new AccountBuilder()
+                .setAvailableMoney(new Amount(-10000.0))
+                .setTaxStrategy(TaxStrategies.getNoTaxesStrategy())
+                .build();
 
         parametersBuilder.setBuyTriggerFactory(isin -> new AlwaysFiresTrigger());
 

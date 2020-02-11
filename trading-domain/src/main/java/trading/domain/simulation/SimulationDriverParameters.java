@@ -2,6 +2,7 @@ package trading.domain.simulation;
 
 import trading.domain.Amount;
 import trading.domain.DayCount;
+import trading.domain.account.TaxStrategy;
 import trading.domain.broker.CommissionStrategy;
 import trading.domain.strategy.TradingStrategyFactory;
 
@@ -12,30 +13,7 @@ public class SimulationDriverParameters {
     private final Amount seedCapital;
     private final TradingStrategyFactory tradingStrategyFactory;
     private final CommissionStrategy commissionStrategy;
-
-    public SimulationMarketDataSource getSimulationMarketDataSource() {
-        return this.simulationMarketDataSource;
-    }
-
-    public DayCount getHistoryDuration() {
-        return this.historyDuration;
-    }
-
-    public DayCount getSimulationDuration() {
-        return this.simulationDuration;
-    }
-
-    public Amount getSeedCapital() {
-        return this.seedCapital;
-    }
-
-    public TradingStrategyFactory getTradingStrategyFactory() {
-        return this.tradingStrategyFactory;
-    }
-
-    public CommissionStrategy getCommissionStrategy() {
-         return this.commissionStrategy;
-    }
+    private final TaxStrategy taxStrategy;
 
     public SimulationDriverParameters(
             SimulationMarketDataSource simulationMarketDataSource,
@@ -43,7 +21,8 @@ public class SimulationDriverParameters {
             DayCount simulationDuration,
             Amount seedCapital,
             TradingStrategyFactory tradingStrategyFactory,
-            CommissionStrategy commissionStrategy
+            CommissionStrategy commissionStrategy,
+            TaxStrategy taxStrategy
     ){
         if(simulationMarketDataSource == null) {
             throw new SimulationDriverInitializationException("The simulation market data source must be specified.");
@@ -85,11 +64,44 @@ public class SimulationDriverParameters {
             throw new SimulationDriverInitializationException("The commission strategy must be specified.");
         }
 
+        if(taxStrategy == null) {
+            throw new SimulationDriverInitializationException("The tax strategy must be specified.");
+        }
+
         this.simulationMarketDataSource = simulationMarketDataSource;
         this.historyDuration = historyDuration;
         this.simulationDuration = simulationDuration;
         this.seedCapital = seedCapital;
         this.tradingStrategyFactory = tradingStrategyFactory;
         this.commissionStrategy = commissionStrategy;
+        this.taxStrategy = taxStrategy;
+    }
+
+    public SimulationMarketDataSource getSimulationMarketDataSource() {
+        return this.simulationMarketDataSource;
+    }
+
+    public DayCount getHistoryDuration() {
+        return this.historyDuration;
+    }
+
+    public DayCount getSimulationDuration() {
+        return this.simulationDuration;
+    }
+
+    public Amount getSeedCapital() {
+        return this.seedCapital;
+    }
+
+    public TradingStrategyFactory getTradingStrategyFactory() {
+        return this.tradingStrategyFactory;
+    }
+
+    public CommissionStrategy getCommissionStrategy() {
+         return this.commissionStrategy;
+    }
+
+    public TaxStrategy getTaxStrategy() {
+        return this.taxStrategy;
     }
 }

@@ -11,7 +11,9 @@ import trading.domain.Amount;
 import trading.domain.ISIN;
 import trading.domain.Quantity;
 import trading.domain.account.Account;
+import trading.domain.account.AccountBuilder;
 import trading.domain.account.AccountId;
+import trading.domain.account.TaxStrategies;
 import trading.domain.broker.OrderRequest;
 import trading.domain.broker.OrderType;
 import trading.domain.market.InstrumentNameProvider;
@@ -43,7 +45,10 @@ public class TradingControllerTest extends ControllerTestBase {
 
     @Test
     public void calculateTrades() throws Exception {
-        Account account = new Account(new Amount(10000.0));
+        Account account = new AccountBuilder()
+                .setAvailableMoney(new Amount(10000.0))
+                .setTaxStrategy(TaxStrategies.getNoTaxesStrategy())
+                .build();
 
         List<OrderRequest> trades = new ArrayList<>();
         trades.add(new OrderRequest(OrderType.BuyMarket, new ISIN("A"), new Quantity(10)));

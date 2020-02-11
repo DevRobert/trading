@@ -9,7 +9,9 @@ import trading.application.ScoringService;
 import trading.domain.Amount;
 import trading.domain.ISIN;
 import trading.domain.account.Account;
+import trading.domain.account.AccountBuilder;
 import trading.domain.account.AccountId;
+import trading.domain.account.TaxStrategies;
 import trading.domain.market.InstrumentNameProvider;
 import trading.domain.strategy.compound.Score;
 import trading.domain.strategy.compound.Scores;
@@ -36,7 +38,10 @@ public class ScoringControllerTest extends ControllerTestBase {
 
     @Test
     public void calculateBuyScoring() throws Exception {
-        Account account = new Account(new Amount(10000.0));
+        Account account = new AccountBuilder()
+                .setAvailableMoney(new Amount(10000.0))
+                .setTaxStrategy(TaxStrategies.getNoTaxesStrategy())
+                .build();
 
         Map<ISIN, Score> values = new HashMap<>();
         values.put(new ISIN("A"), new Score(1.0, "My first comment"));
@@ -67,7 +72,10 @@ public class ScoringControllerTest extends ControllerTestBase {
 
     @Test
     public void calculateSellScoring() throws Exception {
-        Account account = new Account(new Amount(10000.0));
+        Account account = new AccountBuilder()
+                .setAvailableMoney(new Amount(10000.0))
+                .setTaxStrategy(TaxStrategies.getNoTaxesStrategy())
+                .build();
 
         Map<ISIN, Score> values = new HashMap<>();
         values.put(new ISIN("A"), new Score(1.0, "My first comment"));

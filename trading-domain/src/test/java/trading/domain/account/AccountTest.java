@@ -623,14 +623,21 @@ public class AccountTest extends AccountTestBase {
 
     @Test
     public void returnsInitiallyEmptyTransactionLists() {
-        Account account = new Account(new Amount(50000.0));
+        Account account = new AccountBuilder()
+                .setAvailableMoney(new Amount(50000.0))
+                .setTaxStrategy(TaxStrategies.getNoTaxesStrategy())
+                .build();
+
         List<Transaction> transaction = account.getProcessedTransactions();
         Assert.assertEquals(0, transaction.size());
     }
 
     @Test
     public void returnsRegisteredTransactions() {
-        Account account = new Account(new Amount(50000.0));
+        Account account = new AccountBuilder()
+                .setAvailableMoney(new Amount(50000.0))
+                .setTaxStrategy(TaxStrategies.getNoTaxesStrategy())
+                .build();
 
         MarketTransaction firstTransaction = new MarketTransactionBuilder()
                 .setTransactionType(MarketTransactionType.Buy)
@@ -742,7 +749,10 @@ public class AccountTest extends AccountTestBase {
 
     @Test
     public void returnsCurrentStocks() {
-        Account account = new Account(new Amount(50000.0));
+        Account account = new AccountBuilder()
+                .setAvailableMoney(new Amount(50000.0))
+                .setTaxStrategy(TaxStrategies.getNoTaxesStrategy())
+                .build();
 
         MarketTransaction firstTransaction = new MarketTransactionBuilder()
                 .setTransactionType(MarketTransactionType.Buy)
@@ -774,7 +784,10 @@ public class AccountTest extends AccountTestBase {
 
     @Test
     public void returnsCurrentStocksWithoutEmptyPositions() {
-        Account account = new Account(new Amount(10000.0));
+        Account account = new AccountBuilder()
+                .setAvailableMoney(new Amount(10000.0))
+                .setTaxStrategy(TaxStrategies.getNoTaxesStrategy())
+                .build();
 
         account.registerTransaction(new MarketTransactionBuilder()
                 .setTransactionType(MarketTransactionType.Buy)
@@ -813,7 +826,10 @@ public class AccountTest extends AccountTestBase {
 
     @Test
     public void returnsTotalMarketPrice() {
-        Account account = new Account(new Amount(50000.0));
+        Account account = new AccountBuilder()
+                .setAvailableMoney(new Amount(50000.0))
+                .setTaxStrategy(TaxStrategies.getNoTaxesStrategy())
+                .build();
 
         MarketTransaction firstTransaction = new MarketTransactionBuilder()
                 .setTransactionType(MarketTransactionType.Buy)
@@ -841,7 +857,10 @@ public class AccountTest extends AccountTestBase {
 
     @Test
     public void returnsTotalStockQuantity() {
-        Account account = new Account(new Amount(50000.0));
+        Account account = new AccountBuilder()
+                .setAvailableMoney(new Amount(50000.0))
+                .setTaxStrategy(TaxStrategies.getNoTaxesStrategy())
+                .build();
 
         MarketTransaction firstTransaction = new MarketTransactionBuilder()
                 .setTransactionType(MarketTransactionType.Buy)
@@ -882,7 +901,11 @@ public class AccountTest extends AccountTestBase {
 
     @Test
     public void setAccountId() {
-        Account account = new Account(new Amount(10000.0));
+        Account account = new AccountBuilder()
+                .setAvailableMoney(new Amount(10000.0))
+                .setTaxStrategy(TaxStrategies.getNoTaxesStrategy())
+                .build();
+
         AccountId accountId = new AccountId(1);
 
         account.setId(accountId);
@@ -892,7 +915,11 @@ public class AccountTest extends AccountTestBase {
 
     @Test
     public void setAccountIdFails_ifAccountIdAlreadySet() {
-        Account account = new Account(new Amount(10000.0));
+        Account account = new AccountBuilder()
+                .setAvailableMoney(new Amount(10000.0))
+                .setTaxStrategy(TaxStrategies.getNoTaxesStrategy())
+                .build();
+
         account.setId(new AccountId(1));
 
         try {
@@ -900,6 +927,135 @@ public class AccountTest extends AccountTestBase {
         }
         catch(DomainException e) {
             Assert.assertEquals("The account id must not be changed if set once.", e.getMessage());
+            return;
+        }
+
+        Assert.fail("DomainException expected.");
+    }
+
+    // Find last buy transaction
+
+    @Test
+    public void findLastBuyTransaction_returnsRespectiveTransaction_ifLastTransactionIsBuyTransaction() {
+        MarketTransaction buyTransaction = new MarketTransactionBuilder()
+                .setDate(LocalDate.of(2000, 1, 1))
+                .setTransactionType(TransactionType.Buy)
+                .setIsin(ISIN.MunichRe)
+                .setQuantity(new Quantity(1))
+                .setTotalPrice(new Amount(1000.0))
+                .setCommission(new Amount(10.0))
+                .build();
+
+        this.account.registerTransaction(buyTransaction);
+
+        Assert.assertSame(buyTransaction, this.account.findLastBuyTransaction(ISIN.MunichRe));
+    }
+
+    @Test
+    public void findLastBuyTransaction_returnsRespectiveTransaction_ifLastTransactionIsSellTransaction() {
+        MarketTransaction buyTransaction = new MarketTransactionBuilder()
+                .setDate(LocalDate.of(2000, 1, 1))
+                .setTransactionType(TransactionType.Buy)
+                .setIsin(ISIN.MunichRe)
+                .setQuantity(new Quantity(1))
+                .setTotalPrice(new Amount(1000.0))
+                .setCommission(new Amount(10.0))
+                .build();
+
+        MarketTransaction sellTransaction = new MarketTransactionBuilder()
+                .setDate(LocalDate.of(2000, 1, 2))
+                .setTransactionType(TransactionType.Sell)
+                .setIsin(ISIN.MunichRe)
+                .setQuantity(new Quantity(1))
+                .setTotalPrice(new Amount(1000.0))
+                .setCommission(new Amount(10.0))
+                .build();
+
+        this.account.registerTransaction(buyTransaction);
+        this.account.registerTransaction(sellTransaction);
+
+        Assert.assertSame(buyTransaction, this.account.findLastBuyTransaction(ISIN.MunichRe));
+    }
+
+    @Test
+    public void findLastBuyTransaction_returnsLastTransaction_ifMultipleBuyTransactionsRegistered() {
+        MarketTransaction firstBuyTransaction = new MarketTransactionBuilder()
+                .setDate(LocalDate.of(2000, 1, 1))
+                .setTransactionType(TransactionType.Buy)
+                .setIsin(ISIN.MunichRe)
+                .setQuantity(new Quantity(1))
+                .setTotalPrice(new Amount(1000.0))
+                .setCommission(new Amount(10.0))
+                .build();
+
+        MarketTransaction sellTransaction = new MarketTransactionBuilder()
+                .setDate(LocalDate.of(2000, 1, 2))
+                .setTransactionType(TransactionType.Sell)
+                .setIsin(ISIN.MunichRe)
+                .setQuantity(new Quantity(1))
+                .setTotalPrice(new Amount(1000.0))
+                .setCommission(new Amount(10.0))
+                .build();
+
+        MarketTransaction secondBuyTransaction = new MarketTransactionBuilder()
+                .setDate(LocalDate.of(2000, 1, 3))
+                .setTransactionType(TransactionType.Buy)
+                .setIsin(ISIN.MunichRe)
+                .setQuantity(new Quantity(1))
+                .setTotalPrice(new Amount(1000.0))
+                .setCommission(new Amount(10.0))
+                .build();
+
+        this.account.registerTransaction(firstBuyTransaction);
+        this.account.registerTransaction(sellTransaction);
+        this.account.registerTransaction(secondBuyTransaction);
+
+        Assert.assertSame(secondBuyTransaction, this.account.findLastBuyTransaction(ISIN.MunichRe));
+    }
+
+    @Test
+    public void findLastBuyTransaction_returnsRespectiveTransaction_sansInterferenceWithOtherISINs() {
+        MarketTransaction buyTransaction = new MarketTransactionBuilder()
+                .setDate(LocalDate.of(2000, 1, 1))
+                .setTransactionType(TransactionType.Buy)
+                .setIsin(ISIN.MunichRe)
+                .setQuantity(new Quantity(1))
+                .setTotalPrice(new Amount(1000.0))
+                .setCommission(new Amount(10.0))
+                .build();
+
+        MarketTransaction otherBuyTransaction = new MarketTransactionBuilder()
+                .setDate(LocalDate.of(2000, 1, 1))
+                .setTransactionType(TransactionType.Buy)
+                .setIsin(ISIN.Allianz)
+                .setQuantity(new Quantity(1))
+                .setTotalPrice(new Amount(1000.0))
+                .setCommission(new Amount(10.0))
+                .build();
+
+        MarketTransaction sellTransaction = new MarketTransactionBuilder()
+                .setDate(LocalDate.of(2000, 1, 2))
+                .setTransactionType(TransactionType.Sell)
+                .setIsin(ISIN.MunichRe)
+                .setQuantity(new Quantity(1))
+                .setTotalPrice(new Amount(1000.0))
+                .setCommission(new Amount(10.0))
+                .build();
+
+        this.account.registerTransaction(buyTransaction);
+        this.account.registerTransaction(otherBuyTransaction);
+        this.account.registerTransaction(sellTransaction);
+
+        Assert.assertSame(buyTransaction, this.account.findLastBuyTransaction(ISIN.MunichRe));
+    }
+
+    @Test
+    public void findLastBuyTransaction_fails_ifNoBuyTransactionRegistered() {
+        try {
+            this.account.findLastBuyTransaction(ISIN.MunichRe);
+        }
+        catch(DomainException e) {
+            Assert.assertEquals("There was no buy transaction registered for the given ISIN.", e.getMessage());
             return;
         }
 

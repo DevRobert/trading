@@ -3,6 +3,7 @@ package trading.cli;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import trading.domain.account.AccountRepository;
+import trading.domain.account.TaxStrategies;
 import trading.domain.simulation.MultiStockMarketDataStore;
 import trading.persistence.MySqlRepositoryParameters;
 import trading.persistence.MySqlRepositoryParametersBuilder;

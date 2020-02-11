@@ -25,8 +25,8 @@ public class MySqlInstrumentNameProviderTest {
 
     @Test
     public void getName() {
-        String name = this.instrumentNameProvider.getInstrumentName(ISIN.MunichRe);
-        Assert.assertEquals("Münchener Rückversicherungs-Gesellschaft", name);
+        String name = this.instrumentNameProvider.getInstrumentName(ISIN.Allianz);
+        Assert.assertEquals("Allianz", name);
     }
 
     @Test

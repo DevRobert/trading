@@ -14,6 +14,7 @@ public class AccountTransactionDto {
     private Double totalPrice;
     private Double commission;
     private Double amount;
+    private Double taxImpact;
 
     public LocalDate getDate() {
         return this.date;
@@ -85,5 +86,13 @@ public class AccountTransactionDto {
 
     public void setAmount(Double amount) {
         this.amount = amount;
+    }
+
+    public Double getTaxImpact() {
+        return this.taxImpact;
+    }
+
+    public void setTaxImpact(Double taxImpact) {
+        this.taxImpact = taxImpact;
     }
 }

@@ -6,6 +6,8 @@ import org.junit.Test;
 import trading.domain.Amount;
 import trading.domain.ISIN;
 import trading.domain.account.Account;
+import trading.domain.account.AccountBuilder;
+import trading.domain.account.TaxStrategies;
 import trading.domain.broker.Broker;
 import trading.domain.broker.CommissionStrategies;
 import trading.domain.broker.VirtualBroker;
@@ -23,7 +25,11 @@ public class CompoundTradingStrategyInitializationTest {
 
     @Before
     public void before() {
-        Account account = new Account(new Amount(1000.0));
+        Account account = new AccountBuilder()
+                .setAvailableMoney(new Amount(1000.0))
+                .setTaxStrategy(TaxStrategies.getNoTaxesStrategy())
+                .build();
+
         HistoricalMarketData historicalMarketData = new HistoricalMarketData(ISIN.MunichRe, new Amount(1000.0), LocalDate.now());
         Broker broker = new VirtualBroker(account, historicalMarketData, CommissionStrategies.getZeroCommissionStrategy());
 

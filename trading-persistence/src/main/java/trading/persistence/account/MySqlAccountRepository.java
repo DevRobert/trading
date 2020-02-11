@@ -16,7 +16,7 @@ public class MySqlAccountRepository extends MySqlRepository implements AccountRe
     }
 
     @Override
-    public Account createAccount(ClientId clientId, Amount seedCapital) {
+    public Account createAccount(ClientId clientId, Amount seedCapital, TaxStrategy taxStrategy) {
         Connection connection = this.openNewConnection();
 
         try {
@@ -30,7 +30,11 @@ public class MySqlAccountRepository extends MySqlRepository implements AccountRe
             resultSet.next();
             int accountId = resultSet.getInt(1);
 
-            Account account = new Account(seedCapital);
+            Account account = new AccountBuilder()
+                    .setAvailableMoney(seedCapital)
+                    .setTaxStrategy(taxStrategy)
+                    .build();
+
             account.setId(new AccountId(accountId));
 
             return account;
@@ -120,7 +124,7 @@ public class MySqlAccountRepository extends MySqlRepository implements AccountRe
     }
 
     @Override
-    public Account getAccount(AccountId accountId) {
+    public Account getAccount(AccountId accountId, TaxStrategy taxStrategy) {
         Connection connection = this.openNewConnection();
 
         try {
@@ -135,7 +139,11 @@ public class MySqlAccountRepository extends MySqlRepository implements AccountRe
 
             double seedCapital = resultSet.getDouble(3);
 
-            Account account = new Account(new Amount(seedCapital));
+            Account account = new AccountBuilder()
+                    .setAvailableMoney(new Amount(seedCapital))
+                    .setTaxStrategy(taxStrategy)
+                    .build();
+
             account.setId(accountId);
 
             List<Transaction> transactions = this.getAccountTransactions(connection, accountId);

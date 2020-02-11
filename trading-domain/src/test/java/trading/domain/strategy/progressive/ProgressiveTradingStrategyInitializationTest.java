@@ -7,6 +7,8 @@ import trading.domain.Amount;
 import trading.domain.DayCount;
 import trading.domain.ISIN;
 import trading.domain.account.Account;
+import trading.domain.account.AccountBuilder;
+import trading.domain.account.TaxStrategies;
 import trading.domain.broker.Broker;
 import trading.domain.broker.CommissionStrategy;
 import trading.domain.broker.VirtualBroker;
@@ -34,8 +36,10 @@ public class ProgressiveTradingStrategyInitializationTest {
         this.parametersBuilder.setSellTriggerFactory(isin -> new WaitFixedPeriodTrigger(this.historicalMarketData, new DayCount(1)));
         this.parametersBuilder.setResetTriggerFactory(isin -> new WaitFixedPeriodTrigger(this.historicalMarketData, new DayCount(1)));
 
-        Amount availableMoney = new Amount(50000.0);
-        this.account = new Account(availableMoney);
+        this.account = new AccountBuilder()
+                .setAvailableMoney(new Amount(50000.0))
+                .setTaxStrategy(TaxStrategies.getNoTaxesStrategy())
+                .build();
 
         MarketPriceSnapshot initialClosingMarketPrices = new MarketPriceSnapshotBuilder()
                 .setDate(LocalDate.now())

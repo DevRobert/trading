@@ -17,15 +17,30 @@ public class Account {
     private HashMap<ISIN, Position> positions = new HashMap<>();
     private Amount commissions;
     private Amount balance;
+
+    private final TaxStrategy taxStrategy;
     private final List<Transaction> processedTransactions;
     private final Map<ISIN, MarketTransaction> lastMarketTransactionByIsin;
+    private final Map<ISIN, MarketTransaction> lastBuyTransactionBuyIsin;
+    private final Map<Transaction, Amount> taxImpactByTransaction;
 
-    public Account(Amount availableMoney) {
+    Account(Amount availableMoney, TaxStrategy taxStrategy) {
+        if(availableMoney == null) {
+            throw new DomainException("The available money must be set.");
+        }
+
+        if(taxStrategy == null) {
+            throw new DomainException("The tax strategy must be set.");
+        }
+
+        this.taxStrategy = taxStrategy;
         this.commissions = Amount.Zero;
         this.availableMoney = availableMoney;
         this.balance = availableMoney;
         this.processedTransactions = new ArrayList<>();
         this.lastMarketTransactionByIsin = new HashMap<>();
+        this.lastBuyTransactionBuyIsin = new HashMap<>();
+        this.taxImpactByTransaction = new HashMap<>();
     }
 
     public Amount getCommissions() {
@@ -93,6 +108,8 @@ public class Account {
         }
 
         this.processedTransactions.add(transaction);
+
+        this.calculateAndRegisterTransactionTaxImpact(transaction);
     }
 
     private void registerMarketTransaction(MarketTransaction transaction) throws AccountStateException {
@@ -118,6 +135,10 @@ public class Account {
         this.updateBalances(transaction);
 
         this.lastMarketTransactionByIsin.put(transaction.getIsin(), transaction);
+
+        if(transaction.getTransactionType() == TransactionType.Buy) {
+            this.lastBuyTransactionBuyIsin.put(transaction.getIsin(), transaction);
+        }
     }
 
     private void registerDividendTransaction(DividendTransaction transaction) {
@@ -234,6 +255,11 @@ public class Account {
         position.setFullMarketPrice(Amount.Zero);
     }
 
+    private void calculateAndRegisterTransactionTaxImpact(Transaction transaction) {
+        Amount taxImpact = this.taxStrategy.calculateTaxImpact(this, transaction);
+        this.taxImpactByTransaction.put(transaction, taxImpact);
+    }
+
     private void preventPartialSellTransactions(MarketTransaction transaction, Position position) throws AccountStateException {
         if(transaction.getQuantity().getValue() < position.getQuantity().getValue()) {
             throw new AccountStateException("Partial sell transactions are not supported.");
@@ -299,5 +325,29 @@ public class Account {
         }
 
         return transaction;
+    }
+
+    public Amount getTaxImpact(Transaction transaction) {
+        Amount taxImpact = this.taxImpactByTransaction.get(transaction);
+
+        if(taxImpact == null) {
+            throw new DomainException("The given transaction is unknown to the account.");
+        }
+
+        return taxImpact;
+    }
+
+    public MarketTransaction findLastBuyTransaction(ISIN isin) {
+        MarketTransaction buyTransaction = this.lastBuyTransactionBuyIsin.get(isin);
+
+        if(buyTransaction == null) {
+            throw new DomainException("There was no buy transaction registered for the given ISIN.");
+        }
+
+        return buyTransaction;
+    }
+
+    public TaxStrategy getTaxStrategy() {
+        return this.taxStrategy;
     }
 }

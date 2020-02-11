@@ -6,6 +6,8 @@ import org.junit.Test;
 import trading.domain.Amount;
 import trading.domain.ISIN;
 import trading.domain.account.Account;
+import trading.domain.account.AccountBuilder;
+import trading.domain.account.TaxStrategies;
 import trading.domain.market.HistoricalMarketData;
 import trading.domain.market.MarketPriceSnapshot;
 import trading.domain.market.MarketPriceSnapshotBuilder;
@@ -28,7 +30,12 @@ public class MultiStockScoringTest {
                 .build();
 
         this.historicalMarketData = new HistoricalMarketData(initialClosingMarketPrices);
-        this.account = new Account(new Amount(10000.0));
+
+        this.account = new AccountBuilder()
+                .setAvailableMoney(new Amount(10000.0))
+                .setTaxStrategy(TaxStrategies.getNoTaxesStrategy())
+                .build();
+
         this.isins = this.historicalMarketData.getAvailableStocks();
     }
 

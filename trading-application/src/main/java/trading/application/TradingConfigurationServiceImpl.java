@@ -2,17 +2,14 @@ package trading.application;
 
 import org.springframework.stereotype.Component;
 import trading.domain.DayCount;
+import trading.domain.account.TaxStrategies;
+import trading.domain.account.TaxStrategy;
 import trading.domain.broker.CommissionStrategies;
-import trading.domain.broker.CommissionStrategy;
 import trading.domain.broker.DynamicCommissionStrategyParameters;
 import trading.domain.strategy.compoundLocalMaximum.CompoundLocalMaximumTradingStrategyParameters;
 
 @Component
 public class TradingConfigurationServiceImpl implements TradingConfigurationService {
-    public static CommissionStrategy getCommissionStrategy() {
-        return CommissionStrategies.getDegiroXetraCommissionStrategy();
-    }
-
     @Override
     public DynamicCommissionStrategyParameters getCommissionStrategyParameters() {
         return CommissionStrategies.getDegiroXetraCommissionStrategyParameters();
@@ -35,5 +32,10 @@ public class TradingConfigurationServiceImpl implements TradingConfigurationServ
                 sellTriggerStopLossMinimumDeclineSinceBuyingPercentage,
                 maximumPercentage
         );
+    }
+
+    @Override
+    public TaxStrategy getTaxStrategy() {
+        return TaxStrategies.getDefaultTaxStrategy();
     }
 }

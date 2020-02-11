@@ -6,10 +6,7 @@ import org.junit.Test;
 import trading.domain.Amount;
 import trading.domain.ISIN;
 import trading.domain.Quantity;
-import trading.domain.account.Account;
-import trading.domain.account.Position;
-import trading.domain.account.MarketTransactionBuilder;
-import trading.domain.account.MarketTransactionType;
+import trading.domain.account.*;
 import trading.domain.market.HistoricalMarketData;
 import trading.domain.market.MarketPriceSnapshot;
 import trading.domain.market.MarketPriceSnapshotBuilder;
@@ -28,8 +25,10 @@ public class VirtualBrokerTest {
 
     @Before
     public void before() {
-        Amount availableMoney = new Amount(50000.0);
-        this.account = new Account(availableMoney);
+        this.account = new AccountBuilder()
+                .setAvailableMoney(new Amount(50000.0))
+                .setTaxStrategy(TaxStrategies.getNoTaxesStrategy())
+                .build();
 
         MarketPriceSnapshot marketPriceSnapshot = new MarketPriceSnapshotBuilder()
                 .setMarketPrice(ISIN.MunichRe, new Amount(1000.0))

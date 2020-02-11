@@ -5,7 +5,9 @@ import org.junit.Before;
 import trading.domain.Amount;
 import trading.domain.ISIN;
 import trading.domain.account.Account;
+import trading.domain.account.AccountBuilder;
 import trading.domain.account.Position;
+import trading.domain.account.TaxStrategies;
 import trading.domain.broker.CommissionStrategy;
 import trading.domain.broker.VirtualBroker;
 import trading.domain.broker.ZeroCommissionStrategy;
@@ -29,7 +31,11 @@ public abstract class TradingStrategyTestBase {
 
     @Before
     public void tradingStrategyTestBaseBefore() {
-        this.account = new Account(new Amount(50000.0));
+        this.account = new AccountBuilder()
+                .setAvailableMoney(new Amount(50000.0))
+                .setTaxStrategy(TaxStrategies.getNoTaxesStrategy())
+                .build();
+
         this.commissionStrategy = new ZeroCommissionStrategy();
     }
 

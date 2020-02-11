@@ -2,7 +2,7 @@ package trading.domain.broker;
 
 import trading.domain.Amount;
 
-public class CommissionStrategies {
+public abstract class CommissionStrategies {
     private static CommissionStrategy zeroCommissionStrategy;
     private static DynamicCommissionStrategyParameters consorsXetraCommissionStrategyParameters;
     private static DynamicCommissionStrategyParameters degiroXetraCommissionStrategyParameters;

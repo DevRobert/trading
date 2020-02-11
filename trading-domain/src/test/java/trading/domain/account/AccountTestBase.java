@@ -12,8 +12,10 @@ public abstract class AccountTestBase {
 
     @Before()
     public void before() {
-        Amount availableMoney = new Amount(10000.0);
-        this.account = new Account(availableMoney);
+        this.account = new AccountBuilder()
+                .setAvailableMoney(new Amount(10000.0))
+                .setTaxStrategy(TaxStrategies.getNoTaxesStrategy())
+                .build();
     }
 
     protected void prepareAccountWithBuyTransaction() throws AccountStateException {

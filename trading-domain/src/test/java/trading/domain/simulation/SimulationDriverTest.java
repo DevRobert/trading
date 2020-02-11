@@ -6,10 +6,8 @@ import org.junit.Test;
 import trading.domain.*;
 import trading.domain.account.MarketTransaction;
 import trading.domain.account.MarketTransactionType;
-import trading.domain.broker.CommissionStrategy;
-import trading.domain.broker.OrderRequest;
-import trading.domain.broker.OrderType;
-import trading.domain.broker.ZeroCommissionStrategy;
+import trading.domain.account.TaxStrategies;
+import trading.domain.broker.*;
 import trading.domain.market.HistoricalMarketData;
 import trading.domain.market.HistoricalStockData;
 import trading.domain.market.MarketPriceSnapshot;
@@ -56,7 +54,8 @@ public class SimulationDriverTest {
 
         parametersBuilder.setTradingStrategyFactory(context -> null);
 
-        parametersBuilder.setCommissionStrategy(new ZeroCommissionStrategy());
+        parametersBuilder.setCommissionStrategy(CommissionStrategies.getZeroCommissionStrategy());
+        parametersBuilder.setTaxStrategy(TaxStrategies.getNoTaxesStrategy());
     }
 
     // Initialization
@@ -68,8 +67,8 @@ public class SimulationDriverTest {
         try {
             new SimulationDriver(parametersBuilder.build());
         }
-        catch(SimulationDriverInitializationException ex) {
-            Assert.assertEquals("The simulation market data source must be specified.", ex.getMessage());
+        catch(SimulationDriverInitializationException e) {
+            Assert.assertEquals("The simulation market data source must be specified.", e.getMessage());
             return;
         }
 
@@ -83,8 +82,8 @@ public class SimulationDriverTest {
         try {
             new SimulationDriver(parametersBuilder.build());
         }
-        catch(SimulationDriverInitializationException ex) {
-            Assert.assertEquals("The seed capital must be specified.", ex.getMessage());
+        catch(SimulationDriverInitializationException e) {
+            Assert.assertEquals("The seed capital must be specified.", e.getMessage());
             return;
         }
 
@@ -98,8 +97,8 @@ public class SimulationDriverTest {
         try {
             new SimulationDriver(parametersBuilder.build());
         }
-        catch(SimulationDriverInitializationException ex) {
-            Assert.assertEquals("The history duration must be specified.", ex.getMessage());
+        catch(SimulationDriverInitializationException e) {
+            Assert.assertEquals("The history duration must be specified.", e.getMessage());
             return;
         }
 
@@ -113,8 +112,8 @@ public class SimulationDriverTest {
         try {
             new SimulationDriver(parametersBuilder.build());
         }
-        catch(SimulationDriverInitializationException ex) {
-            Assert.assertEquals("The history duration must not be negative.", ex.getMessage());
+        catch(SimulationDriverInitializationException e) {
+            Assert.assertEquals("The history duration must not be negative.", e.getMessage());
             return;
         }
 
@@ -128,8 +127,8 @@ public class SimulationDriverTest {
         try {
             new SimulationDriver(parametersBuilder.build());
         }
-        catch(SimulationDriverInitializationException ex) {
-            Assert.assertEquals("The history duration must not be zero.", ex.getMessage());
+        catch(SimulationDriverInitializationException e) {
+            Assert.assertEquals("The history duration must not be zero.", e.getMessage());
             return;
         }
 
@@ -143,8 +142,8 @@ public class SimulationDriverTest {
         try {
             new SimulationDriver(parametersBuilder.build());
         }
-        catch(SimulationDriverInitializationException ex) {
-            Assert.assertEquals("The simulation duration must be specified.", ex.getMessage());
+        catch(SimulationDriverInitializationException e) {
+            Assert.assertEquals("The simulation duration must be specified.", e.getMessage());
             return;
         }
 
@@ -158,8 +157,8 @@ public class SimulationDriverTest {
         try {
             new SimulationDriver(parametersBuilder.build());
         }
-        catch(SimulationDriverInitializationException ex) {
-            Assert.assertEquals("The simulation duration must not be negative.", ex.getMessage());
+        catch(SimulationDriverInitializationException e) {
+            Assert.assertEquals("The simulation duration must not be negative.", e.getMessage());
             return;
         }
 
@@ -173,8 +172,8 @@ public class SimulationDriverTest {
         try {
             new SimulationDriver(parametersBuilder.build());
         }
-        catch(SimulationDriverInitializationException ex) {
-            Assert.assertEquals("The simulation duration must not be zero.", ex.getMessage());
+        catch(SimulationDriverInitializationException e) {
+            Assert.assertEquals("The simulation duration must not be zero.", e.getMessage());
             return;
         }
 
@@ -188,8 +187,8 @@ public class SimulationDriverTest {
         try {
             new SimulationDriver(parametersBuilder.build());
         }
-        catch(SimulationDriverInitializationException ex) {
-            Assert.assertEquals("The trading strategy factory must be specified.", ex.getMessage());
+        catch(SimulationDriverInitializationException e) {
+            Assert.assertEquals("The trading strategy factory must be specified.", e.getMessage());
             return;
         }
 
@@ -203,8 +202,23 @@ public class SimulationDriverTest {
         try {
             new SimulationDriver(parametersBuilder.build());
         }
-        catch(SimulationDriverInitializationException ex) {
-            Assert.assertEquals("The commission strategy must be specified.", ex.getMessage());
+        catch(SimulationDriverInitializationException e) {
+            Assert.assertEquals("The commission strategy must be specified.", e.getMessage());
+            return;
+        }
+
+        Assert.fail("SimulationDriverInitializationException expected.");
+    }
+
+    @Test
+    public void initializationFails_ifTaxStrategyNotSpecified() {
+        parametersBuilder.setTaxStrategy(null);
+
+        try {
+            new SimulationDriver(parametersBuilder.build());
+        }
+        catch(SimulationDriverInitializationException e) {
+            Assert.assertEquals("The tax strategy must be specified.", e.getMessage());
             return;
         }
 

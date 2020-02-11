@@ -7,9 +7,7 @@ import trading.domain.Amount;
 import trading.domain.DomainException;
 import trading.domain.ISIN;
 import trading.domain.Quantity;
-import trading.domain.account.Account;
-import trading.domain.account.MarketTransactionBuilder;
-import trading.domain.account.MarketTransactionType;
+import trading.domain.account.*;
 import trading.domain.broker.*;
 import trading.domain.market.HistoricalMarketData;
 import trading.domain.market.MarketPriceSnapshot;
@@ -38,8 +36,11 @@ public class SimulationTest {
 
         historicalMarketData = new HistoricalMarketData(marketPriceSnapshot);
 
-        Amount availableMoney = new Amount(50000.0);
-        account = new Account(availableMoney);
+        account = new AccountBuilder()
+                .setAvailableMoney(new Amount(50000.0))
+                .setTaxStrategy(TaxStrategies.getNoTaxesStrategy())
+                .build();
+
         broker = new VirtualBroker(account, historicalMarketData, new ZeroCommissionStrategy());
         tradingStrategy = new ManualTradingStrategy(broker);
     }
