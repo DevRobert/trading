@@ -17,6 +17,8 @@ public class Account {
     private HashMap<ISIN, Position> positions = new HashMap<>();
     private Amount commissions;
     private Amount balance;
+    private Amount actualTaxes;
+    private Amount reservedForTaxes;
 
     private final TaxStrategy taxStrategy;
     private final List<Transaction> processedTransactions;
@@ -37,6 +39,8 @@ public class Account {
         this.commissions = Amount.Zero;
         this.availableMoney = availableMoney;
         this.balance = availableMoney;
+        this.actualTaxes = Amount.Zero;
+        this.reservedForTaxes = Amount.Zero;
         this.processedTransactions = new ArrayList<>();
         this.lastMarketTransactionByIsin = new HashMap<>();
         this.lastBuyTransactionBuyIsin = new HashMap<>();
@@ -258,6 +262,16 @@ public class Account {
     private void calculateAndRegisterTransactionTaxImpact(Transaction transaction) {
         Amount taxImpact = this.taxStrategy.calculateTaxImpact(this, transaction);
         this.taxImpactByTransaction.put(transaction, taxImpact);
+
+        this.actualTaxes = this.actualTaxes.add(taxImpact);
+
+        if(this.actualTaxes.getValue() > this.reservedForTaxes.getValue()) {
+            Amount additionalTaxReservation = this.actualTaxes.subtract(this.reservedForTaxes);
+            this.reservedForTaxes = this.actualTaxes;
+            this.availableMoney = this.availableMoney.subtract(additionalTaxReservation);
+        }
+
+        // todo change balance according to tax impact
     }
 
     private void preventPartialSellTransactions(MarketTransaction transaction, Position position) throws AccountStateException {
