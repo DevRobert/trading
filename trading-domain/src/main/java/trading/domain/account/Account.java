@@ -17,14 +17,11 @@ public class Account {
     private HashMap<ISIN, Position> positions = new HashMap<>();
     private Amount commissions;
     private Amount balance;
-    private Amount actualTaxes;
-    private Amount reservedForTaxes;
 
     private final TaxStrategy taxStrategy;
     private final List<Transaction> processedTransactions;
     private final Map<ISIN, MarketTransaction> lastMarketTransactionByIsin;
-    private final Map<ISIN, MarketTransaction> lastBuyTransactionBuyIsin;
-    private final Map<Transaction, Amount> taxImpactByTransaction;
+    private final Map<ISIN, MarketTransaction> lastBuyTransactionByIsin;
 
     Account(Amount availableMoney, TaxStrategy taxStrategy) {
         if(availableMoney == null) {
@@ -39,12 +36,9 @@ public class Account {
         this.commissions = Amount.Zero;
         this.availableMoney = availableMoney;
         this.balance = availableMoney;
-        this.actualTaxes = Amount.Zero;
-        this.reservedForTaxes = Amount.Zero;
         this.processedTransactions = new ArrayList<>();
         this.lastMarketTransactionByIsin = new HashMap<>();
-        this.lastBuyTransactionBuyIsin = new HashMap<>();
-        this.taxImpactByTransaction = new HashMap<>();
+        this.lastBuyTransactionByIsin = new HashMap<>();
     }
 
     public Amount getCommissions() {
@@ -141,7 +135,7 @@ public class Account {
         this.lastMarketTransactionByIsin.put(transaction.getIsin(), transaction);
 
         if(transaction.getTransactionType() == TransactionType.Buy) {
-            this.lastBuyTransactionBuyIsin.put(transaction.getIsin(), transaction);
+            this.lastBuyTransactionByIsin.put(transaction.getIsin(), transaction);
         }
     }
 
@@ -260,18 +254,7 @@ public class Account {
     }
 
     private void calculateAndRegisterTransactionTaxImpact(Transaction transaction) {
-        Amount taxImpact = this.taxStrategy.calculateTaxImpact(this, transaction);
-        this.taxImpactByTransaction.put(transaction, taxImpact);
 
-        this.actualTaxes = this.actualTaxes.add(taxImpact);
-
-        if(this.actualTaxes.getValue() > this.reservedForTaxes.getValue()) {
-            Amount additionalTaxReservation = this.actualTaxes.subtract(this.reservedForTaxes);
-            this.reservedForTaxes = this.actualTaxes;
-            this.availableMoney = this.availableMoney.subtract(additionalTaxReservation);
-        }
-
-        // todo change balance according to tax impact
     }
 
     private void preventPartialSellTransactions(MarketTransaction transaction, Position position) throws AccountStateException {
@@ -341,18 +324,8 @@ public class Account {
         return transaction;
     }
 
-    public Amount getTaxImpact(Transaction transaction) {
-        Amount taxImpact = this.taxImpactByTransaction.get(transaction);
-
-        if(taxImpact == null) {
-            throw new DomainException("The given transaction is unknown to the account.");
-        }
-
-        return taxImpact;
-    }
-
     public MarketTransaction findLastBuyTransaction(ISIN isin) {
-        MarketTransaction buyTransaction = this.lastBuyTransactionBuyIsin.get(isin);
+        MarketTransaction buyTransaction = this.lastBuyTransactionByIsin.get(isin);
 
         if(buyTransaction == null) {
             throw new DomainException("There was no buy transaction registered for the given ISIN.");
@@ -363,5 +336,13 @@ public class Account {
 
     public TaxStrategy getTaxStrategy() {
         return this.taxStrategy;
+    }
+
+    public Amount getReservedTaxes() {
+        return null;
+    }
+
+    public Amount getPaidTaxes() {
+        return null;
     }
 }

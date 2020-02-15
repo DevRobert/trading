@@ -1,8 +1,7 @@
-package trading.domain.account;
+package trading.domain.taxes;
 
 import org.junit.Assert;
 import org.junit.Test;
-import trading.domain.taxes.ProfitCategories;
 
 public class TaxableProfitCategoriesTest {
     @Test

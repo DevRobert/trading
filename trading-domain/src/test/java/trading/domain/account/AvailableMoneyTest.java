@@ -9,7 +9,7 @@ import trading.domain.Quantity;
 import java.time.LocalDate;
 
 public class AvailableMoneyTest extends AccountTestBase {
-    @Test()
+    @Test
     public void accountIsInitializedWithSpecifiedAvailableMoney() {
         Assert.assertEquals(new Amount(10000.0), account.getAvailableMoney());
     }

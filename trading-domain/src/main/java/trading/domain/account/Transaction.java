@@ -19,6 +19,7 @@ public abstract class Transaction {
     }
 
     public void setId(TransactionId id) {
+        // TODO test and alter so that id cannot be changed? RB, 15.02.2020
         this.id = id;
     }
 }

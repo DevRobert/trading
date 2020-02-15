@@ -125,7 +125,6 @@ import java.util.List;
         accountTransactionDto.setTotalPrice(transaction.getTotalPrice().getValue());
         accountTransactionDto.setCommission(transaction.getCommission().getValue());
         accountTransactionDto.setName(this.getInstrumentName(transaction.getIsin()));
-        accountTransactionDto.setTaxImpact(account.getTaxImpact(transaction).getValue());
 
         return accountTransactionDto;
     }
@@ -138,7 +137,6 @@ import java.util.List;
         accountTransactionDto.setIsin(transaction.getIsin().getText());
         accountTransactionDto.setName(this.getInstrumentName(transaction.getIsin()));
         accountTransactionDto.setAmount(transaction.getAmount().getValue());
-        accountTransactionDto.setTaxImpact(account.getTaxImpact(transaction).getValue());
 
         return accountTransactionDto;
     }
