@@ -69,6 +69,8 @@ import java.util.List;
         accountSummaryDto.setTotalBalance(account.getBalance().getValue());
         accountSummaryDto.setTotalStocksMarketPrice(account.getTotalStocksMarketPrice().getValue());
         accountSummaryDto.setTotalStocksQuantity(account.getTotalStocksQuantity().getValue());
+        accountSummaryDto.setReservedTaxes(account.getReservedTaxes().getValue());
+        accountSummaryDto.setPaidTaxes(account.getPaidTaxes().getValue());
 
         response.setSummary(accountSummaryDto);
 

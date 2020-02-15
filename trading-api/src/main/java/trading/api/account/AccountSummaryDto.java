@@ -5,6 +5,8 @@ public class AccountSummaryDto {
     private double totalStocksMarketPrice;
     private double availableMoney;
     private double totalBalance;
+    private double reservedTaxes;
+    private double paidTaxes;
 
     public int getTotalStocksQuantity() {
         return totalStocksQuantity;
@@ -36,5 +38,21 @@ public class AccountSummaryDto {
 
     public void setTotalBalance(double totalBalance) {
         this.totalBalance = totalBalance;
+    }
+
+    public double getReservedTaxes() {
+        return this.reservedTaxes;
+    }
+
+    public void setReservedTaxes(double reservedTaxes) {
+        this.reservedTaxes = reservedTaxes;
+    }
+
+    public double getPaidTaxes() {
+        return this.paidTaxes;
+    }
+
+    public void setPaidTaxes(double paidTaxes) {
+        this.paidTaxes = paidTaxes;
     }
 }

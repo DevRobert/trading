@@ -36,8 +36,10 @@ public class AccountControllerTest extends AccountControllerTestBase {
                 .andExpect(jsonPath("positions[1].totalMarketPrice", is(3000.0)))
                 .andExpect(jsonPath("summary.totalStocksQuantity", is(20)))
                 .andExpect(jsonPath("summary.totalStocksMarketPrice", is(5000.0)))
-                .andExpect(jsonPath("summary.availableMoney", is(8060.0)))
-                .andExpect(jsonPath("summary.totalBalance", is(13060.0)))
+                .andExpect(jsonPath("summary.availableMoney", is(8050.0)))
+                .andExpect(jsonPath("summary.totalBalance", is(13050.0)))
+                .andExpect(jsonPath("summary.reservedTaxes", is(10.0)))
+                .andExpect(jsonPath("summary.paidTaxes", is(0.0)))
                 .andExpect(jsonPath("marketPricesDate", is("2018-05-09")));
     }
 
@@ -68,7 +70,6 @@ public class AccountControllerTest extends AccountControllerTestBase {
                 .andExpect(jsonPath("transactions[0].totalPrice", is(1000.0)))
                 .andExpect(jsonPath("transactions[0].commission", is(20.0)))
                 .andExpect(jsonPath("transactions[0].amount").doesNotExist())
-                .andExpect(jsonPath("transactions[0].taxImpact", is(0.0)))
                 .andExpect(jsonPath("transactions[1].date", is("2018-04-13")))
                 .andExpect(jsonPath("transactions[1].transactionType", is("Buy")))
                 .andExpect(jsonPath("transactions[1].isin", is("B")))
@@ -78,7 +79,6 @@ public class AccountControllerTest extends AccountControllerTestBase {
                 .andExpect(jsonPath("transactions[1].totalPrice", is(1000.0)))
                 .andExpect(jsonPath("transactions[1].commission", is(20.0)))
                 .andExpect(jsonPath("transactions[1].amount").doesNotExist())
-                .andExpect(jsonPath("transactions[1].taxImpact", is(0.0)))
                 .andExpect(jsonPath("transactions[2].date", is("2018-04-14")))
                 .andExpect(jsonPath("transactions[2].transactionType", is("Dividend")))
                 .andExpect(jsonPath("transactions[2].isin", is("B")))
@@ -87,8 +87,7 @@ public class AccountControllerTest extends AccountControllerTestBase {
                 .andExpect(jsonPath("transactions[2].marketPrice").doesNotExist())
                 .andExpect(jsonPath("transactions[2].totalPrice").doesNotExist())
                 .andExpect(jsonPath("transactions[2].commission").doesNotExist())
-                .andExpect(jsonPath("transactions[2].amount", is(100.0)))
-                .andExpect(jsonPath("transactions[2].taxImpact", is(10.0)));
+                .andExpect(jsonPath("transactions[2].amount", is(100.0)));
     }
 
     /*
