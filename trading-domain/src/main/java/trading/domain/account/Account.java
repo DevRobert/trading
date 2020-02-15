@@ -5,8 +5,6 @@ import trading.domain.DomainException;
 import trading.domain.ISIN;
 import trading.domain.Quantity;
 import trading.domain.market.MarketPriceSnapshot;
-import trading.domain.taxes.TaxCalculator;
-import trading.domain.taxes.TaxConfiguration;
 import trading.domain.taxes.TaxManager;
 
 import java.util.ArrayList;
