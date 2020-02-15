@@ -1,13 +1,11 @@
 package trading.domain.account;
 
-import trading.domain.Amount;
-
 public abstract class TaxStrategies {
     private static TaxStrategy noTaxesStrategy;
     private static TaxStrategy defaultTaxStrategy;
 
     static {
-        noTaxesStrategy = (account, transaction) -> Amount.Zero;
+        noTaxesStrategy = new TaxStrategyImpl(0.0);
         defaultTaxStrategy = new TaxStrategyImpl(0.26375);
     }
 

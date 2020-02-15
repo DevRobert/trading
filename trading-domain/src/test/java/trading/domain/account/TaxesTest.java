@@ -6,14 +6,34 @@ import org.junit.Test;
 import trading.domain.Amount;
 import trading.domain.ISIN;
 import trading.domain.Quantity;
+import trading.domain.taxes.LinearTaxCalculator;
 import trading.domain.taxes.ProfitCategories;
+import trading.domain.taxes.TaxCalculator;
 
 import java.time.LocalDate;
 
 public class TaxesTest extends AccountTestBase {
     @Before
     public void initialize() {
-        // TODO set tax rate 10% sale, 20% dividend
+        TaxCalculator saleTaxCalculator = new LinearTaxCalculator(0.1);
+        TaxCalculator dividendTaxCalculator = new LinearTaxCalculator(0.2);
+
+        TaxStrategy taxStrategy = new TaxStrategy() {
+            @Override
+            public TaxCalculator getSaleTaxCalculator() {
+                return saleTaxCalculator;
+            }
+
+            @Override
+            public TaxCalculator getDividendTaxCalculator() {
+                return dividendTaxCalculator;
+            }
+        };
+
+        this.account = new AccountBuilder()
+                .setAvailableMoney(new Amount(10000.0))
+                .setTaxStrategy(taxStrategy)
+                .build();
     }
 
     // Sale
@@ -162,7 +182,7 @@ public class TaxesTest extends AccountTestBase {
         // Sale tax rate: 10%
         // Reserved taxes: 45.5
 
-        Assert.assertEquals(new Amount(45.0), this.account.getReservedTaxes());
+        Assert.assertEquals(new Amount(45.5), this.account.getReservedTaxes());
     }
 
     // Dividend Taxes are not decreases by Loss
@@ -202,7 +222,7 @@ public class TaxesTest extends AccountTestBase {
 
         Transaction taxPaymentTransaction = new TaxPaymentTransactionBuilder()
                 .setDate(LocalDate.of(2000, 1, 10))
-                .setProfitCategory(ProfitCategories.Dividends)
+                .setProfitCategory(ProfitCategories.Sale)
                 .setTaxedProfit(new Amount(970.0))
                 .setPaidTaxes(new Amount(97.0))
                 .build();
@@ -247,7 +267,7 @@ public class TaxesTest extends AccountTestBase {
 
         Transaction taxPaymentTransaction = new TaxPaymentTransactionBuilder()
                 .setDate(LocalDate.of(2000, 1, 10))
-                .setProfitCategory(ProfitCategories.Dividends)
+                .setProfitCategory(ProfitCategories.Sale)
                 .setTaxedProfit(new Amount(970.0))
                 .setPaidTaxes(new Amount(107.0))
                 .build();
@@ -294,9 +314,9 @@ public class TaxesTest extends AccountTestBase {
 
         Transaction taxPaymentTransaction = new TaxPaymentTransactionBuilder()
                 .setDate(LocalDate.of(2000, 1, 10))
-                .setProfitCategory(ProfitCategories.Dividends)
+                .setProfitCategory(ProfitCategories.Sale)
                 .setTaxedProfit(new Amount(970.0))
-                .setPaidTaxes(new Amount(107.0))
+                .setPaidTaxes(new Amount(87.0))
                 .build();
 
         this.account.registerTransaction(taxPaymentTransaction);

@@ -1,7 +1,8 @@
 package trading.domain.account;
 
-import trading.domain.Amount;
+import trading.domain.taxes.TaxCalculator;
 
 public interface TaxStrategy {
-    Amount calculateTaxImpact(Account account, Transaction transaction);
+    TaxCalculator getSaleTaxCalculator();
+    TaxCalculator getDividendTaxCalculator();
 }

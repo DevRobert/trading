@@ -38,6 +38,7 @@ public class ProfitTaxation {
 
     public void registerTaxPayment(Amount taxedProfit, Amount paidTaxes) {
         if(taxedProfit.getValue() > this.taxableProfit.getValue()) {
+            System.out.println(taxedProfit + " > " + this.taxableProfit);
             throw new DomainException("The specified taxed profit must not exceed the accrued taxable profit.");
         }
 

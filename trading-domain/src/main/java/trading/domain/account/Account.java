@@ -5,6 +5,9 @@ import trading.domain.DomainException;
 import trading.domain.ISIN;
 import trading.domain.Quantity;
 import trading.domain.market.MarketPriceSnapshot;
+import trading.domain.taxes.TaxCalculator;
+import trading.domain.taxes.TaxConfiguration;
+import trading.domain.taxes.TaxManager;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -18,10 +21,11 @@ public class Account {
     private Amount commissions;
     private Amount balance;
 
-    private final TaxStrategy taxStrategy;
     private final List<Transaction> processedTransactions;
     private final Map<ISIN, MarketTransaction> lastMarketTransactionByIsin;
     private final Map<ISIN, MarketTransaction> lastBuyTransactionByIsin;
+
+    private final TaxManager taxManager;
 
     Account(Amount availableMoney, TaxStrategy taxStrategy) {
         if(availableMoney == null) {
@@ -32,13 +36,18 @@ public class Account {
             throw new DomainException("The tax strategy must be set.");
         }
 
-        this.taxStrategy = taxStrategy;
+        this.taxManager = new TaxManager(taxStrategy);
+
         this.commissions = Amount.Zero;
         this.availableMoney = availableMoney;
         this.balance = availableMoney;
         this.processedTransactions = new ArrayList<>();
         this.lastMarketTransactionByIsin = new HashMap<>();
         this.lastBuyTransactionByIsin = new HashMap<>();
+    }
+
+    public TaxStrategy getTaxStrategy() {
+        return this.taxManager.getTaxStrategy();
     }
 
     public Amount getCommissions() {
@@ -100,6 +109,9 @@ public class Account {
         }
         else if(transaction instanceof DividendTransaction) {
             this.registerDividendTransaction((DividendTransaction) transaction);
+        }
+        else if(transaction instanceof TaxPaymentTransaction) {
+            // nothing to do here; effects take place in tax impact calculation
         }
         else {
             throw new RuntimeException("Unknown transaction type.");
@@ -254,7 +266,19 @@ public class Account {
     }
 
     private void calculateAndRegisterTransactionTaxImpact(Transaction transaction) {
+        Amount paidTaxesBefore = this.getPaidTaxes();
+        Amount reservedTaxesBefore = this.getReservedTaxes();
 
+        this.taxManager.registerTransaction(transaction);
+
+        Amount paidTaxesAdded = this.getPaidTaxes().subtract(paidTaxesBefore);
+        Amount reservedTaxesAdded = this.getReservedTaxes().subtract(reservedTaxesBefore);
+
+        this.availableMoney = this.availableMoney.subtract(paidTaxesAdded);
+        this.availableMoney = this.availableMoney.subtract(reservedTaxesAdded);
+
+        this.balance = this.balance.subtract(paidTaxesAdded);
+        this.balance = this.balance.subtract(reservedTaxesAdded);
     }
 
     private void preventPartialSellTransactions(MarketTransaction transaction, Position position) throws AccountStateException {
@@ -334,15 +358,11 @@ public class Account {
         return buyTransaction;
     }
 
-    public TaxStrategy getTaxStrategy() {
-        return this.taxStrategy;
-    }
-
     public Amount getReservedTaxes() {
-        return null;
+        return this.taxManager.getReservedTaxes();
     }
 
     public Amount getPaidTaxes() {
-        return null;
+        return this.taxManager.getPaidTaxes();
     }
 }
