@@ -10,7 +10,7 @@ public class TaxPaymentTransaction extends Transaction {
     private final Amount taxedProfit;
     private final Amount paidTaxes;
 
-    public TaxPaymentTransaction(LocalDate date, ProfitCategory profitCategory, Amount taxedProfit, Amount paidTaxes) {
+    TaxPaymentTransaction(LocalDate date, ProfitCategory profitCategory, Amount taxedProfit, Amount paidTaxes) {
         super(date);
 
         this.profitCategory = profitCategory;
