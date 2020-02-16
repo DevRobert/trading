@@ -3,6 +3,8 @@ package trading.domain.taxes;
 import trading.domain.Amount;
 import trading.domain.account.TaxStrategy;
 
+import java.util.ArrayList;
+
 public class TaxPeriod
 {
     private final int year;
@@ -67,5 +69,17 @@ public class TaxPeriod
     public Amount getPaidTaxes() {
         return this.saleProfitTaxation.getPaidTaxes()
                 .add(this.dividendProfitTaxation.getPaidTaxes());
+    }
+
+    public TaxPeriodReport buildTaxPeriodReport() {
+        TaxPeriodReport taxPeriodReport = new TaxPeriodReport();
+
+        taxPeriodReport.setYear(this.year);
+
+        taxPeriodReport.setProfitCategories(new ArrayList<>());
+        taxPeriodReport.getProfitCategories().add(this.saleProfitTaxation.buildTaxPeriodProfitCategoryReport(ProfitCategories.Sale));
+        taxPeriodReport.getProfitCategories().add(this.dividendProfitTaxation.buildTaxPeriodProfitCategoryReport(ProfitCategories.Dividends));
+
+        return taxPeriodReport;
     }
 }

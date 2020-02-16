@@ -72,4 +72,17 @@ public class ProfitTaxation {
         this.taxedProfit = this.taxedProfit.add(taxedProfit);
         this.paidTaxes = this.paidTaxes.add(paidTaxes);
     }
+
+    public TaxPeriodProfitCategoryReport buildTaxPeriodProfitCategoryReport(ProfitCategory profitCategory) {
+        TaxPeriodProfitCategoryReport taxPeriodProfitCategoryReport = new TaxPeriodProfitCategoryReport();
+
+        taxPeriodProfitCategoryReport.setProfitCategory(profitCategory);
+        taxPeriodProfitCategoryReport.setLossCarryforward(this.getLossCarryforward());
+        taxPeriodProfitCategoryReport.setAccruedProfit(this.accruedProfit);
+        taxPeriodProfitCategoryReport.setClearedProfit(this.accruedProfit.subtract(this.getLossCarryforward()));
+        taxPeriodProfitCategoryReport.setReservedTaxes(this.getReservedTaxes());
+        taxPeriodProfitCategoryReport.setPaidTaxes(this.getPaidTaxes());
+
+        return taxPeriodProfitCategoryReport;
+    }
 }

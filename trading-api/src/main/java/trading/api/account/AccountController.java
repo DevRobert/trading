@@ -9,6 +9,7 @@ import trading.domain.account.*;
 import trading.domain.market.InstrumentNameProvider;
 import trading.domain.market.MarketPriceSnapshot;
 import trading.domain.simulation.MultiStockMarketDataStore;
+import trading.domain.taxes.TaxReport;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -259,5 +260,12 @@ import java.util.List;
         }
 
         return transactionBuilder.build();
+    }
+
+    @RequestMapping(value = "/api/account/taxReport/", method = RequestMethod.GET)
+    public GetAccountTaxReportResponse getTaxReport() {
+        Account account = this.getAccount();
+        TaxReport taxReport = account.buildTaxReport();
+        return new GetAccountTaxReportResponse(taxReport);
     }
 }

@@ -100,4 +100,29 @@ public class AccountControllerTest extends AccountControllerTestBase {
                 .andExpect(content().json("Test"));
     }
     */
+
+    @Test
+    public void getTaxReport() throws Exception {
+        this.mvc.perform(MockMvcRequestBuilders
+                .get("/api/account/taxReport/")
+                .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("taxPeriods", hasSize(1)))
+                .andExpect(jsonPath("taxPeriods[0].year", is(2018)))
+                .andExpect(jsonPath("taxPeriods[0].profitCategories", hasSize(2)))
+
+                .andExpect(jsonPath("taxPeriods[0].profitCategories[0].name", is("Sale")))
+                .andExpect(jsonPath("taxPeriods[0].profitCategories[0].lossCarryforward", is(0.0)))
+                .andExpect(jsonPath("taxPeriods[0].profitCategories[0].accruedProfit", is(0.0)))
+                .andExpect(jsonPath("taxPeriods[0].profitCategories[0].clearedProfit", is(0.0)))
+                .andExpect(jsonPath("taxPeriods[0].profitCategories[0].reservedTaxes", is(0.0)))
+                .andExpect(jsonPath("taxPeriods[0].profitCategories[0].paidTaxes", is(0.0)))
+
+                .andExpect(jsonPath("taxPeriods[0].profitCategories[1].name", is("Dividends")))
+                .andExpect(jsonPath("taxPeriods[0].profitCategories[1].lossCarryforward", is(0.0)))
+                .andExpect(jsonPath("taxPeriods[0].profitCategories[1].accruedProfit", is(100.0)))
+                .andExpect(jsonPath("taxPeriods[0].profitCategories[1].clearedProfit", is(100.0)))
+                .andExpect(jsonPath("taxPeriods[0].profitCategories[1].reservedTaxes", is(10.0)))
+                .andExpect(jsonPath("taxPeriods[0].profitCategories[1].paidTaxes", is(0.0)));
+    }
 }

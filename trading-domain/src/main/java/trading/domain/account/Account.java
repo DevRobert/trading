@@ -7,6 +7,7 @@ import trading.domain.Quantity;
 import trading.domain.market.MarketPriceSnapshot;
 import trading.domain.taxes.TaxImpact;
 import trading.domain.taxes.TaxManager;
+import trading.domain.taxes.TaxReport;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -359,5 +360,9 @@ public class Account {
 
     public Amount getPaidTaxes() {
         return this.taxManager.getPaidTaxes();
+    }
+
+    public TaxReport buildTaxReport() {
+        return this.taxManager.buildTaxReport();
     }
 }

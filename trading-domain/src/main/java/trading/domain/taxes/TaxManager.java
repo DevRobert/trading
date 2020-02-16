@@ -112,4 +112,18 @@ public class TaxManager {
 
         return paidTaxes;
     }
+
+    public TaxReport buildTaxReport() {
+        // TODO Write Tests, RB, 16.02.2020
+
+        TaxReport taxReport = new TaxReport();
+
+        taxReport.setTaxPeriods(new ArrayList<>());
+
+        for(TaxPeriod taxPeriod: this.taxPeriods) {
+            taxReport.getTaxPeriods().add(taxPeriod.buildTaxPeriodReport());
+        }
+
+        return taxReport;
+    }
 }
