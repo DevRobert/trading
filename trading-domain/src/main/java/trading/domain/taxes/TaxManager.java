@@ -48,6 +48,8 @@ public class TaxManager {
             throw new DomainException("The tax period cannot be added because there already exists a tax period for a future year.");
         }
 
+        // todo detect and fill gap
+
         TaxPeriod newTaxPeriod = new TaxPeriod(year, previousTaxPeriod, this.taxStrategy);
         this.taxPeriods.add(newTaxPeriod);
         return newTaxPeriod;
