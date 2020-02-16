@@ -2,58 +2,77 @@ package trading.domain.taxes;
 
 import trading.domain.Amount;
 import trading.domain.DomainException;
+import trading.domain.Quantity;
 
+/**
+ * Profit taxation for one profit category in one tax period.
+ */
 public class ProfitTaxation {
     private final TaxCalculator taxCalculator;
+    private final ProfitTaxation previousTaxPeriodProfitTaxation;
 
-    private Amount taxableProfit = Amount.Zero;
+    private Amount accruedProfit = Amount.Zero;
     private Amount taxedProfit = Amount.Zero;
-    private Amount reservedTaxes = Amount.Zero;
     private Amount paidTaxes = Amount.Zero;
 
-    public ProfitTaxation(TaxCalculator taxCalculator) {
+    public ProfitTaxation(TaxCalculator taxCalculator, ProfitTaxation previousTaxPeriodProfitTaxation) {
         this.taxCalculator = taxCalculator;
+        this.previousTaxPeriodProfitTaxation = previousTaxPeriodProfitTaxation;
     }
 
-    public Amount getTaxableProfit() {
-        return taxableProfit;
+    public Amount getTaxableProfitBeforeLossCarryforward() {
+        return this.accruedProfit.subtract(this.taxedProfit);
+    }
+
+    public Amount getTaxableProfitAfterLossCarryforward() {
+        return this.getTaxableProfitBeforeLossCarryforward().subtract(this.getLossCarryforward());
+    }
+
+    public Amount getLossCarryforward() {
+        if(this.previousTaxPeriodProfitTaxation == null) {
+            return Amount.Zero;
+        }
+
+        return this.previousTaxPeriodProfitTaxation.getLossCarryforwardForNextPeriod();
+    }
+
+    public Amount getLossCarryforwardForNextPeriod() {
+        if(this.getTaxableProfitAfterLossCarryforward().getValue() >= 0) {
+            return Amount.Zero;
+        }
+
+        return this.getTaxableProfitAfterLossCarryforward().multiply(new Quantity(-1));
     }
 
     public Amount getTaxedProfit() {
-        return taxedProfit;
+        return this.taxedProfit;
     }
 
     public Amount getReservedTaxes() {
-        return reservedTaxes;
+        Amount taxableProfit = this.getTaxableProfitAfterLossCarryforward();
+
+        if(taxableProfit.getValue() > 0) {
+            return this.taxCalculator.calculateTaxes(taxableProfit);
+        }
+
+        return Amount.Zero;
     }
 
     public Amount getPaidTaxes() {
-        return paidTaxes;
+        return this.paidTaxes;
     }
 
     public void registerProfit(Amount profit) {
-        this.taxableProfit = this.taxableProfit.add(profit);
-        this.recalculateReservedTaxes();
+        this.accruedProfit = this.accruedProfit.add(profit);
     }
 
     public void registerTaxPayment(Amount taxedProfit, Amount paidTaxes) {
-        if(taxedProfit.getValue() > this.taxableProfit.getValue()) {
-            System.out.println(taxedProfit + " > " + this.taxableProfit);
-            throw new DomainException("The specified taxed profit must not exceed the accrued taxable profit.");
+        if(taxedProfit.getValue() > this.getTaxableProfitAfterLossCarryforward().getValue()) {
+            throw new DomainException("The specified taxed profit must not exceed the remaining taxable profit.");
+            // todo loss carryover
         }
 
-        this.taxableProfit = this.taxableProfit.subtract(taxedProfit);
         this.taxedProfit = this.taxedProfit.add(taxedProfit);
         this.paidTaxes = this.paidTaxes.add(paidTaxes);
-        this.recalculateReservedTaxes();
-    }
-
-    private void recalculateReservedTaxes() {
-        if(this.taxableProfit.getValue() >= 0.0) {
-            this.reservedTaxes = this.taxCalculator.calculateTaxes(this.taxableProfit);
-        }
-        else {
-            this.reservedTaxes = Amount.Zero;
-        }
     }
 }

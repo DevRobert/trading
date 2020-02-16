@@ -244,6 +244,7 @@ public class ProfitCalculatorTest {
     public void doesNotCalculateAnyProfitForTaxPayment() {
         TaxPaymentTransaction taxPaymentTransaction = new TaxPaymentTransactionBuilder()
                 .setProfitCategory(ProfitCategories.Sale)
+                .setTaxPeriodYear(2000)
                 .setTaxedProfit(new Amount(1000.0))
                 .setPaidTaxes(new Amount(100.0))
                 .setDate(LocalDate.of(2000, 1, 1))

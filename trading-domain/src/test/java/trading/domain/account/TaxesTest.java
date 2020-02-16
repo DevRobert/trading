@@ -222,6 +222,7 @@ public class TaxesTest extends AccountTestBase {
 
         Transaction taxPaymentTransaction = new TaxPaymentTransactionBuilder()
                 .setDate(LocalDate.of(2000, 1, 10))
+                .setTaxPeriodYear(2000)
                 .setProfitCategory(ProfitCategories.Sale)
                 .setTaxedProfit(new Amount(970.0))
                 .setPaidTaxes(new Amount(97.0))
@@ -267,6 +268,7 @@ public class TaxesTest extends AccountTestBase {
 
         Transaction taxPaymentTransaction = new TaxPaymentTransactionBuilder()
                 .setDate(LocalDate.of(2000, 1, 10))
+                .setTaxPeriodYear(2000)
                 .setProfitCategory(ProfitCategories.Sale)
                 .setTaxedProfit(new Amount(970.0))
                 .setPaidTaxes(new Amount(107.0))
@@ -314,6 +316,7 @@ public class TaxesTest extends AccountTestBase {
 
         Transaction taxPaymentTransaction = new TaxPaymentTransactionBuilder()
                 .setDate(LocalDate.of(2000, 1, 10))
+                .setTaxPeriodYear(2000)
                 .setProfitCategory(ProfitCategories.Sale)
                 .setTaxedProfit(new Amount(970.0))
                 .setPaidTaxes(new Amount(87.0))
@@ -346,5 +349,119 @@ public class TaxesTest extends AccountTestBase {
     public void forTaxPayment_balanceIncreases_ifPaidTaxesUndercutReservedEstimatedTaxes() {
         this.registerBuyAndSale_withProfit970_andRegisterUndercuttingTaxPayment97minus10();
         Assert.assertEquals(new Amount(10883.0), this.account.getBalance());
+    }
+
+    // Multi Period Taxation
+
+    @Test
+    public void reservedTaxesForProfitInPastTaxPeriodAreNotDecreasedByLossInCurrentTaxPeriod() {
+        Transaction buyTransaction1 = new MarketTransactionBuilder()
+                .setTransactionType(TransactionType.Buy)
+                .setIsin(ISIN.MunichRe)
+                .setQuantity(new Quantity(1))
+                .setTotalPrice(new Amount(1000.0))
+                .setCommission(new Amount(10.0))
+                .setDate(LocalDate.of(2000, 1, 1))
+                .build();
+
+        this.account.registerTransaction(buyTransaction1);
+
+        Transaction sellTransaction1 = new MarketTransactionBuilder()
+                .setTransactionType(TransactionType.Sell)
+                .setIsin(ISIN.MunichRe)
+                .setQuantity(new Quantity(1))
+                .setTotalPrice(new Amount(2000.0))
+                .setCommission(new Amount(20.0))
+                .setDate(LocalDate.of(2000, 1, 1))
+                .build();
+
+        this.account.registerTransaction(sellTransaction1);
+
+        // Sale profit: 2,000.0 - 1,000.0 - 10.0 - 20.0 = 970.0
+        // Available money after sale/ before taxes: 10,970.0
+        // Taxes: 970.0 * 10% = 97.0
+
+        Transaction buyTransaction2 = new MarketTransactionBuilder()
+                .setTransactionType(TransactionType.Buy)
+                .setIsin(ISIN.MunichRe)
+                .setQuantity(new Quantity(1))
+                .setTotalPrice(new Amount(1000.0))
+                .setCommission(new Amount(10.0))
+                .setDate(LocalDate.of(2001, 1, 1))
+                .build();
+
+        this.account.registerTransaction(buyTransaction2);
+
+        Transaction sellTransaction2 = new MarketTransactionBuilder()
+                .setTransactionType(TransactionType.Sell)
+                .setIsin(ISIN.MunichRe)
+                .setQuantity(new Quantity(1))
+                .setTotalPrice(new Amount(500.0))
+                .setCommission(new Amount(5.0))
+                .setDate(LocalDate.of(2001, 1, 1))
+                .build();
+
+        this.account.registerTransaction(sellTransaction2);
+
+        // Sale loss: 500.0 - 1,000.0 - 10.0 - 5.0 = -515.0
+        // Total profit: 970.0 - 515.0 = 455.0
+        // Total taxes: 45.5
+
+        Assert.assertEquals(new Amount(97.0), this.account.getReservedTaxes());
+    }
+
+    @Test
+    public void noTaxesForProfitInCurrentTaxPeriodReserved_becauseOfLossInPreviousTaxPeriod() {
+        Transaction buyTransaction1 = new MarketTransactionBuilder()
+                .setTransactionType(TransactionType.Buy)
+                .setIsin(ISIN.MunichRe)
+                .setQuantity(new Quantity(1))
+                .setTotalPrice(new Amount(1000.0))
+                .setCommission(new Amount(10.0))
+                .setDate(LocalDate.of(2000, 1, 1))
+                .build();
+
+        this.account.registerTransaction(buyTransaction1);
+
+        Transaction sellTransaction1 = new MarketTransactionBuilder()
+                .setTransactionType(TransactionType.Sell)
+                .setIsin(ISIN.MunichRe)
+                .setQuantity(new Quantity(1))
+                .setTotalPrice(new Amount(500.0))
+                .setCommission(new Amount(5.0))
+                .setDate(LocalDate.of(2000, 1, 1))
+                .build();
+
+        this.account.registerTransaction(sellTransaction1);
+
+        // Sale loss: 500.0 - 1,000.0 - 10.0 - 5.0 = -515.0
+
+        Transaction buyTransaction2 = new MarketTransactionBuilder()
+                .setTransactionType(TransactionType.Buy)
+                .setIsin(ISIN.MunichRe)
+                .setQuantity(new Quantity(1))
+                .setTotalPrice(new Amount(1000.0))
+                .setCommission(new Amount(10.0))
+                .setDate(LocalDate.of(2001, 1, 1))
+                .build();
+
+        this.account.registerTransaction(buyTransaction2);
+
+        Transaction sellTransaction2 = new MarketTransactionBuilder()
+                .setTransactionType(TransactionType.Sell)
+                .setIsin(ISIN.MunichRe)
+                .setQuantity(new Quantity(1))
+                .setTotalPrice(new Amount(2000.0))
+                .setCommission(new Amount(20.0))
+                .setDate(LocalDate.of(2001, 1, 1))
+                .build();
+
+        this.account.registerTransaction(sellTransaction2);
+
+        // Sale profit: 2,000.0 - 1,000.0 - 10.0 - 20.0 = 970.0
+        // Total profit: 970.0 - 515.0 = 455.0
+        // Total taxes: 45.5
+
+        Assert.assertEquals(new Amount(45.5), this.account.getReservedTaxes());
     }
 }

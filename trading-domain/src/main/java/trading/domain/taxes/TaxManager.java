@@ -1,25 +1,56 @@
 package trading.domain.taxes;
 
 import trading.domain.Amount;
+import trading.domain.DomainException;
 import trading.domain.account.TaxPaymentTransaction;
 import trading.domain.account.TaxStrategy;
 import trading.domain.account.Transaction;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class TaxManager {
     private final TaxStrategy taxStrategy;
-    private final ProfitTaxation saleProfitTaxation;
-    private final ProfitTaxation dividendProfitTaxation;
     private final ProfitCalculator profitCalculator = new ProfitCalculator();
+    private final List<TaxPeriod> taxPeriods = new ArrayList<>();
 
     public TaxManager(TaxStrategy taxStrategy) {
         this.taxStrategy = taxStrategy;
-
-        this.saleProfitTaxation = new ProfitTaxation(taxStrategy.getSaleTaxCalculator());
-        this.dividendProfitTaxation = new ProfitTaxation(taxStrategy.getDividendTaxCalculator());
     }
 
     public TaxStrategy getTaxStrategy() {
         return this.taxStrategy;
+    }
+
+    private TaxPeriod getExistingTaxPeriod(int year) {
+        for(int taxPeriodIndex = this.taxPeriods.size() - 1; taxPeriodIndex >= 0; taxPeriodIndex--) {
+            TaxPeriod taxPeriod = this.taxPeriods.get(taxPeriodIndex);
+
+            if(taxPeriod.getYear() == year) {
+                return taxPeriod;
+            }
+        }
+
+        return null;
+    }
+
+    private TaxPeriod getOrCreateTaxPeriod(int year) {
+        TaxPeriod existingTaxPeriod = this.getExistingTaxPeriod(year);
+
+        if(existingTaxPeriod != null) {
+            return existingTaxPeriod;
+        }
+
+        TaxPeriod previousTaxPeriod = this.getExistingTaxPeriod(year - 1);
+
+        if(this.taxPeriods.size() > 0 && this.taxPeriods.get(this.taxPeriods.size() - 1).getYear() > year) {
+            System.out.println(this.taxPeriods.get(this.taxPeriods.size() - 1).getYear() + " > " + year);
+            throw new DomainException("The tax period cannot be added because there already exists a tax period for a future year.");
+        }
+
+        TaxPeriod newTaxPeriod = new TaxPeriod(year, previousTaxPeriod, this.taxStrategy);
+        this.taxPeriods.add(newTaxPeriod);
+        return newTaxPeriod;
     }
 
     public TaxImpact registerTransactionAndCalculateTaxImpact(Transaction transaction) {
@@ -42,15 +73,8 @@ public class TaxManager {
             return;
         }
 
-        if(profit.getProfitCategory() == ProfitCategories.Sale) {
-            this.saleProfitTaxation.registerProfit(profit.getAmount());
-        }
-        else if(profit.getProfitCategory() == ProfitCategories.Dividends) {
-            this.dividendProfitTaxation.registerProfit(profit.getAmount());
-        }
-        else {
-            throw new RuntimeException("Unknown profit category.");
-        }
+        TaxPeriod taxPeriod = this.getOrCreateTaxPeriod(transaction.getDate().getYear());
+        taxPeriod.registerProfit(profit);
     }
 
     private void handleTransactionTaxPayment(Transaction transaction) {
@@ -60,30 +84,32 @@ public class TaxManager {
 
         TaxPaymentTransaction taxPaymentTransaction = (TaxPaymentTransaction) transaction;
 
-        if(taxPaymentTransaction.getProfitCategory() == ProfitCategories.Sale) {
-            this.saleProfitTaxation.registerTaxPayment(
-                    taxPaymentTransaction.getTaxedProfit(),
-                    taxPaymentTransaction.getPaidTaxes()
-            );
-        }
-        else if(taxPaymentTransaction.getProfitCategory() == ProfitCategories.Dividends) {
-            this.dividendProfitTaxation.registerTaxPayment(
-                    taxPaymentTransaction.getTaxedProfit(),
-                    taxPaymentTransaction.getPaidTaxes()
-            );
-        }
-        else {
-            throw new RuntimeException("Unknown profit category.");
-        }
-    }
+        TaxPeriod taxPeriod = this.getOrCreateTaxPeriod(taxPaymentTransaction.getTaxPeriodYear());
 
-    public Amount getPaidTaxes() {
-        return this.saleProfitTaxation.getPaidTaxes()
-                .add(this.dividendProfitTaxation.getPaidTaxes());
+        taxPeriod.registerTaxPayment(
+                taxPaymentTransaction.getProfitCategory(),
+                taxPaymentTransaction.getTaxedProfit(),
+                taxPaymentTransaction.getPaidTaxes()
+        );
     }
 
     public Amount getReservedTaxes() {
-        return this.saleProfitTaxation.getReservedTaxes()
-                .add(this.dividendProfitTaxation.getReservedTaxes());
+        Amount reservedTaxes = Amount.Zero;
+
+        for(TaxPeriod taxPeriod: this.taxPeriods) {
+            reservedTaxes = reservedTaxes.add(taxPeriod.getReservedTaxes());
+        }
+
+        return reservedTaxes;
+    }
+
+    public Amount getPaidTaxes() {
+        Amount paidTaxes = Amount.Zero;
+
+        for(TaxPeriod taxPeriod: this.taxPeriods) {
+            paidTaxes = paidTaxes.add(taxPeriod.getPaidTaxes());
+        }
+
+        return paidTaxes;
     }
 }
