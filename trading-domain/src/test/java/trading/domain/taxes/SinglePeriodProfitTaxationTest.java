@@ -44,7 +44,7 @@ public class SinglePeriodProfitTaxationTest {
     @Test
     public void profitIncreasesTaxableProfit() {
         this.registerSimpleProfit();
-        Assert.assertEquals(new Amount(1000.0), this.profitTaxation.getTaxableProfitBeforeLossCarryforward());
+        Assert.assertEquals(new Amount(1000.0), this.profitTaxation.getUntaxedTaxableProfitConsideringLossCarryforward());
     }
 
     @Test
@@ -75,7 +75,7 @@ public class SinglePeriodProfitTaxationTest {
     @Test
     public void lossDecreasesTaxableProfit() {
         this.registerSimpleLoss();
-        Assert.assertEquals(new Amount(-1000.0), this.profitTaxation.getTaxableProfitBeforeLossCarryforward());
+        Assert.assertEquals(new Amount(-1000.0), this.profitTaxation.getUntaxedTaxableProfitConsideringLossCarryforward());
     }
 
     @Test
@@ -109,7 +109,7 @@ public class SinglePeriodProfitTaxationTest {
     @Test
     public void profitIncreasesTaxableProfitAfterLoss() {
         this.registerLossAndProfit();
-        Assert.assertEquals(new Amount(500.0), this.profitTaxation.getTaxableProfitBeforeLossCarryforward());
+        Assert.assertEquals(new Amount(500.0), this.profitTaxation.getUntaxedTaxableProfitConsideringLossCarryforward());
     }
 
     @Test
@@ -146,7 +146,7 @@ public class SinglePeriodProfitTaxationTest {
     @Test
     public void lossDecreasesTaxableProfitAfterLoss() {
         this.registerProfitAndLoss();
-        Assert.assertEquals(new Amount(-500.0), this.profitTaxation.getTaxableProfitBeforeLossCarryforward());
+        Assert.assertEquals(new Amount(-500.0), this.profitTaxation.getUntaxedTaxableProfitConsideringLossCarryforward());
     }
 
     @Test
@@ -179,7 +179,7 @@ public class SinglePeriodProfitTaxationTest {
     @Test
     public void taxPaymentDecreasesTaxableProfit() {
         this.registerProfitAndPayTaxes();
-        Assert.assertEquals(new Amount(400.0), this.profitTaxation.getTaxableProfitBeforeLossCarryforward());
+        Assert.assertEquals(new Amount(400.0), this.profitTaxation.getUntaxedTaxableProfitConsideringLossCarryforward());
     }
 
     @Test
@@ -217,7 +217,7 @@ public class SinglePeriodProfitTaxationTest {
     @Test
     public void lossDecreasesTaxableProfit_independentFromAlreadyTaxedProfit() {
         this.registerTaxedProfitAndRegisterLoss();
-        Assert.assertEquals(new Amount(-500.0), this.profitTaxation.getTaxableProfitBeforeLossCarryforward());
+        Assert.assertEquals(new Amount(-500.0), this.profitTaxation.getUntaxedTaxableProfitConsideringLossCarryforward());
     }
 
     @Test
@@ -252,7 +252,7 @@ public class SinglePeriodProfitTaxationTest {
             this.profitTaxation.registerTaxPayment(taxedProfit, paidTaxes);
         }
         catch(DomainException e) {
-            Assert.assertEquals("The specified taxed profit must not exceed the remaining taxable profit.", e.getMessage());
+            Assert.assertEquals("The specified taxed profit must not exceed the remaining untaxed taxable profit/ considering loss carryforward.", e.getMessage());
             return;
         }
 
@@ -271,7 +271,7 @@ public class SinglePeriodProfitTaxationTest {
             this.profitTaxation.registerTaxPayment(taxedProfit, paidTaxes);
         }
         catch(DomainException e) {
-            Assert.assertEquals("The specified taxed profit must not exceed the remaining taxable profit.", e.getMessage());
+            Assert.assertEquals("The specified taxed profit must not exceed the remaining untaxed taxable profit/ considering loss carryforward.", e.getMessage());
             return;
         }
 

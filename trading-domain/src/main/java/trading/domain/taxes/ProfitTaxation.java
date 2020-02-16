@@ -20,12 +20,10 @@ public class ProfitTaxation {
         this.previousTaxPeriodProfitTaxation = previousTaxPeriodProfitTaxation;
     }
 
-    public Amount getTaxableProfitBeforeLossCarryforward() {
-        return this.accruedProfit.subtract(this.taxedProfit);
-    }
-
-    public Amount getTaxableProfitAfterLossCarryforward() {
-        return this.getTaxableProfitBeforeLossCarryforward().subtract(this.getLossCarryforward());
+    public Amount getUntaxedTaxableProfitConsideringLossCarryforward() {
+        return this.accruedProfit
+                .subtract(this.taxedProfit)
+                .subtract(this.getLossCarryforward());
     }
 
     public Amount getLossCarryforward() {
@@ -37,11 +35,11 @@ public class ProfitTaxation {
     }
 
     public Amount getLossCarryforwardForNextPeriod() {
-        if(this.getTaxableProfitAfterLossCarryforward().getValue() >= 0) {
+        if(this.getUntaxedTaxableProfitConsideringLossCarryforward().getValue() >= 0) {
             return Amount.Zero;
         }
 
-        return this.getTaxableProfitAfterLossCarryforward().multiply(new Quantity(-1));
+        return this.getUntaxedTaxableProfitConsideringLossCarryforward().multiply(new Quantity(-1));
     }
 
     public Amount getTaxedProfit() {
@@ -49,7 +47,7 @@ public class ProfitTaxation {
     }
 
     public Amount getReservedTaxes() {
-        Amount taxableProfit = this.getTaxableProfitAfterLossCarryforward();
+        Amount taxableProfit = this.getUntaxedTaxableProfitConsideringLossCarryforward();
 
         if(taxableProfit.getValue() > 0) {
             return this.taxCalculator.calculateTaxes(taxableProfit);
@@ -67,9 +65,8 @@ public class ProfitTaxation {
     }
 
     public void registerTaxPayment(Amount taxedProfit, Amount paidTaxes) {
-        if(taxedProfit.getValue() > this.getTaxableProfitAfterLossCarryforward().getValue()) {
-            throw new DomainException("The specified taxed profit must not exceed the remaining taxable profit.");
-            // todo loss carryover
+        if(taxedProfit.getValue() > this.getUntaxedTaxableProfitConsideringLossCarryforward().getValue()) {
+            throw new DomainException("The specified taxed profit must not exceed the remaining untaxed taxable profit/ considering loss carryforward.");
         }
 
         this.taxedProfit = this.taxedProfit.add(taxedProfit);

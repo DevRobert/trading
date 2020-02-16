@@ -27,23 +27,16 @@ public class MultiPeriodProfitTaxationTest {
     }
 
     @Test
-    public void lossCarryforwardForNextPeriodEqualsAmoutOfLoss_forLoss() {
+    public void lossCarryforwardForNextPeriodEqualsAmountOfLoss_forLoss() {
         this.profitTaxation_period1.registerProfit(new Amount(-1000.0));
         Assert.assertEquals(new Amount(1000.0), this.profitTaxation_period1.getLossCarryforwardForNextPeriod());
-    }
-
-    @Test
-    public void lossCarryforwardIsNotAppliedToTaxableProfitBeforeLossCarryforward() {
-        this.profitTaxation_period1.registerProfit(new Amount(-1000.0));
-        this.profitTaxation_period2.registerProfit(new Amount(500.0));
-        Assert.assertEquals(new Amount(500.0), this.profitTaxation_period2.getTaxableProfitBeforeLossCarryforward());
     }
 
     @Test
     public void lossCarryforwardIsAppliedToTaxableProfitAfterLossCarryforward() {
         this.profitTaxation_period1.registerProfit(new Amount(-1000.0));
         this.profitTaxation_period2.registerProfit(new Amount(500.0));
-        Assert.assertEquals(new Amount(-500.0), this.profitTaxation_period2.getTaxableProfitAfterLossCarryforward());
+        Assert.assertEquals(new Amount(-500.0), this.profitTaxation_period2.getUntaxedTaxableProfitConsideringLossCarryforward());
     }
 
     @Test
@@ -72,7 +65,7 @@ public class MultiPeriodProfitTaxationTest {
             this.profitTaxation_period2.registerTaxPayment(taxedProfit, paidTaxes);
         }
         catch(DomainException e) {
-            Assert.assertEquals("The specified taxed profit must not exceed the remaining taxable profit.", e.getMessage());
+            Assert.assertEquals("The specified taxed profit must not exceed the remaining untaxed taxable profit/ considering loss carryforward.", e.getMessage());
             return;
         }
 
