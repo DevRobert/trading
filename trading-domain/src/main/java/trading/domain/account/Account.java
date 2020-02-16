@@ -5,6 +5,7 @@ import trading.domain.DomainException;
 import trading.domain.ISIN;
 import trading.domain.Quantity;
 import trading.domain.market.MarketPriceSnapshot;
+import trading.domain.taxes.TaxImpact;
 import trading.domain.taxes.TaxManager;
 
 import java.util.ArrayList;
@@ -264,19 +265,15 @@ public class Account {
     }
 
     private void calculateAndRegisterTransactionTaxImpact(Transaction transaction) {
-        Amount paidTaxesBefore = this.getPaidTaxes();
-        Amount reservedTaxesBefore = this.getReservedTaxes();
+        TaxImpact taxImpact = this.taxManager.registerTransactionAndCalculateTaxImpact(transaction);
 
-        this.taxManager.registerTransaction(transaction);
+        this.availableMoney = this.availableMoney
+                .subtract(taxImpact.getAddedReservedTaxes())
+                .subtract(taxImpact.getAddedPaidTaxes());
 
-        Amount paidTaxesAdded = this.getPaidTaxes().subtract(paidTaxesBefore);
-        Amount reservedTaxesAdded = this.getReservedTaxes().subtract(reservedTaxesBefore);
-
-        this.availableMoney = this.availableMoney.subtract(paidTaxesAdded);
-        this.availableMoney = this.availableMoney.subtract(reservedTaxesAdded);
-
-        this.balance = this.balance.subtract(paidTaxesAdded);
-        this.balance = this.balance.subtract(reservedTaxesAdded);
+        this.balance = this.balance
+                .subtract(taxImpact.getAddedReservedTaxes())
+                .subtract(taxImpact.getAddedPaidTaxes());
     }
 
     private void preventPartialSellTransactions(MarketTransaction transaction, Position position) throws AccountStateException {

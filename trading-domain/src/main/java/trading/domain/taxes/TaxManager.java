@@ -22,9 +22,17 @@ public class TaxManager {
         return this.taxStrategy;
     }
 
-    public void registerTransaction(Transaction transaction) {
+    public TaxImpact registerTransactionAndCalculateTaxImpact(Transaction transaction) {
+        Amount reservedTaxesBefore = this.getReservedTaxes();
+        Amount paidTaxesBefore = this.getPaidTaxes();
+
         this.handleTransactionProfit(transaction);
         this.handleTransactionTaxPayment(transaction);
+
+        Amount addedReservedTaxes = this.getReservedTaxes().subtract(reservedTaxesBefore);
+        Amount addedPaidTaxes = this.getPaidTaxes().subtract(paidTaxesBefore);
+
+        return new TaxImpact(addedReservedTaxes, addedPaidTaxes);
     }
 
     private void handleTransactionProfit(Transaction transaction) {
