@@ -6,7 +6,7 @@
     </facet>
   </component>
   <component name="NewModuleRootManager" LANGUAGE_LEVEL="JDK_1_8">
-    <output-test url="file://$MODULE_DIR$/../../../trading-cli/out/test/classes" />
+    <output-test url="file://$MODULE_DIR$/../../../trading-cli/build/classes/java/test" />
     <exclude-output />
     <content url="file://$MODULE_DIR$/../../../trading-cli/src/test">
       <sourceFolder url="file://$MODULE_DIR$/../../../trading-cli/src/test/java" isTestSource="true" />
@@ -40,8 +40,6 @@
     <orderEntry type="library" name="Gradle: org.springframework:spring-beans:5.0.5.RELEASE" level="project" />
     <orderEntry type="library" name="Gradle: org.springframework:spring-expression:5.0.5.RELEASE" level="project" />
     <orderEntry type="library" name="Gradle: org.springframework:spring-core:5.0.5.RELEASE" level="project" />
-    <orderEntry type="library" name="Gradle: org.mongodb:mongodb-driver-core:3.6.2" level="project" />
-    <orderEntry type="library" name="Gradle: org.mongodb:bson:3.6.2" level="project" />
     <orderEntry type="library" name="Gradle: org.springframework.boot:spring-boot-starter-logging:1.5.8.RELEASE" level="project" />
     <orderEntry type="library" name="Gradle: org.yaml:snakeyaml:1.17" level="project" />
     <orderEntry type="library" name="Gradle: org.apache.tomcat.embed:tomcat-embed-el:8.5.23" level="project" />
@@ -58,6 +56,8 @@
     <orderEntry type="library" name="Gradle: ch.qos.logback:logback-core:1.1.11" level="project" />
     <orderEntry type="library" name="Gradle: org.slf4j:slf4j-api:1.7.25" level="project" />
     <orderEntry type="library" name="Gradle: org.springframework:spring-jcl:5.0.5.RELEASE" level="project" />
+    <orderEntry type="library" name="Gradle: org.mongodb:mongodb-driver-core:3.6.2" level="project" />
+    <orderEntry type="library" name="Gradle: org.mongodb:bson:3.6.2" level="project" />
   </component>
   <component name="TestModuleProperties" production-module="trading-cli_main" />
 </module>

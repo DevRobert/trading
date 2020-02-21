@@ -2,22 +2,22 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/.idea/modules/trading.iml" filepath="$PROJECT_DIR$/.idea/modules/trading.iml" />
-      <module fileurl="file://$PROJECT_DIR$/.idea/modules/trading-api.iml" filepath="$PROJECT_DIR$/.idea/modules/trading-api.iml" group="trading-api" />
-      <module fileurl="file://$PROJECT_DIR$/.idea/modules/trading-api/trading-api_main.iml" filepath="$PROJECT_DIR$/.idea/modules/trading-api/trading-api_main.iml" group="trading-api" />
-      <module fileurl="file://$PROJECT_DIR$/.idea/modules/trading-api/trading-api_test.iml" filepath="$PROJECT_DIR$/.idea/modules/trading-api/trading-api_test.iml" group="trading-api" />
-      <module fileurl="file://$PROJECT_DIR$/.idea/modules/trading-application.iml" filepath="$PROJECT_DIR$/.idea/modules/trading-application.iml" group="trading-application" />
-      <module fileurl="file://$PROJECT_DIR$/.idea/modules/trading-application/trading-application_main.iml" filepath="$PROJECT_DIR$/.idea/modules/trading-application/trading-application_main.iml" group="trading-application" />
-      <module fileurl="file://$PROJECT_DIR$/.idea/modules/trading-application/trading-application_test.iml" filepath="$PROJECT_DIR$/.idea/modules/trading-application/trading-application_test.iml" group="trading-application" />
-      <module fileurl="file://$PROJECT_DIR$/.idea/modules/trading-cli.iml" filepath="$PROJECT_DIR$/.idea/modules/trading-cli.iml" group="trading-cli" />
-      <module fileurl="file://$PROJECT_DIR$/.idea/modules/trading-cli/trading-cli_main.iml" filepath="$PROJECT_DIR$/.idea/modules/trading-cli/trading-cli_main.iml" group="trading-cli" />
-      <module fileurl="file://$PROJECT_DIR$/.idea/modules/trading-cli/trading-cli_test.iml" filepath="$PROJECT_DIR$/.idea/modules/trading-cli/trading-cli_test.iml" group="trading-cli" />
-      <module fileurl="file://$PROJECT_DIR$/.idea/modules/trading-domain.iml" filepath="$PROJECT_DIR$/.idea/modules/trading-domain.iml" group="trading-domain" />
-      <module fileurl="file://$PROJECT_DIR$/.idea/modules/trading-domain/trading-domain_main.iml" filepath="$PROJECT_DIR$/.idea/modules/trading-domain/trading-domain_main.iml" group="trading-domain" />
-      <module fileurl="file://$PROJECT_DIR$/.idea/modules/trading-domain/trading-domain_test.iml" filepath="$PROJECT_DIR$/.idea/modules/trading-domain/trading-domain_test.iml" group="trading-domain" />
-      <module fileurl="file://$PROJECT_DIR$/.idea/modules/trading-persistence.iml" filepath="$PROJECT_DIR$/.idea/modules/trading-persistence.iml" group="trading-persistence" />
-      <module fileurl="file://$PROJECT_DIR$/.idea/modules/trading-persistence/trading-persistence_main.iml" filepath="$PROJECT_DIR$/.idea/modules/trading-persistence/trading-persistence_main.iml" group="trading-persistence" />
-      <module fileurl="file://$PROJECT_DIR$/.idea/modules/trading-persistence/trading-persistence_test.iml" filepath="$PROJECT_DIR$/.idea/modules/trading-persistence/trading-persistence_test.iml" group="trading-persistence" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/trading.iml" filepath="$PROJECT_DIR$/.idea/modules/trading.iml" group="trading" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/trading-api.iml" filepath="$PROJECT_DIR$/.idea/modules/trading-api.iml" group="trading/trading-api" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/trading-api/trading-api_main.iml" filepath="$PROJECT_DIR$/.idea/modules/trading-api/trading-api_main.iml" group="trading/trading-api" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/trading-api/trading-api_test.iml" filepath="$PROJECT_DIR$/.idea/modules/trading-api/trading-api_test.iml" group="trading/trading-api" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/trading-application.iml" filepath="$PROJECT_DIR$/.idea/modules/trading-application.iml" group="trading/trading-application" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/trading-application/trading-application_main.iml" filepath="$PROJECT_DIR$/.idea/modules/trading-application/trading-application_main.iml" group="trading/trading-application" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/trading-application/trading-application_test.iml" filepath="$PROJECT_DIR$/.idea/modules/trading-application/trading-application_test.iml" group="trading/trading-application" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/trading-cli.iml" filepath="$PROJECT_DIR$/.idea/modules/trading-cli.iml" group="trading/trading-cli" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/trading-cli/trading-cli_main.iml" filepath="$PROJECT_DIR$/.idea/modules/trading-cli/trading-cli_main.iml" group="trading/trading-cli" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/trading-cli/trading-cli_test.iml" filepath="$PROJECT_DIR$/.idea/modules/trading-cli/trading-cli_test.iml" group="trading/trading-cli" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/trading-domain.iml" filepath="$PROJECT_DIR$/.idea/modules/trading-domain.iml" group="trading/trading-domain" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/trading-domain/trading-domain_main.iml" filepath="$PROJECT_DIR$/.idea/modules/trading-domain/trading-domain_main.iml" group="trading/trading-domain" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/trading-domain/trading-domain_test.iml" filepath="$PROJECT_DIR$/.idea/modules/trading-domain/trading-domain_test.iml" group="trading/trading-domain" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/trading-persistence.iml" filepath="$PROJECT_DIR$/.idea/modules/trading-persistence.iml" group="trading/trading-persistence" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/trading-persistence/trading-persistence_main.iml" filepath="$PROJECT_DIR$/.idea/modules/trading-persistence/trading-persistence_main.iml" group="trading/trading-persistence" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/trading-persistence/trading-persistence_test.iml" filepath="$PROJECT_DIR$/.idea/modules/trading-persistence/trading-persistence_test.iml" group="trading/trading-persistence" />
     </modules>
   </component>
 </project>

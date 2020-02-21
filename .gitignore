@@ -50,3 +50,5 @@ fabric.properties
 
 # Misc
 spring-shell.log
+build/
+.gradle/
