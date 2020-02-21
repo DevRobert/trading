@@ -4,11 +4,15 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import trading.api.ClientException;
 import trading.application.AccountService;
-import trading.domain.*;
+import trading.domain.Amount;
+import trading.domain.DomainException;
+import trading.domain.ISIN;
+import trading.domain.Quantity;
 import trading.domain.account.*;
 import trading.domain.market.InstrumentNameProvider;
 import trading.domain.market.MarketPriceSnapshot;
 import trading.domain.simulation.MultiStockMarketDataStore;
+import trading.domain.taxes.ProfitCategories;
 import trading.domain.taxes.TaxReport;
 
 import java.util.ArrayList;
@@ -16,32 +20,33 @@ import java.util.List;
 
 @RestController
 @CrossOrigin("http://localhost:3001")
-        public class AccountController {
-            @Autowired
-            private AccountService accountService;
+public class AccountController
+{
+    @Autowired
+    private AccountService accountService;
 
-            @Autowired
-            private InstrumentNameProvider instrumentNameProvider;
+    @Autowired
+    private InstrumentNameProvider instrumentNameProvider;
 
-            @Autowired
-            private MultiStockMarketDataStore multiStockMarketDataStore;
+    @Autowired
+    private MultiStockMarketDataStore multiStockMarketDataStore;
 
-            // TODO get account id from JWT
-            private AccountId accountId = new AccountId(1);
+    // TODO get account id from JWT
+    private AccountId accountId = new AccountId(1);
 
-            private Account getAccount() {
-                return this.accountService.getAccount(this.accountId);
-            }
+    private Account getAccount() {
+        return this.accountService.getAccount(this.accountId);
+    }
 
-            @RequestMapping(value = "/api/account/positions/", method = RequestMethod.GET)
-            public GetAccountPositionsResponse getAccountPositions() {
-                GetAccountPositionsResponse response = new GetAccountPositionsResponse();
+    @RequestMapping(value = "/api/account/positions/", method = RequestMethod.GET)
+    public GetAccountPositionsResponse getAccountPositions() {
+        GetAccountPositionsResponse response = new GetAccountPositionsResponse();
 
-                Account account = this.getAccount();
-                List<AccountPositionDto> accountPositionDtos = new ArrayList<>();
+        Account account = this.getAccount();
+        List<AccountPositionDto> accountPositionDtos = new ArrayList<>();
 
-                MarketPriceSnapshot lastClosingPrices = this.multiStockMarketDataStore.getLastClosingPrices();
-                account.reportMarketPrices(lastClosingPrices);
+        MarketPriceSnapshot lastClosingPrices = this.multiStockMarketDataStore.getLastClosingPrices();
+        account.reportMarketPrices(lastClosingPrices);
 
         for(ISIN isin: account.getCurrentStocks().keySet()) {
             Position position = account.getPosition(isin);
@@ -102,6 +107,9 @@ import java.util.List;
             else if(transaction instanceof DividendTransaction) {
                 accountTransactionDto = this.buildAccountTransactionDto(account, (DividendTransaction) transaction);
             }
+            else if(transaction instanceof TaxPaymentTransaction) {
+                accountTransactionDto = this.buildAccountTransactionDto(account, (TaxPaymentTransaction) transaction);
+            }
             else {
                 throw new RuntimeException("Transaction type not supported.");
             }
@@ -144,6 +152,19 @@ import java.util.List;
         return accountTransactionDto;
     }
 
+    private AccountTransactionDto buildAccountTransactionDto(Account account, TaxPaymentTransaction transaction) {
+        AccountTransactionDto accountTransactionDto = new AccountTransactionDto();
+
+        accountTransactionDto.setDate(transaction.getDate());
+        accountTransactionDto.setTransactionType(TransactionType.TaxPayment.toString());
+        accountTransactionDto.setProfitCategory(transaction.getProfitCategory().getName());
+        accountTransactionDto.setTaxPeriodYear(transaction.getTaxPeriodYear());
+        accountTransactionDto.setTaxedProfit(transaction.getTaxedProfit().getValue());
+        accountTransactionDto.setPaidTaxes(transaction.getPaidTaxes().getValue());
+
+        return accountTransactionDto;
+    }
+
     private String getInstrumentName(ISIN isin) {
         String instrumentName = this.instrumentNameProvider.getInstrumentName(isin);
 
@@ -182,10 +203,13 @@ import java.util.List;
             Transaction transaction;
 
             if(transactionType instanceof MarketTransactionType) {
-                transaction = this.registerMarketTransaction(request, (MarketTransactionType) transactionType);
+                transaction = this.buildMarketTransactionFromRequest(request, (MarketTransactionType) transactionType);
             }
             else if(transactionType == TransactionType.Dividend) {
-                transaction = this.registerDividendTransaction(request);
+                transaction = this.buildDividendTransactionFromRequest(request);
+            }
+            else if(transactionType == TransactionType.TaxPayment) {
+                transaction = this.buildTaxPaymentTransactionFromRequest(request);
             }
             else {
                 throw new RuntimeException("Unknown transaction type.");
@@ -212,7 +236,7 @@ import java.util.List;
         return isin;
     }
 
-    private Transaction registerMarketTransaction(RegisterTransactionRequest request, MarketTransactionType transactionType) {
+    private Transaction buildMarketTransactionFromRequest(RegisterTransactionRequest request, MarketTransactionType transactionType) {
         MarketTransactionBuilder transactionBuilder = new MarketTransactionBuilder();
 
         transactionBuilder.setTransactionType(transactionType);
@@ -243,7 +267,7 @@ import java.util.List;
         return transactionBuilder.build();
     }
 
-    private Transaction registerDividendTransaction(RegisterTransactionRequest request) {
+    private Transaction buildDividendTransactionFromRequest(RegisterTransactionRequest request) {
         DividendTransactionBuilder transactionBuilder = new DividendTransactionBuilder();
 
         if(request.getDate() != null) {
@@ -257,6 +281,40 @@ import java.util.List;
         if(request.getAmount() != null) {
             Amount amount = new Amount(request.getAmount());
             transactionBuilder.setAmount(amount);
+        }
+
+        return transactionBuilder.build();
+    }
+
+    private Transaction buildTaxPaymentTransactionFromRequest(RegisterTransactionRequest request) {
+        TaxPaymentTransactionBuilder transactionBuilder = new TaxPaymentTransactionBuilder();
+
+        if(request.getDate() != null) {
+            transactionBuilder.setDate(request.getDate());
+        }
+
+        if(request.getTaxPeriodYear() != null) {
+            transactionBuilder.setTaxPeriodYear(request.getTaxPeriodYear());
+        }
+
+        if(request.getProfitCategory() != null) {
+            if(request.getProfitCategory().equals(ProfitCategories.Sale.getName())) {
+                transactionBuilder.setProfitCategory(ProfitCategories.Sale);
+            }
+            else if(request.getProfitCategory().equals(ProfitCategories.Dividends.getName())) {
+                transactionBuilder.setProfitCategory(ProfitCategories.Dividends);
+            }
+            else {
+                throw new DomainException("The profit category is unknown.");
+            }
+        }
+
+        if(request.getTaxedProfit() != null) {
+            transactionBuilder.setTaxedProfit(new Amount(request.getTaxedProfit()));
+        }
+
+        if(request.getPaidTaxes() != null) {
+            transactionBuilder.setPaidTaxes(new Amount(request.getPaidTaxes()));
         }
 
         return transactionBuilder.build();

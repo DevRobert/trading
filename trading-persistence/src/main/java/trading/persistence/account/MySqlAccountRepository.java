@@ -2,6 +2,7 @@ package trading.persistence.account;
 
 import trading.domain.*;
 import trading.domain.account.*;
+import trading.domain.taxes.ProfitCategories;
 import trading.persistence.MySqlRepository;
 import trading.persistence.MySqlRepositoryParameters;
 
@@ -77,6 +78,9 @@ public class MySqlAccountRepository extends MySqlRepository implements AccountRe
         else if(transaction instanceof DividendTransaction) {
             this.saveDividendTransaction(connection, accountId, (DividendTransaction) transaction);
         }
+        else if(transaction instanceof TaxPaymentTransaction) {
+            this.saveTaxPaymentTransaction(connection, accountId, (TaxPaymentTransaction) transaction);
+        }
         else {
             throw new RuntimeException("Transaction type not supported.");
         }
@@ -110,6 +114,24 @@ public class MySqlAccountRepository extends MySqlRepository implements AccountRe
         preparedStatement.setDouble(3, transaction.getAmount().getValue());
         preparedStatement.setString(4, transaction.getIsin().getText());
         preparedStatement.setString(5, transaction.getDate().toString());
+
+        preparedStatement.executeUpdate();
+
+        this.applyGeneratedIdToTransaction(transaction, preparedStatement);
+    }
+
+    private void saveTaxPaymentTransaction(Connection connection, AccountId accountId, TaxPaymentTransaction transaction) throws SQLException {
+        PreparedStatement preparedStatement = connection.prepareStatement(
+                "insert into transaction (Id, AccountId, TransactionTypeId, ProfitCategoryId, TaxPeriodYear, TaxedProfit, PaidTaxes, `Date`, Created) " +
+                        "values (default, ?, ?, ?, ?, ?, ?, ?, now())", Statement.RETURN_GENERATED_KEYS);
+
+        preparedStatement.setInt(1, accountId.getValue());
+        preparedStatement.setInt(2, 3);
+        preparedStatement.setInt(3, transaction.getProfitCategory().getId());
+        preparedStatement.setInt(4, transaction.getTaxPeriodYear());
+        preparedStatement.setDouble(5, transaction.getTaxedProfit().getValue());
+        preparedStatement.setDouble(6, transaction.getPaidTaxes().getValue());
+        preparedStatement.setString(7, transaction.getDate().toString());
 
         preparedStatement.executeUpdate();
 
@@ -163,7 +185,9 @@ public class MySqlAccountRepository extends MySqlRepository implements AccountRe
     }
 
     private List<Transaction> getAccountTransactions(Connection connection, AccountId accountId) throws SQLException {
-        PreparedStatement preparedStatement = connection.prepareStatement("select Id, AccountId, TransactionTypeId, Quantity, TotalPrice, Commission, Amount, Isin, Date, Created from transaction where AccountId = ?");
+        PreparedStatement preparedStatement = connection.prepareStatement(
+                "select Id, AccountId, TransactionTypeId, Quantity, TotalPrice, Commission, Amount, Isin, Date, ProfitCategoryId, TaxPeriodYear, TaxedProfit, PaidTaxes, Created " +
+                        "from transaction where AccountId = ?");
         preparedStatement.setInt(1, accountId.getValue());
 
         ResultSet resultSet = preparedStatement.executeQuery();
@@ -178,6 +202,10 @@ public class MySqlAccountRepository extends MySqlRepository implements AccountRe
             double amount = resultSet.getDouble(7);
             String isin = resultSet.getString(8);
             LocalDate date = LocalDate.parse(resultSet.getString(9));
+            int profitCategoryId = resultSet.getInt(10);
+            int taxPeriodYear = resultSet.getInt(11);
+            double taxedProfit = resultSet.getInt(12);
+            double paidTaxes = resultSet.getDouble(13);
 
             TransactionType transactionType = TransactionType.ofIndex(transactionTypeIndex);
 
@@ -198,6 +226,15 @@ public class MySqlAccountRepository extends MySqlRepository implements AccountRe
                         .setIsin(new ISIN(isin))
                         .setAmount(new Amount(amount))
                         .setDate(date)
+                        .build();
+            }
+            else if(transactionType == TransactionType.TaxPayment) {
+                transaction = new TaxPaymentTransactionBuilder()
+                        .setDate(date)
+                        .setProfitCategory(ProfitCategories.fromId(profitCategoryId))
+                        .setTaxPeriodYear(taxPeriodYear)
+                        .setTaxedProfit(new Amount(taxedProfit))
+                        .setPaidTaxes(new Amount(paidTaxes))
                         .build();
             }
             else {

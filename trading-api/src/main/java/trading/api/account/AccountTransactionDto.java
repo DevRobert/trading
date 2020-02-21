@@ -1,7 +1,5 @@
 package trading.api.account;
 
-import com.fasterxml.jackson.annotation.JsonFormat;
-
 import java.time.LocalDate;
 
 public class AccountTransactionDto {
@@ -14,6 +12,10 @@ public class AccountTransactionDto {
     private Double totalPrice;
     private Double commission;
     private Double amount;
+    private String profitCategory;
+    private Integer taxPeriodYear;
+    private Double taxedProfit;
+    private Double paidTaxes;
 
     public LocalDate getDate() {
         return this.date;
@@ -85,5 +87,37 @@ public class AccountTransactionDto {
 
     public void setAmount(Double amount) {
         this.amount = amount;
+    }
+
+    public String getProfitCategory() {
+        return profitCategory;
+    }
+
+    public void setProfitCategory(String profitCategory) {
+        this.profitCategory = profitCategory;
+    }
+
+    public Integer getTaxPeriodYear() {
+        return taxPeriodYear;
+    }
+
+    public void setTaxPeriodYear(Integer taxPeriodYear) {
+        this.taxPeriodYear = taxPeriodYear;
+    }
+
+    public Double getTaxedProfit() {
+        return taxedProfit;
+    }
+
+    public void setTaxedProfit(Double taxedProfit) {
+        this.taxedProfit = taxedProfit;
+    }
+
+    public Double getPaidTaxes() {
+        return paidTaxes;
+    }
+
+    public void setPaidTaxes(Double paidTaxes) {
+        this.paidTaxes = paidTaxes;
     }
 }

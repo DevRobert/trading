@@ -5,6 +5,7 @@ import org.junit.Before;
 import org.junit.Test;
 import trading.domain.*;
 import trading.domain.account.*;
+import trading.domain.taxes.ProfitCategories;
 import trading.persistence.MySqlRepositoryParameters;
 import trading.persistence.MySqlRepositoryParametersBuilder;
 
@@ -154,15 +155,25 @@ public class MySqlAccountRepositoryTest {
                 .setAmount(new Amount(100.0))
                 .build();
 
+        TaxPaymentTransaction taxPaymentTransaction = new TaxPaymentTransactionBuilder()
+                .setDate(LocalDate.of(2018, 5, 2))
+                .setTaxPeriodYear(2018)
+                .setProfitCategory(ProfitCategories.Sale)
+                .setTaxedProfit(Amount.Zero)
+                .setPaidTaxes(new Amount(10.00))
+                .build();
+
         account.registerTransaction(buyTransaction);
         account.registerTransaction(sellTransaction);
         account.registerTransaction(dividendTransaction);
+        account.registerTransaction(taxPaymentTransaction);
 
         this.accountRepository.saveAccount(account);
 
         Assert.assertNotNull(buyTransaction.getId());
         Assert.assertNotNull(sellTransaction.getId());
         Assert.assertNotNull(dividendTransaction.getId());
+        Assert.assertNotNull(taxPaymentTransaction.getId());
 
         // Read account and transactions from database
 
@@ -170,7 +181,7 @@ public class MySqlAccountRepositoryTest {
 
         List<Transaction> transactionsFromDatabase = accountFromDatabase.getProcessedTransactions();
 
-        Assert.assertEquals(3, transactionsFromDatabase.size());
+        Assert.assertEquals(4, transactionsFromDatabase.size());
 
         MarketTransaction buyTransactionFromDatabase = (MarketTransaction) transactionsFromDatabase.get(0);
         Assert.assertEquals(buyTransaction.getDate(), buyTransactionFromDatabase.getDate());
@@ -192,6 +203,13 @@ public class MySqlAccountRepositoryTest {
         Assert.assertEquals(dividendTransaction.getDate(), dividendTransactionFromDatabase.getDate());
         Assert.assertEquals(dividendTransaction.getIsin(), dividendTransactionFromDatabase.getIsin());
         Assert.assertEquals(dividendTransaction.getAmount(), dividendTransactionFromDatabase.getAmount());
+
+        TaxPaymentTransaction taxPaymentTransactionFromDatabase = (TaxPaymentTransaction) transactionsFromDatabase.get(3);
+        Assert.assertEquals(taxPaymentTransaction.getDate(), taxPaymentTransactionFromDatabase.getDate());
+        Assert.assertEquals(taxPaymentTransaction.getTaxPeriodYear(), taxPaymentTransactionFromDatabase.getTaxPeriodYear());
+        Assert.assertEquals(taxPaymentTransaction.getProfitCategory(), taxPaymentTransactionFromDatabase.getProfitCategory());
+        Assert.assertEquals(taxPaymentTransaction.getTaxedProfit(), taxPaymentTransactionFromDatabase.getTaxedProfit());
+        Assert.assertEquals(taxPaymentTransaction.getPaidTaxes(), taxPaymentTransactionFromDatabase.getPaidTaxes());
     }
 
     @Test

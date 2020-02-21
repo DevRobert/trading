@@ -10,6 +10,7 @@ import trading.domain.market.InstrumentNameProvider;
 import trading.domain.market.MarketPriceSnapshot;
 import trading.domain.market.MarketPriceSnapshotBuilder;
 import trading.domain.simulation.MultiStockMarketDataStore;
+import trading.domain.taxes.ProfitCategories;
 
 import java.time.LocalDate;
 
@@ -54,6 +55,14 @@ public abstract class AccountControllerTestBase extends ControllerTestBase {
                 .setDate(LocalDate.of(2018, 4, 14))
                 .setIsin(new ISIN("B"))
                 .setAmount(new Amount(100.0))
+                .build());
+
+        account.registerTransaction(new TaxPaymentTransactionBuilder()
+                .setDate(LocalDate.of(2018, 4, 15))
+                .setProfitCategory(ProfitCategories.Dividends)
+                .setTaxPeriodYear(2018)
+                .setTaxedProfit(new Amount(10.0))
+                .setPaidTaxes(new Amount(5.0))
                 .build());
 
         given(this.accountService.getAccount(new AccountId(1))).willReturn(account);

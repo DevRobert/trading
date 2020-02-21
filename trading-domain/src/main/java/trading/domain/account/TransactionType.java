@@ -21,6 +21,7 @@ public class TransactionType {
     public static final MarketTransactionType Buy = new MarketTransactionType(0, "Buy");
     public static final MarketTransactionType Sell = new MarketTransactionType(1, "Sell");
     public static final TransactionType Dividend = new TransactionType(2, "Dividend");
+    public static final TransactionType TaxPayment = new TransactionType(3, "TaxPayment");
 
     public static TransactionType ofIndex(int index) {
         switch(index) {
@@ -32,6 +33,9 @@ public class TransactionType {
 
             case 2:
                 return TransactionType.Dividend;
+
+            case 3:
+                return TransactionType.TaxPayment;
 
             default:
                 throw new RuntimeException("Invalid index.");
@@ -48,6 +52,9 @@ public class TransactionType {
 
             case "Dividend":
                 return TransactionType.Dividend;
+
+            case "TaxPayment":
+                return TransactionType.TaxPayment;
 
             default:
                 throw new RuntimeException("Invalid name.");
